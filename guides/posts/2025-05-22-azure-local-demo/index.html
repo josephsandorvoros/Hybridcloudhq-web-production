@@ -1,0 +1,901 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Set up and deploy a Virtual Azure Local node</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <div class="brand">
+          <a class="logo" href="/">Hybridcloudhq</a>
+          <span class="tag">Cloud tools & guides</span>
+        </div>
+        <nav class="main-nav">
+          <a href="/">Home</a>
+          <a href="/projects/">Projects</a>
+          <a href="/guides/">Guides</a>
+          <a href="/blog/">Blog</a>
+          <a href="/aboutme/">About</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      
+<p class="breadcrumb"><a href="/blog/">← Back to Blog</a></p>
+
+<article class="post container">
+  
+
+  <header>
+    <h1>Set up and deploy a Virtual Azure Local node</h1>
+    <p class="post-meta">May 22, 2025</p>
+  </header>
+
+  <section class="post-content">
+    <ul>
+<li><a href="#intro">Introduction</a>
+<ul>
+<li><a href="#know-your-local-ip-information">Know your Local IP information</a></li>
+<li><a href="#create-a-virtual-switch">Create a Virtual Switch</a></li>
+<li><a href="#deploy-the-ad-dns-server">Deploy AD/DNS</a>
+<ul>
+<li><a href="#set-uniform-time-for-all-machines">Set Uniform Time</a></li>
+<li><a href="#prepare-active-directory">Prepare Active directory</a></li>
+</ul>
+</li>
+<li><a href="#make-sure-your-host-node-meets-these-requirements">Host node and VM node requirements</a></li>
+<li><a href="#now-to-run-some-code-to-create-the-vms-for-us-and-register-our-node">Create and register Nodes</a>
+<ul>
+<li><a href="#on-the-host-node">Create the VM</a></li>
+<li><a href="#set-these-permissions-first">Set permissions</a></li>
+<li><a href="#find-your-azure-subscription">Get your Subscription</a></li>
+<li><a href="#find-your-microsoft-entra-tenant">Get your Tenant</a></li>
+<li><a href="#on-local-node">Register the Node</a></li>
+<li><a href="#now-you-are-registered-and-ready-to-deploy">Time to Deploy</a></li>
+</ul>
+</li>
+<li><a href="#now-you-have-an-azure-local-cluster-now-what">Now you have a Cluster, lets put it to Work</a>
+<ul>
+<li><a href="#add-a-logical-network-to-your-cluster">Set up Logical Network</a></li>
+<li><a href="#setting-up-a-windows-server-vm-on-azure-local">Your first Azure Local VM</a></li>
+<li><a href="#setting-up-rdp">Add RDP</a></li>
+<li><a href="#congratulations-you-should-now-be-in-your-cluster-and-in-the-server-now-to-set-up-wac">Set Up Windows Admin Center</a></li>
+<li><a href="#finally-to-add-the-cluster">Manage your Cluster in WAC</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#is-that-all-folks">Is that all Folks?</a></li>
+</ul>
+<h2>Intro</h2>
+<p>Create and register Azure Local Node (VM version)</p>
+<p>Hello and welcome to my &quot;this has been done before but I struggled quite a bit so I want to try to help you with something that includes all the things I missed and steps that make sense to me&quot; guide to deploying a virtual Azure Local edge node/cluster to try it out and get a feel for the setup/management etc.</p>
+<p>I set out on this project because I knew it was possible and because, while I have been selling Azure Local (under several names now), I have not had any real experience setting up-deploying-managing a node/cluster hands on. This was a chance for me to do it on my own and stumble through and learn. Some people learn how I do...in which case I would say maybe use this as a guide path, but go learn on your own you'll love it. Some people just want to get up and running and good documentation with a clear path through the pages and pages Microsoft has available can be the thing that makes the experience a nice one rather than a daunting task.</p>
+<p>Either way, this guide is my attempt to make sense for me, and even though I know there are several others out there, maybe help make sense of the process for you too. It is laid out as if you are a noob, because I am and I started from scratch here. I did have some networking knowledge coming into this I am trying to not make the assumption you do, and hopefully wont miss any notation you need. With that in mind, if you have something in place already feel free to skip on down to a later part if the process. There are also, I know, more automated processes, and better ways to do some of these with scripting and some coding automation. I am not there yet. As I learn I will make forks of this with those things in there. For now this is where I am starting.</p>
+<p>I am starting this as if you have no AD/DNS DC set up. I am running this on two pieces of hardware, a small NAS  with an intel N100 - 16GB of memory - and 2.5GB NIC that I set up to run a VM with Windows server to be my AD/DNS server and a small micro PC with an AMD Ryzen 7 5825U - 64GB of memory - 2TB of NVME SSD and 2.5GB NIC. I am leaving names of manufactures out of this guide to be neutral but providing relevant information to help you make hardware decisions if you need to. All in my solution here cost less than $1000.00 The is a small switch, the NAS, the mini PC, and memory and hard drive upgrades for the NAS and Mini PC. My router is just from my internet provider. So nothing is super fancy here, and all of it can be used for more. I am running a small home lab, hosting a game server, running some containers for home automation. That is all to say you can use this hardware for multiple things if you need to buy new and need a reason other than &quot;I want to try Azure Local&quot;.</p>
+<p>I created this guide using markdown and put the code into blocks with notes. that means you can copy a codeblock into any text editor and edit it to your needs then just copy paste that into an elevated powershell instance. I have also tried to call out where you need to run what as that initially caused me some confusion.</p>
+<p>Anyway enough about me lets get into the project.</p>
+<h2>Know your Local IP information</h2>
+<p>This is important for a few parts of the setup and deployment. I am outlining it here and have put detailed notes in the other places it comes up later in the guide.</p>
+<p>This assumes you are on a home network. If you are in a corporate environment you can get this information from your network administrator. If you are on a home network you'll have an internal ip address range and your router typically does ip assignment, but you'll take that over here. This also means you need to keep track of your IP assignments. I would suggest keeping an excel table and filling it out and so you know what you have and haven't assigned. Your router will assign around what you have set, so just dodge the lower ip addresses and you should be fine. You can also use some auto discovery tools if you want, those can feel daunting if you aren't used to them, so if you are new, just a spreadsheet is fine for small networks. typically for a home network your ip address will be 192.168.xxx.xxx/24 your subnet mask 255.255.255.0 your default gateway 192.168.xxx.1 and your DNS server we set up earlier but as always checking is best.</p>
+<ul>
+<li>
+<p><strong>Windows:</strong></p>
+<ul>
+<li>Open the Start Menu and type &quot;cmd&quot; to open Command Prompt.</li>
+<li>Type <code>ipconfig /all</code> and press Enter.</li>
+<li>Your IP address will be listed under &quot;IPv4 Address&quot;.</li>
+<li>Alternatively, go to Settings &gt; Network &amp; Internet &gt; Wi-Fi (or Ethernet) &gt; Advanced Settings &gt; Network connection.</li>
+</ul>
+</li>
+</ul>
+<p>When you run ipconfig you will see a list of outputs. There may be several adapters listed, but one will look something like this</p>
+<p>Ethernet adapter Ethernet 3:</p>
+<p>Connection-specific DNS Suffix  . : lan
+Link-local IPv6 Address . . . . . : fe80::f5e:82e4:ff2:b18c%28
+IPv4 Address. . . . . . . . . . . : 192.168.95.23
+Subnet Mask . . . . . . . . . . . : 255.255.255.0
+Default Gateway . . . . . . . . . : 192.168.87.1</p>
+<p>In this case
+your IP address range for you network will be
+192.168.95.0 - 192.168.95.255
+your Subnet Mask will be
+255.255.255.0
+your Default Gateway will be
+192.168.95.1
+and your router is the DNS server (or it is resolving to one somewhere)</p>
+<p>This is important info for later</p>
+<h2>Create a Virtual Switch</h2>
+<p>I am just copying this from Microsoft guide here <a href="https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/get-started/create-a-virtual-switch-for-hyper-v-virtual-machines?tabs=hyper-v-manager&amp;pivots=windows"># Create and configure a virtual switch with Hyper-V</a> Since they have it spelled out already very nicely. You will also need to do this for the Azure Local host if they are two different machines.</p>
+<p>This article shows you how to create and configure your virtual switch using Hyper-V Manager or PowerShell. A virtual switch allows virtual machines created on Hyper-V hosts to communicate with other computers.</p>
+<h4>Prerequisites</h4>
+<p>Before you can create and configure your virtual switch, your computer must meet the following prerequisites:</p>
+<ul>
+<li>
+<p>Hyper-V must be enabled</p>
+</li>
+<li>
+<p>Virtual switch types are: external, internal. and private. Determine <a href="https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/plan/plan-hyper-v-networking-in-windows-server">what type of virtual switch you need to create</a>.</p>
+</li>
+<li>
+<p>Identify which network you connect your computer to. Review the <a href="https://learn.microsoft.com/en-us/windows-server/networking/core-network-guide/core-network-guide#BKMK_planning">Core network planning</a> article for more information.</p>
+</li>
+<li>
+<p>Have administrative rights.</p>
+</li>
+</ul>
+<h4>Create a virtual switch</h4>
+<p>Once you complete the prerequisites, you're ready to create your virtual switch. In this section, we create a basic virtual switch by following these steps.</p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/get-started/create-a-virtual-switch-for-hyper-v-virtual-machines?tabs=hyper-v-manager&amp;pivots=windows#tabpanel_1_hyper-v-manager">Hyper-V Manager</a></li>
+<li><a href="https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/get-started/create-a-virtual-switch-for-hyper-v-virtual-machines?tabs=hyper-v-manager&amp;pivots=windows#tabpanel_1_powershell">PowerShell</a></li>
+</ul>
+<p>Here's how to create a virtual switch using Hyper-V Manager.</p>
+<ol>
+<li>
+<p>Open Hyper-V Manager.</p>
+</li>
+<li>
+<p>From the <strong>Actions</strong> pane, select <strong>Virtual Switch Manager</strong>.</p>
+</li>
+<li>
+<p>Choose the type of virtual switch, then select <strong>Create Virtual Switch</strong>.</p>
+</li>
+<li>
+<p>Enter a name for the virtual switch, then perform one of the following steps.</p>
+<ol>
+<li>
+<p>If you selected <em>external</em>, choose the network adapter (NIC) that you want to use, then select <strong>OK</strong>.</p>
+<p>You're prompted with a warning that the change may disrupt your network connectivity; select <strong>Yes</strong> if you're happy to continue.</p>
+</li>
+<li>
+<p>If you selected <em>internal</em> or <em>private</em>, select <strong>OK</strong>.</p>
+</li>
+</ol>
+</li>
+</ol>
+<h4>Management Operating System sharing</h4>
+<p>An external virtual switch allows your virtual machines to connect to an external network. You can also allow the management operating system to share the same selected network adapter. To begin, follow these steps.</p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/get-started/create-a-virtual-switch-for-hyper-v-virtual-machines?tabs=hyper-v-manager&amp;pivots=windows#tabpanel_2_hyper-v-manager">Hyper-V Manager</a></li>
+<li><a href="https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/get-started/create-a-virtual-switch-for-hyper-v-virtual-machines?tabs=hyper-v-manager&amp;pivots=windows#tabpanel_2_powershell">PowerShell</a></li>
+</ul>
+<p>Here's how to allow the management operating system to share the selected network adapter switch using Hyper-V Manager.</p>
+<ol>
+<li>
+<p>Open Hyper-V Manager.</p>
+</li>
+<li>
+<p>From the <strong>Actions</strong> pane, select <strong>Virtual Switch Manager</strong>.</p>
+</li>
+<li>
+<p>Select the virtual switch you wish to configure, check the <strong>Allow management operating system to share this network adapter</strong> and select <strong>OK</strong>.</p>
+<p>You'll be prompted with a warning that the change may disrupt your network connectivity; select <strong>Yes</strong> if you're happy to continue.</p>
+</li>
+</ol>
+<h4>Virtual LAN (VLAN) identification</h4>
+<p>You can specify the VLAN identification (ID) used by virtual machines network adapters and virtual switches. For virtual switches connected to either an external or internal network, you can specify the (VLAN) ID. The VLAN ID number is used by the management operating system and virtual machines communicating through this virtual switch.</p>
+<p>You can also configure your virtual switch with other VLAN options, such port mode and the native VLAN ID. For these options, you need to use PowerShell and ensure the configuration is compatible with your networks configuration.</p>
+<p>To configure the VLAN identification for the switch, follow these steps.</p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/get-started/create-a-virtual-switch-for-hyper-v-virtual-machines?tabs=hyper-v-manager&amp;pivots=windows#tabpanel_3_hyper-v-manager">Hyper-V Manager</a></li>
+<li><a href="https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/get-started/create-a-virtual-switch-for-hyper-v-virtual-machines?tabs=hyper-v-manager&amp;pivots=windows#tabpanel_3_powershell">PowerShell</a></li>
+</ul>
+<p>Here's how to specify the VLAN ID using the Hyper-V Manager.</p>
+<ol>
+<li>
+<p>Open Hyper-V Manager.</p>
+</li>
+<li>
+<p>From the <strong>Actions</strong> pane, select <strong>Virtual Switch Manager</strong>.</p>
+</li>
+<li>
+<p>Select the virtual switch you wish to configure, check the <strong>Enable virtual LAN identification for management operating system</strong>.</p>
+<ol>
+<li>
+<p>You can enter any VLAN ID number or leave the default, then select <strong>OK</strong>.</p>
+<p>You're prompted to warn you that the change may disrupt your network connectivity, select <strong>Yes</strong> if you're happy to continue.</p>
+</li>
+</ol>
+</li>
+</ol>
+<p>VLAN identifiers should be consistent with your network to ensure compatibility between your computer, virtual machines, and other network devices.</p>
+<h4>NAT networking</h4>
+<p>Network Address Translation (NAT) gives a virtual machine access to your computer's network by combining the host computer's IP address with a port through an internal Hyper-V Virtual Switch.</p>
+<p>This has a few useful properties:</p>
+<ol>
+<li>NAT Conserves IP addresses by mapping an external IP address and port to a much larger set of internal IP addresses.</li>
+<li>NAT allows multiple virtual machines to host applications that require identical (internal) communication ports by mapping these to unique external ports.</li>
+<li>NAT uses an internal switch -- creating an internal switch doesn't cause you to use network connection and tends to interfere less with a computer's networking.</li>
+</ol>
+<p>To set up a NAT network and connect it to a virtual machine, follow the <a href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/user-guide/setup-nat-network">NAT networking user guide</a></p>
+<h2>Deploy the AD DNS server</h2>
+<p>On the NAS or some other node external to what will be your cluster start a VM running Windows server.</p>
+<p>Lots of people have done this part, I am not sure I could do it better. I am going to link a video here <strong><a href="https://www.youtube.com/watch?v=7-XL5r3pPZQ&amp;t=488s">How To Make A Windows Domain Controller In Hyper-V</a></strong> Its as easy in a NAS as well as several have a VM host that makes the VM creation easy you just need a windows server trial .iso You can download one here <strong><a href="https://www.microsoft.com/en-us/evalcenter/evaluate-windows-server-2022">Windows Server 2022</a></strong> Just make sure you install it with the GUI experience.</p>
+<p>To create a Windows domain controller within Hyper-V, you'll first create a new virtual machine, install a Windows Server operating system, then install the <a href="https://www.google.com/search?sca_esv=b17bece7f59cc74c&amp;cs=1&amp;q=Active+Directory+Domain+Services+%28AD+DS%29&amp;sa=X&amp;ved=2ahUKEwiY76TB5JCMAxXu78kDHSE9Az8QxccNegQIAxAB&amp;mstk=AUtExfBtiIUDVvg2DbFQjzGJ7SnhbXosFWYC9pIAStcki_wmMQ89_yMpavKU2zh5ve4hOM1hOIk5pAIbo-uw2ECIZnbrUuGu7S_Jb8u0HICHcztwv0PcFWZI2nZENM3gWSySVyIJ6aUVYnA8fT3ZoTYSmL9-GYZJoyXknvb4I8PnEWHdLys&amp;csui=3">Active Directory Domain Services (AD DS)</a> role and promote the server to a domain controller.</p>
+<p>Here's a more detailed breakdown:</p>
+<ol>
+<li>Prepare the Hyper-V Environment:</li>
+</ol>
+<ul>
+<li><strong>Ensure Hyper-V is installed and configured:</strong> Make sure the Hyper-V role is enabled on your host server.</li>
+<li><strong>Verify Hardware Requirements:</strong> Your host server needs an x64 processor, hardware-assisted virtualization (Intel VT or AMD-V), and Hardware Data Execution Protection (DEP).</li>
+<li><strong>Create a Virtual Network Switch (if needed):</strong> If you need external network connectivity, create a virtual network switch in Hyper-V and connect the virtual machine's network adapter to it.</li>
+</ul>
+<ol start="2">
+<li>Create the Virtual Machine:</li>
+</ol>
+<ul>
+<li><strong>Open Hyper-V Manager:</strong> Navigate to the Hyper-V Manager and select your server.</li>
+<li><strong>Create a New Virtual Machine:</strong> Click &quot;New&quot; and then &quot;Virtual Machine&quot;.</li>
+<li><strong>Follow the New Virtual Machine Wizard:</strong>
+<ul>
+<li><strong>Name the VM:</strong> Choose a descriptive name for your domain controller.</li>
+<li><strong>Select Generation:</strong> Choose the appropriate generation (Generation 1 or Generation 2).</li>
+<li><strong>Assign Memory:</strong> Allocate sufficient RAM to the VM.</li>
+<li><strong>Configure Virtual Hard Disk:</strong> Create a virtual hard disk for the VM's operating system.</li>
+<li><strong>Network Adapter:</strong> Connect the VM to a virtual network switch (if applicable).</li>
+<li><strong>Install Operating System:</strong> Choose the Windows Server ISO image and install the operating system.</li>
+</ul>
+</li>
+</ul>
+<ol start="3">
+<li>Install and Configure <a href="https://www.google.com/search?sca_esv=b17bece7f59cc74c&amp;cs=1&amp;q=Windows+Server&amp;sa=X&amp;ved=2ahUKEwiY76TB5JCMAxXu78kDHSE9Az8QxccNegQISxAC&amp;mstk=AUtExfBtiIUDVvg2DbFQjzGJ7SnhbXosFWYC9pIAStcki_wmMQ89_yMpavKU2zh5ve4hOM1hOIk5pAIbo-uw2ECIZnbrUuGu7S_Jb8u0HICHcztwv0PcFWZI2nZENM3gWSySVyIJ6aUVYnA8fT3ZoTYSmL9-GYZJoyXknvb4I8PnEWHdLys&amp;csui=3">Windows Server</a>:</li>
+</ol>
+<ul>
+<li><strong>Install Windows Server:</strong> Follow the on-screen instructions to install Windows Server.</li>
+<li><strong>Join the Domain (if applicable):</strong> If you are adding a new domain controller to an existing domain, join the VM to the domain.</li>
+<li><strong>Configure Static IP Address (recommended):</strong> Assign a static IP address to the VM's network adapter (this should be one within your ip address range from earlier).</li>
+<li><strong>Open Server Manager:</strong> Launch Server Manager on the new VM.</li>
+<li><strong>Install Active Directory Domain Services (AD DS) Role:</strong>
+<ul>
+<li>Click &quot;Add roles and features&quot;.</li>
+<li>Select &quot;Role-based or feature-based installation&quot;.</li>
+<li>Select the server.</li>
+<li>Choose &quot;Active Directory Domain Services&quot;.</li>
+<li>Add necessary features (e.g., DNS).</li>
+<li>Install the role.</li>
+</ul>
+</li>
+<li><strong>Promote the Server to a Domain Controller:</strong>
+<ul>
+<li>Click &quot;Promote this server to a domain controller&quot;.</li>
+<li>Choose the appropriate option (e.g., &quot;Add a new forest&quot; for the first domain controller).</li>
+<li>Enter the domain name.</li>
+<li>Set the <a href="https://www.google.com/search?sca_esv=b17bece7f59cc74c&amp;cs=1&amp;q=Directory+Services+Restore+Mode+password&amp;sa=X&amp;ved=2ahUKEwiY76TB5JCMAxXu78kDHSE9Az8QxccNegQIeBAB&amp;mstk=AUtExfBtiIUDVvg2DbFQjzGJ7SnhbXosFWYC9pIAStcki_wmMQ89_yMpavKU2zh5ve4hOM1hOIk5pAIbo-uw2ECIZnbrUuGu7S_Jb8u0HICHcztwv0PcFWZI2nZENM3gWSySVyIJ6aUVYnA8fT3ZoTYSmL9-GYZJoyXknvb4I8PnEWHdLys&amp;csui=3">Directory Services Restore Mode password</a>.</li>
+<li>Complete the promotion wizard.</li>
+</ul>
+</li>
+<li><strong>Configure DNS (if needed):</strong> If you are creating the first domain controller in a new forest, the DNS server role will be installed automatically.</li>
+</ul>
+<ol start="4">
+<li>Post-Promotion Configuration:</li>
+</ol>
+<ul>
+<li>
+<p><strong>Configure Time Synchronization:</strong></p>
+<p>Ensure that your domain controller is configured to synchronize time with a reliable time source.</p>
+</li>
+</ul>
+<h2>Set Uniform time for all machines</h2>
+<p>Make sure all machines are syncing from the windows timeserver, You can use Powershell to do this easily with the code below.</p>
+<pre class="language-powershell"><code class="language-powershell">
+<span class="token comment">#Set time not from CMOS</span>
+w32tm <span class="token operator">/</span>query <span class="token operator">/</span>status
+w32tm <span class="token operator">/</span>config <span class="token operator">/</span>manualpeerlist:<span class="token string">"time.windows.com"</span> <span class="token operator">/</span>syncfromflags:manual <span class="token operator">/</span>update
+w32tm <span class="token operator">/</span>query <span class="token operator">/</span>status
+</code></pre>
+<p>Follow the guide, do the perquisites...feel free to read it a few times</p>
+<p><a href="https://learn.microsoft.com/en-us/azure/azure-local/deploy/deployment-introduction?view=azloc-24112">Deploy Azure Local</a></p>
+<p><a href="https://learn.microsoft.com/en-us/azure/azure-local/deploy/deployment-virtual?view=azloc-24113">Deploy a virtual Azure Local System</a></p>
+<p><a href="https://www.linkedin.com/pulse/building-my-first-azure-local-aka-stack-hci-cluster-home-pomato-6gdqf/">Alternative guide</a></p>
+<h2>Prepare Active Directory</h2>
+<p>Make sure your AD is ready. I missed this and thought because I had a forest and domain to join I was ready but I wasn't, and if you are new to this like me, you might not be too.</p>
+<p>Run this script  in powershell on your AD/DNS server</p>
+<pre class="language-powershell"><code class="language-powershell">
+<span class="token function">Install-Module</span> AsHciADArtifactsPreCreationTool <span class="token operator">-</span>Repository PSGallery <span class="token operator">-</span>Force
+</code></pre>
+<p>Now you need to create an OU and add a user (this can be new or a user if you already have one set just copy them into the new OU) make sure the password for the user meets Azure Local requirements. <strong>Use a password that is at least 12 characters long and contains: a lowercase character, an uppercase character, a numeral, and a special character.</strong></p>
+<pre class="language-powershell"><code class="language-powershell">
+<span class="token function">New-HciAdObjectsPreCreation</span> <span class="token operator">-</span>AzureStackLCMUserCredential <span class="token punctuation">(</span><span class="token function">Get-Credential</span><span class="token punctuation">)</span> <span class="token operator">-</span>AsHciOUName <span class="token string">"&lt;OU name or distinguished name including the domain components>"</span>
+</code></pre>
+<p>In case again like me you are new to this an example of a formal OU name would be &quot;OU=ASHCI,DC=AzurelocalDC,DC=aztest&quot; Assuming you have a domain that is AzurelocalDC.aztest</p>
+<h2>Make sure your host node meets these requirements</h2>
+<h4>Physical host requirements</h4>
+<p>The following are the minimum requirements to successfully deploy Azure Local.</p>
+<p>Before you begin, make sure that:</p>
+<ul>
+<li>
+<p>You have access to a physical host system that is running Hyper-V on Windows Server 2022, Windows 11, or later. This host is used to provision a virtual Azure Local deployment.</p>
+</li>
+<li>
+<p>You have enough capacity. More capacity is required for running actual workloads like virtual machines or containers.</p>
+</li>
+<li>
+<p>The physical hardware used for the virtual deployment meets the following requirements:</p>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Minimum</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Processor</td>
+<td>Intel VT-x or AMD-V, with support for nested virtualization. For more information, see <a href="https://www.intel.com/content/www/us/en/support/articles/000005486/processors.html">Does My Processor Support Intel® virtualization technology?</a>.</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>The physical host must have a minimum of 32 GB RAM for single virtual node deployments. The virtual host VM should have at least 24 GB RAM.  <br>  <br>The physical host must have a minimum of 64 GB RAM for two virtual node deployments. Each virtual host VM should have at least 24 GB RAM for deployment and 32 GB for applying updates.</td>
+</tr>
+<tr>
+<td>Host network adapters</td>
+<td>A single network adapter.</td>
+</tr>
+<tr>
+<td>Storage</td>
+<td>1 TB Solid state drive (SSD).</td>
+</tr>
+</tbody>
+</table>
+<h4>Virtual host requirements</h4>
+<p>Before you begin, make sure that each virtual host system can dedicate the following resources to provision your virtualized Azure Local instance:</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Virtual machine (VM) type</td>
+<td>Secure Boot and Trusted Platform Module (TPM) enabled.</td>
+</tr>
+<tr>
+<td>vCPUs</td>
+<td>Four cores.</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>A minimum of 24 GB.</td>
+</tr>
+<tr>
+<td>Networking</td>
+<td>At least two network adapters connected to internal network. MAC spoofing must be enabled.</td>
+</tr>
+<tr>
+<td>Boot disk</td>
+<td>One disk to install the Azure Stack HCI operating system from ISO. At least 200 GB</td>
+</tr>
+<tr>
+<td>Hard disks for Storage Spaces Direct</td>
+<td>Four dynamic expanding disks. Maximum disk size is 1024 GB.</td>
+</tr>
+<tr>
+<td>Data disks</td>
+<td>At least 127 GB each. The size must be the same for each disk</td>
+</tr>
+<tr>
+<td>Time synchronization in integration</td>
+<td>Disabled.</td>
+</tr>
+</tbody>
+</table>
+<h2>Now to run some code to create the VMs for us and register our node</h2>
+<p>Below are a few code blocks that can be copy pated into an elevated powershell session and used to create the VM, install the required software and get things set and registered in Azure. I have tried to add notes to help you understand what is happening where. Anywhere you see a variable it can be changed into something that works for you. I have several defaults set so that if you are working on a fresh machine things will install in some nice default locations. These come from Microsoft's example but work well.</p>
+<p>Locations for things</p>
+<ol>
+<li>This is where the primary hard drive for your VM lives
+<ul>
+<li>C:\ProgramData\Microsoft\Windows\Virtual Hard Disks\</li>
+</ul>
+</li>
+<li>This is where your VM configuration data is store
+<ul>
+<li>C:\ProgramData\Microsoft\Windows\Hyper-v\</li>
+</ul>
+</li>
+<li>This is where we are keeping the data hard drives for the node
+<ul>
+<li>C:\vms\Node1\</li>
+</ul>
+</li>
+</ol>
+<p>Next we have the variables you can change if you would like to call them something other than what is outlined.</p>
+<p>- Node(n) (if you are creating more than one node you have to adjust this or at the least the number for each node you create)
+- NIC(n)
+- ip address (xxx.xxx.xxx.xxx)</p>
+<h2>On The Host node</h2>
+<p>Open Hyper-V manager</p>
+<p>To enable Hyper-V and install the Hyper-V Manager, go to Control Panel &gt; Programs &gt; Programs and Features, click &quot;Turn Windows features on or off,&quot; select &quot;Hyper-V,&quot; and then click &quot;OK&quot;.</p>
+<p>Here's a more detailed breakdown:</p>
+<p>Steps to Enable Hyper-V and Install Hyper-V Manager:</p>
+<ol>
+<li><strong>Open Control Panel:</strong>
+<ul>
+<li>Click the Start button and type &quot;Control Panel&quot; in the search bar.</li>
+<li>Select &quot;Control Panel&quot; from the search results.</li>
+</ul>
+</li>
+<li><strong>Navigate to Programs and Features:</strong>
+<ul>
+<li>Click on &quot;Programs&quot;.</li>
+<li>Click on &quot;Programs and Features&quot;.</li>
+</ul>
+</li>
+<li><strong>Turn Windows Features On or Off:</strong>
+<ul>
+<li>Click on &quot;Turn Windows features on or off&quot; in the left-hand pane.</li>
+</ul>
+</li>
+<li><strong>Select Hyper-V:</strong>
+<ul>
+<li>Expand the &quot;Hyper-V&quot; folder.</li>
+<li>Check the box next to &quot;Hyper-V&quot;.</li>
+<li>If you want to also install the Hyper-V Management Tools, select that option as well.</li>
+</ul>
+</li>
+<li><strong>Confirm Changes:</strong>
+<ul>
+<li>Click &quot;OK&quot;.</li>
+</ul>
+</li>
+<li><strong>Restart Computer:</strong>
+<ul>
+<li>The system will prompt you to restart your computer to complete the installation.</li>
+<li>Restart your computer.</li>
+</ul>
+</li>
+<li><strong>Access Hyper-V Manager:</strong>
+<ul>
+<li>After restarting, you can access Hyper-V Manager by searching for it in the Start menu or through Administrative Tools.</li>
+</ul>
+</li>
+</ol>
+<p>Open an elevated powershell session on the host machine and run the following code block (after adjusting any of the variables we called out above)</p>
+<pre class="language-powershell"><code class="language-powershell">
+<span class="token comment">#In Powershell on host</span>
+
+<span class="token comment">#Create New VM</span>
+
+<span class="token function">New-VHD</span> <span class="token operator">-</span>Path <span class="token string">"C:\ProgramData\Microsoft\Windows\Virtual Hard Disks\Node1.vhdx"</span> <span class="token operator">-</span>SizeBytes 127GB
+<span class="token function">New-VM</span> <span class="token operator">-</span>Name Node1 <span class="token operator">-</span>MemoryStartupBytes 24GB <span class="token operator">-</span>VHDPath <span class="token string">"C:\ProgramData\Microsoft\Windows\Virtual Hard Disks\Node1.vhdx"</span> <span class="token operator">-</span>Generation 2 <span class="token operator">-</span>Path <span class="token string">"C:\ProgramData\Microsoft\Windows\Hyper-V"</span>
+<span class="token function">Set-VMMemory</span> <span class="token operator">-</span>VMName <span class="token string">"Node1"</span> <span class="token operator">-</span>DynamicMemoryEnabled <span class="token boolean">$false</span>
+<span class="token function">Set-VM</span> <span class="token operator">-</span>VMName <span class="token string">"Node1"</span> <span class="token operator">-</span>CheckpointType Disabled
+
+<span class="token comment">#create NICs and attach to Virtual Switch in Hyper-V</span>
+<span class="token comment">#you only need 1 NIC for VM but if you want to create more to practice teaming or multiple </span>
+<span class="token comment">#intents make more, just remember to adjust steps related to NICs throughout the rest of the deployment</span>
+<span class="token function">Get-VMNetworkAdapter</span> <span class="token operator">-</span>VMName <span class="token string">"Node1"</span> <span class="token punctuation">|</span> <span class="token function">Remove-VMNetworkAdapter</span>
+<span class="token function">Add-VmNetworkAdapter</span> <span class="token operator">-</span>VmName <span class="token string">"Node1"</span> <span class="token operator">-</span>Name <span class="token string">"NIC1"</span>
+<span class="token function">Add-VmNetworkAdapter</span> <span class="token operator">-</span>VmName <span class="token string">"Node1"</span> <span class="token operator">-</span>Name <span class="token string">"NIC2"</span>
+<span class="token function">Get-VmNetworkAdapter</span> <span class="token operator">-</span>VmName <span class="token string">"Node1"</span> <span class="token punctuation">|</span><span class="token function">Connect-VmNetworkAdapter</span> <span class="token operator">-</span>SwitchName <span class="token string">"azure_local_external_switch"</span>
+<span class="token function">Get-VmNetworkAdapter</span> <span class="token operator">-</span>VmName <span class="token string">"Node1"</span> <span class="token punctuation">|</span><span class="token function">Set-VmNetworkAdapter</span> <span class="token operator">-</span>MacAddressSpoofing On
+
+<span class="token comment">#enable security on VM</span>
+<span class="token variable">$owner</span> = <span class="token function">Get-HgsGuardian</span> UntrustedGuardian
+<span class="token variable">$kp</span> = <span class="token function">New-HgsKeyProtector</span> <span class="token operator">-</span>Owner <span class="token variable">$owner</span> <span class="token operator">-</span>AllowUntrustedRoot
+<span class="token function">Set-VMKeyProtector</span> <span class="token operator">-</span>VMName <span class="token string">"Node1"</span> <span class="token operator">-</span>KeyProtector <span class="token variable">$kp</span><span class="token punctuation">.</span>RawData
+<span class="token function">Enable-VmTpm</span> <span class="token operator">-</span>VMName <span class="token string">"Node1"</span>
+
+<span class="token comment">#set core count and create hard drives and mount them to the node</span>
+<span class="token comment">#importnat, remember because this is a VM and dynamic (thin) provisioned you can add</span>
+<span class="token comment">#way more space than you actually have. Be careful with this.</span>
+<span class="token function">Set-VmProcessor</span> <span class="token operator">-</span>VMName <span class="token string">"Node1"</span> <span class="token operator">-</span>Count 8
+
+<span class="token function">new-VHD</span> <span class="token operator">-</span>Path <span class="token string">"C:\vms\Node1\s2d1.vhdx"</span> <span class="token operator">-</span>SizeBytes 1024GB
+<span class="token function">new-VHD</span> <span class="token operator">-</span>Path <span class="token string">"C:\vms\Node1\s2d2.vhdx"</span> <span class="token operator">-</span>SizeBytes 1024GB
+<span class="token function">new-VHD</span> <span class="token operator">-</span>Path <span class="token string">"C:\vms\Node1\s2d3.vhdx"</span> <span class="token operator">-</span>SizeBytes 1024GB
+<span class="token function">new-VHD</span> <span class="token operator">-</span>Path <span class="token string">"C:\vms\Node1\s2d4.vhdx"</span> <span class="token operator">-</span>SizeBytes 1024GB
+<span class="token function">new-VHD</span> <span class="token operator">-</span>Path <span class="token string">"C:\vms\Node1\s2d5.vhdx"</span> <span class="token operator">-</span>SizeBytes 1024GB
+<span class="token function">new-VHD</span> <span class="token operator">-</span>Path <span class="token string">"C:\vms\Node1\s2d6.vhdx"</span> <span class="token operator">-</span>SizeBytes 1024GB
+<span class="token function">Add-VMHardDiskDrive</span> <span class="token operator">-</span>VMName <span class="token string">"Node1"</span> <span class="token operator">-</span>Path <span class="token string">"C:\vms\Node1\s2d1.vhdx"</span>
+<span class="token function">Add-VMHardDiskDrive</span> <span class="token operator">-</span>VMName <span class="token string">"Node1"</span> <span class="token operator">-</span>Path <span class="token string">"C:\vms\Node1\s2d2.vhdx"</span>
+<span class="token function">Add-VMHardDiskDrive</span> <span class="token operator">-</span>VMName <span class="token string">"Node1"</span> <span class="token operator">-</span>Path <span class="token string">"C:\vms\Node1\s2d3.vhdx"</span>
+<span class="token function">Add-VMHardDiskDrive</span> <span class="token operator">-</span>VMName <span class="token string">"Node1"</span> <span class="token operator">-</span>Path <span class="token string">"C:\vms\Node1\s2d4.vhdx"</span>
+<span class="token function">Get-VMIntegrationService</span> <span class="token operator">-</span>VMName <span class="token string">"Node1"</span> <span class="token punctuation">|</span><span class="token function">Where-Object</span> <span class="token punctuation">{</span><span class="token variable">$_</span><span class="token punctuation">.</span>name <span class="token operator">-like</span> <span class="token string">"T*"</span><span class="token punctuation">}</span><span class="token punctuation">|</span><span class="token function">Disable-VMIntegrationService</span>
+<span class="token function">Set-VMProcessor</span> <span class="token operator">-</span>VMName <span class="token string">"Node1"</span> <span class="token operator">-</span>ExposeVirtualizationExtensions <span class="token boolean">$true</span>
+</code></pre>
+<p>Now that is done in Hyper-V manager Before this adjust memory and add DVD with ISO in boot order in Hyper-V manager</p>
+<pre class="language-powershell"><code class="language-powershell">
+<span class="token function">Start-VM</span> <span class="token string">"Node1"</span>
+</code></pre>
+<p>Once started you may need to wait until after fail screen comes up and hit tab to
+activate keyboard. Restart and install OS &gt; rename node in Sconfig &gt; do not join AD
+you'll be asked for an admin password. <strong>Make sure that the password meets complexity and length requirements. Use a password that is at least 12 characters long and contains: a lowercase character, an uppercase character, a numeral, and a special character.</strong></p>
+<pre class="language-powershell"><code class="language-powershell">
+<span class="token comment">#Set NICs and configre network settings on the NICS</span>
+<span class="token function">Get-VMNetworkAdapter</span> <span class="token operator">-</span>VMName <span class="token string">"Node1"</span> <span class="token operator">-</span>Name <span class="token string">"NIC1"</span>
+<span class="token function">Get-VMNetworkAdapter</span> <span class="token operator">-</span>VMName <span class="token string">"Node1"</span> <span class="token operator">-</span>Name <span class="token string">"NIC2"</span>
+
+<span class="token comment">#set MAC addresses properly</span>
+<span class="token variable">$Node1macNIC1</span> = <span class="token function">Get-VMNetworkAdapter</span> <span class="token operator">-</span>VMName <span class="token string">"Node1"</span> <span class="token operator">-</span>Name <span class="token string">"NIC1"</span>
+<span class="token variable">$Node1macNIC1</span><span class="token punctuation">.</span>MacAddress
+<span class="token variable">$Node1finalmacNIC1</span>=<span class="token variable">$Node1macNIC1</span><span class="token punctuation">.</span>MacAddress<span class="token punctuation">|</span><span class="token function">ForEach-Object</span><span class="token punctuation">{</span><span class="token punctuation">(</span><span class="token variable">$_</span><span class="token punctuation">.</span>Insert<span class="token punctuation">(</span>2<span class="token punctuation">,</span><span class="token string">"-"</span><span class="token punctuation">)</span><span class="token punctuation">.</span>Insert<span class="token punctuation">(</span>5<span class="token punctuation">,</span><span class="token string">"-"</span><span class="token punctuation">)</span><span class="token punctuation">.</span>Insert<span class="token punctuation">(</span>8<span class="token punctuation">,</span><span class="token string">"-"</span><span class="token punctuation">)</span><span class="token punctuation">.</span>Insert<span class="token punctuation">(</span>11<span class="token punctuation">,</span><span class="token string">"-"</span><span class="token punctuation">)</span><span class="token punctuation">.</span>Insert<span class="token punctuation">(</span>14<span class="token punctuation">,</span><span class="token string">"-"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token operator">-join</span> <span class="token string">" "</span><span class="token punctuation">}</span>
+<span class="token variable">$Node1finalmacNIC1</span>
+<span class="token variable">$Node1macNIC2</span> = <span class="token function">Get-VMNetworkAdapter</span> <span class="token operator">-</span>VMName <span class="token string">"Node1"</span> <span class="token operator">-</span>Name <span class="token string">"NIC2"</span>
+<span class="token variable">$Node1macNIC2</span><span class="token punctuation">.</span>MacAddress
+<span class="token variable">$Node1finalmacNIC2</span>=<span class="token variable">$Node1macNIC2</span><span class="token punctuation">.</span>MacAddress<span class="token punctuation">|</span><span class="token function">ForEach-Object</span><span class="token punctuation">{</span><span class="token punctuation">(</span><span class="token variable">$_</span><span class="token punctuation">.</span>Insert<span class="token punctuation">(</span>2<span class="token punctuation">,</span><span class="token string">"-"</span><span class="token punctuation">)</span><span class="token punctuation">.</span>Insert<span class="token punctuation">(</span>5<span class="token punctuation">,</span><span class="token string">"-"</span><span class="token punctuation">)</span><span class="token punctuation">.</span>Insert<span class="token punctuation">(</span>8<span class="token punctuation">,</span><span class="token string">"-"</span><span class="token punctuation">)</span><span class="token punctuation">.</span>Insert<span class="token punctuation">(</span>11<span class="token punctuation">,</span><span class="token string">"-"</span><span class="token punctuation">)</span><span class="token punctuation">.</span>Insert<span class="token punctuation">(</span>14<span class="token punctuation">,</span><span class="token string">"-"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token operator">-join</span> <span class="token string">" "</span><span class="token punctuation">}</span>
+<span class="token variable">$Node1finalmacNIC2</span>
+
+<span class="token comment">#reaname with the new MAC address and name all correct</span>
+<span class="token variable">$cred</span> = <span class="token function">get-credential</span>
+<span class="token function">Invoke-Command</span> <span class="token operator">-</span>VMName <span class="token string">"Node1"</span> <span class="token operator">-</span>Credential <span class="token variable">$cred</span> <span class="token operator">-</span>ScriptBlock <span class="token punctuation">{</span><span class="token keyword">param</span><span class="token punctuation">(</span><span class="token variable">$Node1finalmacNIC1</span><span class="token punctuation">)</span> <span class="token function">Get-NetAdapter</span> <span class="token operator">-</span>Physical <span class="token punctuation">|</span> <span class="token function">Where-Object</span> <span class="token punctuation">{</span><span class="token variable">$_</span><span class="token punctuation">.</span>MacAddress <span class="token operator">-eq</span> <span class="token variable">$Node1finalmacNIC1</span><span class="token punctuation">}</span> <span class="token punctuation">|</span> <span class="token function">Rename-NetAdapter</span> <span class="token operator">-</span>NewName <span class="token string">"NIC1"</span><span class="token punctuation">}</span> <span class="token operator">-</span>ArgumentList <span class="token variable">$Node1finalmacNIC1</span>
+<span class="token function">Invoke-Command</span> <span class="token operator">-</span>VMName <span class="token string">"Node1"</span> <span class="token operator">-</span>Credential <span class="token variable">$cred</span> <span class="token operator">-</span>ScriptBlock <span class="token punctuation">{</span><span class="token keyword">param</span><span class="token punctuation">(</span><span class="token variable">$Node1finalmacNIC2</span><span class="token punctuation">)</span> <span class="token function">Get-NetAdapter</span> <span class="token operator">-</span>Physical <span class="token punctuation">|</span> <span class="token function">Where-Object</span> <span class="token punctuation">{</span><span class="token variable">$_</span><span class="token punctuation">.</span>MacAddress <span class="token operator">-eq</span> <span class="token variable">$Node1finalmacNIC2</span><span class="token punctuation">}</span> <span class="token punctuation">|</span> <span class="token function">Rename-NetAdapter</span> <span class="token operator">-</span>NewName <span class="token string">"NIC2"</span><span class="token punctuation">}</span> <span class="token operator">-</span>ArgumentList <span class="token variable">$Node1finalmacNIC2</span>
+
+<span class="token comment">#Disable DHCP</span>
+<span class="token function">Invoke-Command</span> <span class="token operator">-</span>VMName <span class="token string">"Node1"</span> <span class="token operator">-</span>Credential <span class="token variable">$cred</span> <span class="token operator">-</span>ScriptBlock <span class="token punctuation">{</span><span class="token function">Set-NetIPInterface</span> <span class="token operator">-</span>InterfaceAlias <span class="token string">"NIC1"</span> <span class="token operator">-</span>Dhcp Disabled<span class="token punctuation">}</span>
+<span class="token function">Invoke-Command</span> <span class="token operator">-</span>VMName <span class="token string">"Node1"</span> <span class="token operator">-</span>Credential <span class="token variable">$cred</span> <span class="token operator">-</span>ScriptBlock <span class="token punctuation">{</span><span class="token function">Set-NetIPInterface</span> <span class="token operator">-</span>InterfaceAlias <span class="token string">"NIC2"</span> <span class="token operator">-</span>Dhcp Disabled<span class="token punctuation">}</span>
+
+<span class="token comment">#add the IP addresses you want, as an example if you are on a home network you'll have an internal ip</span>
+<span class="token comment">#address range your router typically does assignment, but you'll take that over here. This also means you</span>
+<span class="token comment">#need to keep track of your IP assignments. I would suggest keeping an excel table and filling it out</span>
+<span class="token comment">#and so you know what you have and haven't assigned. Your router will assign around what you have</span>
+<span class="token comment">#set, so just dodge the lower ip addresses and you should be fine. You can also use some auto discovery</span>
+<span class="token comment">#tools if you want, those can feel daunting if you aren't used to them, so if you are new, just a spreadsheet</span>
+<span class="token comment">#is fine for small networks.</span>
+<span class="token comment">#typically for a home network your ip address will be 192.168.xxx.xxx/24 your subnet mask 255.255.255.0</span>
+<span class="token comment">#your default gateway 192.168.xxx.1 and your DNS server we set up earlier</span>
+<span class="token comment">#but as always checking is best in any powershell terminal you can run ipconfig and that will spit out </span>
+<span class="token comment">#the info for you</span>
+<span class="token function">Invoke-Command</span> <span class="token operator">-</span>VMName <span class="token string">"Node1"</span> <span class="token operator">-</span>Credential <span class="token variable">$cred</span> <span class="token operator">-</span>ScriptBlock <span class="token punctuation">{</span><span class="token function">New-NetIPAddress</span> <span class="token operator">-</span>InterfaceAlias <span class="token string">"NIC1"</span> <span class="token operator">-</span>IPAddress <span class="token string">"XXX.XXX.XXX.XXX"</span> <span class="token operator">-</span>PrefixLength 24 <span class="token operator">-</span>AddressFamily IPv4 <span class="token operator">-</span>DefaultGateway <span class="token string">"XXX.XXX.XXX.XXX"</span><span class="token punctuation">}</span>
+<span class="token function">Invoke-Command</span> <span class="token operator">-</span>VMName <span class="token string">"Node1"</span> <span class="token operator">-</span>Credential <span class="token variable">$cred</span> <span class="token operator">-</span>ScriptBlock <span class="token punctuation">{</span><span class="token function">New-NetIPAddress</span> <span class="token operator">-</span>InterfaceAlias <span class="token string">"NIC2"</span> <span class="token operator">-</span>IPAddress <span class="token string">"XXX.XXX.XXX.XXX"</span> <span class="token operator">-</span>PrefixLength 24 <span class="token operator">-</span>AddressFamily IPv4 <span class="token operator">-</span>DefaultGateway <span class="token string">"XXX.XXX.XXX.XXX"</span><span class="token punctuation">}</span>
+
+<span class="token comment">#set DNS server in the NICs</span>
+<span class="token function">Invoke-Command</span> <span class="token operator">-</span>VMName <span class="token string">"Node1"</span> <span class="token operator">-</span>Credential <span class="token variable">$cred</span> <span class="token operator">-</span>ScriptBlock <span class="token punctuation">{</span><span class="token function">Set-DnsClientServerAddress</span> <span class="token operator">-</span>InterfaceAlias <span class="token string">"NIC1"</span> <span class="token operator">-</span>ServerAddresses <span class="token string">"XXX.XXX.XXX.XXX"</span><span class="token punctuation">}</span>
+<span class="token function">Invoke-Command</span> <span class="token operator">-</span>VMName <span class="token string">"Node1"</span> <span class="token operator">-</span>Credential <span class="token variable">$cred</span> <span class="token operator">-</span>ScriptBlock <span class="token punctuation">{</span><span class="token function">Set-DnsClientServerAddress</span> <span class="token operator">-</span>InterfaceAlias <span class="token string">"NIC2"</span> <span class="token operator">-</span>ServerAddresses <span class="token string">"XXX.XXX.XXX.XXX"</span><span class="token punctuation">}</span>
+
+<span class="token comment">#enable Hyper-v for the VM</span>
+<span class="token function">Invoke-Command</span> <span class="token operator">-</span>VMName <span class="token string">"Node1"</span> <span class="token operator">-</span>Credential <span class="token variable">$cred</span> <span class="token operator">-</span>ScriptBlock <span class="token punctuation">{</span><span class="token function">Enable-WindowsOptionalFeature</span> <span class="token operator">-</span>Online <span class="token operator">-</span>FeatureName Microsoft-Hyper-V <span class="token operator">-</span>All <span class="token punctuation">}</span>
+
+<span class="token comment">#Now your node is ready to be regesterd as an Azure Local node is Azure</span>
+</code></pre>
+<h2>Set these permissions first</h2>
+<p>these are available in this guide <a href="https://learn.microsoft.com/en-us/azure/azure-local/deploy/deployment-arc-register-server-permissions?view=azloc-24112&amp;tabs=powershell"># Register your machines and assign permissions for Azure Local deployment</a> I used the portal for this, it's easier.</p>
+<ol>
+<li>
+<p>Register your subscription with the required resource providers (RPs). You can use either the <a href="https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-providers-and-types#register-resource-provider-1">Azure portal</a> or the <a href="https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-providers-and-types#azure-powershell">Azure PowerShell</a> to register. You need to be an owner or contributor on your subscription to register the following resource RPs:</p>
+<ul>
+<li><em>Microsoft.HybridCompute</em></li>
+<li><em>Microsoft.GuestConfiguration</em></li>
+<li><em>Microsoft.HybridConnectivity</em></li>
+<li><em>Microsoft.AzureStackHCI</em></li>
+</ul>
+<p>Note</p>
+<p>The assumption is that the person registering the Azure subscription with the resource providers is a different person than the one who is registering the Azure Local machines with Arc.</p>
+</li>
+<li>
+<p>If you're registering the machines as Arc resources, make sure that you have the following permissions on the resource group where the machines were provisioned:</p>
+<ul>
+<li>Azure Connected Machine Onboarding</li>
+<li>Azure Connected Machine Resource Administrator</li>
+</ul>
+<p>To verify that you have these roles, follow these steps in the Azure portal:</p>
+<ol>
+<li>Go to the subscription that you use for the Azure Local deployment.</li>
+<li>Go to the resource group where you're planning to register the machines.</li>
+<li>In the left-pane, go to <strong>Access Control (IAM)</strong>.</li>
+<li>In the right-pane, go the <strong>Role assignments</strong>. Verify that you have the <strong>Azure Connected Machine Onboarding</strong> and <strong>Azure Connected Machine Resource Administrator</strong> roles assigned.</li>
+</ol>
+</li>
+<li>
+<p>Check your Azure policies. Make sure that:</p>
+<ul>
+<li>The Azure policies aren't blocking the installation of extensions.</li>
+<li>The Azure policies aren't blocking the creation of certain resource types in a resource group.</li>
+<li>The Azure policies aren't blocking the resource deployment in certain locations.</li>
+</ul>
+</li>
+</ol>
+<p>Now you can run the script below to register the machine. You need to go need to find a few things in your azure portal.</p>
+<h2>Find your Azure subscription</h2>
+<p>Follow these steps to retrieve the ID for a subscription in the Azure portal.</p>
+<ol>
+<li>
+<p>Sign in to the <a href="https://portal.azure.com/">Azure portal</a>.</p>
+</li>
+<li>
+<p>Under the Azure services heading, select <strong>Subscriptions</strong>. If you don't see <strong>Subscriptions</strong> here, use the search box to find it.</p>
+</li>
+<li>
+<p>Find the subscription in the list, and note the <strong>Subscription ID</strong> shown in the second column. If no subscriptions appear, or you don't see the right one, you may need to <a href="https://learn.microsoft.com/en-us/azure/azure-portal/set-preferences#switch-and-manage-directories">switch directories</a> to show the subscriptions from a different Microsoft Entra tenant.</p>
+</li>
+<li>
+<p>To easily copy the <strong>Subscription ID</strong>, select the subscription name to display more details. Select the <strong>Copy to clipboard</strong> icon shown next to the <strong>Subscription ID</strong> in the <strong>Essentials</strong> section. You can paste this value into a text document or other location.</p>
+</li>
+</ol>
+<h2>Find your Microsoft Entra tenant</h2>
+<p>Follow these steps to retrieve the ID for a Microsoft Entra tenant in the Azure portal.</p>
+<ol>
+<li>
+<p>Sign in to the <a href="https://portal.azure.com/">Azure portal</a>.</p>
+</li>
+<li>
+<p>Confirm that you are signed into the tenant for which you want to retrieve the ID. If not, <a href="https://learn.microsoft.com/en-us/azure/azure-portal/set-preferences#switch-and-manage-directories">switch directories</a> so that you're working in the right tenant.</p>
+</li>
+<li>
+<p>Under the Azure services heading, select <strong>Microsoft Entra ID</strong>. If you don't see <strong>Microsoft Entra ID</strong> here, use the search box to find it.</p>
+</li>
+<li>
+<p>Find the <strong>Tenant ID</strong> in the <strong>Basic information</strong> section of the <strong>Overview</strong> screen.</p>
+</li>
+<li>
+<p>Copy the <strong>Tenant ID</strong> by selecting the <strong>Copy to clipboard</strong> icon shown next to it. You can paste this value into a text document or other location.</p>
+</li>
+</ol>
+<p>Create a resource group in a region that supports Azure Local</p>
+<p>To create a resource group in the <a href="https://www.google.com/search?sca_esv=ea7911cd1c52328e&amp;cs=1&amp;q=Azure+portal&amp;sa=X&amp;ved=2ahUKEwj25v-F85CMAxUP4ckDHaRvMbgQxccNegQIAxAB&amp;mstk=AUtExfBJ9AnUmF8cNByWLe3ZvafIRgO49_aYC8A3Dgz4_X4kTBXnoxxulgtmJYffpocE0QGKWPmrQzSl8Jm8fhILTCRp9LAMTS2jrdIKoUgXJc351EM3lsIurtmNNsvhjSj5KkK85u8Ji2MpXzH7SajDXi8PEVgYSM4iSyARu-bJjnxzAO0i0PaRCN2JO4hHgGIhUw1mEpNEzF0_vFZYf2irxgIuf4Vo4qA-AKMxMlciekLBpQ&amp;csui=3">Azure portal</a>, sign in, navigate to &quot;Resource groups,&quot; click &quot;+ Create,&quot; select your subscription, enter a name and region, then click &quot;Review + create&quot; and &quot;Create&quot;.</p>
+<p>Here's a more detailed step-by-step guide:</p>
+<ol>
+<li>
+<p>Sign in to the Azure Portal:</p>
+<ul>
+<li>Go to the Azure portal: https://portal.azure.com/</li>
+</ul>
+</li>
+<li>
+<p>Navigate to Resource Groups:</p>
+<ul>
+<li>Click on &quot;Resource groups&quot; in the left-hand menu.</li>
+</ul>
+</li>
+<li>
+<p>Create a New Resource Group:</p>
+<ul>
+<li>Click the &quot;+&quot; button to create a new resource group.</li>
+</ul>
+</li>
+<li>
+<p>Fill in the Details:</p>
+<ul>
+<li><strong>Subscription:</strong> Select the Azure subscription where you want to create the resource group.</li>
+<li><strong>Resource Group:</strong> Enter a unique name for the resource group.</li>
+<li><strong>Region:</strong> Select the Azure region where you want to deploy resources within this resource group.</li>
+</ul>
+</li>
+<li>
+<p>Review and Create:</p>
+<ul>
+<li>Click &quot;Review + create&quot; to review the details.</li>
+<li>Click &quot;Create&quot; to create the resource group.</li>
+</ul>
+</li>
+</ol>
+<p><strong>Azure regions: Azure Local is supported for the following regions:</strong> (I have formatted them to work below)</p>
+<ul>
+<li>eastus</li>
+<li>westeurope</li>
+<li>australiaeast</li>
+<li>southeastasia</li>
+<li>indiacentral</li>
+<li>canadacentral</li>
+<li>japaneast</li>
+<li>southcentralus</li>
+</ul>
+<h2>On Local Node</h2>
+<pre class="language-powershell"><code class="language-powershell">
+<span class="token comment">#Set time not from CMOS</span>
+w32tm <span class="token operator">/</span>query <span class="token operator">/</span>status
+w32tm <span class="token operator">/</span>config <span class="token operator">/</span>manualpeerlist:<span class="token string">"time.windows.com"</span> <span class="token operator">/</span>syncfromflags:manual <span class="token operator">/</span>update
+w32tm <span class="token operator">/</span>query <span class="token operator">/</span>status
+
+<span class="token comment">#Define the subscription where you want to register your machine as Arc device </span>
+<span class="token variable">$Subscription</span> = <span class="token string">"your subscription id here"</span>
+
+<span class="token comment">#Define the resource group where you want to register your machine as Arc device</span>
+<span class="token variable">$RG</span> = <span class="token string">"your resource group name here"</span>
+
+<span class="token comment">#Define the region to use to register your server as Arc device</span>
+<span class="token comment">#Do not use spaces or capital letters when defining region</span>
+<span class="token variable">$Region</span> = <span class="token string">"the region you choose"</span>
+
+<span class="token comment">#Define the tenant you will use to register your machine as Arc device</span>
+<span class="token variable">$Tenant</span> = <span class="token string">"your tennant id here"</span>
+
+<span class="token comment">#Connect to your Azure account and Subscription</span>
+<span class="token function">Connect-AzAccount</span> <span class="token operator">-</span>SubscriptionId <span class="token variable">$Subscription</span> <span class="token operator">-</span>TenantId <span class="token variable">$Tenant</span> <span class="token operator">-</span>DeviceCode
+
+<span class="token comment">#Get the Access Token for the registration</span>
+<span class="token variable">$ARMtoken</span> = <span class="token punctuation">(</span><span class="token function">Get-AzAccessToken</span> <span class="token operator">-</span>WarningAction SilentlyContinue<span class="token punctuation">)</span><span class="token punctuation">.</span>Token
+
+<span class="token comment">#Get the Account ID for the registration</span>
+<span class="token variable">$id</span> = <span class="token punctuation">(</span><span class="token function">Get-AzContext</span><span class="token punctuation">)</span><span class="token punctuation">.</span>Account<span class="token punctuation">.</span>Id
+
+<span class="token comment">#Invoke the registration script. Use a supported region.</span>
+<span class="token function">Invoke-AzStackHciArcInitialization</span> <span class="token operator">-</span>SubscriptionID <span class="token variable">$Subscription</span> <span class="token operator">-</span>ResourceGroup <span class="token variable">$RG</span> <span class="token operator">-</span>TenantID <span class="token variable">$Tenant</span> <span class="token operator">-</span>Region <span class="token variable">$Region</span> <span class="token operator">-</span>Cloud <span class="token string">"AzureCloud"</span> <span class="token operator">-</span>ArmAccessToken <span class="token variable">$ARMtoken</span> <span class="token operator">-</span>AccountID <span class="token variable">$id</span> <span class="token comment">#(if you have proxy server remove this comment)-Proxy $ProxyServer</span>
+</code></pre>
+<p>Now assign permissions for deployment</p>
+<ol>
+<li>
+<p>In <a href="https://portal.azure.com/">the Azure portal</a>, go to the subscription used to register the machines. In the left pane, select <strong>Access control (IAM)</strong>. In the right pane, select <strong>+ Add</strong> and from the dropdown list, select <strong>Add role assignment</strong>.</p>
+</li>
+<li>
+<p>Go through the tabs and assign the following role permissions to the user who deploys the instance:</p>
+<ul>
+<li><strong>Azure Stack HCI Administrator</strong></li>
+<li><strong>Reader</strong></li>
+</ul>
+</li>
+<li>
+<p>In the Azure portal, go to the resource group used to register the machines on your subscription. In the left pane, select <strong>Access control (IAM)</strong>. In the right pane, select <strong>+ Add</strong> and from the dropdown list, select <strong>Add role assignment</strong>.</p>
+</li>
+<li>
+<p>Go through the tabs and assign the following permissions to the user who deploys the instance:</p>
+<ul>
+<li><strong>Key Vault Data Access Administrator</strong>: This permission is required to manage data plane permissions to the key vault used for deployment.</li>
+<li><strong>Key Vault Secrets Officer</strong>: This permission is required to read and write secrets in the key vault used for deployment.</li>
+<li><strong>Key Vault Contributor</strong>: This permission is required to create the key vault used for deployment.</li>
+<li><strong>Storage Account Contributor</strong>: This permission is required to create the storage account used for deployment.</li>
+</ul>
+</li>
+<li>
+<p>In the right pane, go to <strong>Role assignments</strong>. Verify that the deployment user has all the configured roles.</p>
+</li>
+<li>
+<p>In the Azure portal go to <strong>Microsoft Entra Roles and Administrators</strong> and assign the <strong>Cloud Application Administrator</strong> role permission at the Microsoft Entra tenant level.</p>
+</li>
+</ol>
+<h2>Now you are registered and ready to deploy</h2>
+<p>If you followed through this point you should be registered with a node that is available in the Azure &gt; Azure ARC &gt; Azure Local &gt; Deploy Azure Local workflow.</p>
+<p>You can deploy using this guide and follow it all the way do the bottom to the enable RDP portion because you'll need that for the next couple of parts.</p>
+<h4><a href="https://learn.microsoft.com/en-us/azure/azure-local/deploy/deploy-via-portal?view=azloc-24112">Deploy Azure Local using the Azure portal</a></h4>
+<h4>Validated network topologies (its going to have a visual for you)</h4>
+<p>When you deploy Azure Local from Azure portal, the network configuration options vary depending on the number of machines and the type of storage connectivity. Azure portal guides you through the supported options for each configuration.</p>
+<h4>Supported network topologies</h4>
+<table>
+<thead>
+<tr>
+<th>Network topology</th>
+<th>Azure portal</th>
+<th>Resource Manager template</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>One machine - no switch for storage</td>
+<td>By default</td>
+<td>Supported</td>
+</tr>
+<tr>
+<td>One machine - with network switch for storage</td>
+<td>Not applicable</td>
+<td>Supported</td>
+</tr>
+<tr>
+<td>Two machines - no switch for storage</td>
+<td>Supported</td>
+<td>Supported</td>
+</tr>
+<tr>
+<td>Two machines - with network switch for storage</td>
+<td>Supported</td>
+<td>Supported</td>
+</tr>
+<tr>
+<td>Three machines - with network switch for storage</td>
+<td>Supported</td>
+<td>Supported</td>
+</tr>
+<tr>
+<td>Three machines - with no network switch for storage</td>
+<td>Not supported</td>
+<td>Supported</td>
+</tr>
+<tr>
+<td>Four to 16 machines - with no network switch for storage</td>
+<td>Not supported</td>
+<td>Not supported</td>
+</tr>
+<tr>
+<td>Four to 16 machines - with network switch for storage</td>
+<td>Supported</td>
+<td>Supported</td>
+</tr>
+</tbody>
+</table>
+<p>The two storage network options are:</p>
+<ul>
+<li>
+<p><strong>No switch for storage</strong>. When you select this option, your Azure Local system uses crossover network cables directly connected to your network interfaces for storage communication. The current supported switchless deployments from the portal are one or two machines.</p>
+</li>
+<li>
+<p><strong>Network switch for storage</strong>. When you select this option, your Azure Local system uses network switches connected to your network interfaces for storage communication. You can deploy up to 16 machines using this configuration.</p>
+</li>
+</ul>
+<h2>Now you have an Azure Local Cluster now what?</h2>
+<p>Now you should have a cluster with a management name for the cluster. In my case I chose JSVS2D so I'll use this as the frame of reference for example but yours is whatever you named it in the deployment process. The registration process created a resource group for you, and the deployment process added your cluster to that resource group with all the required things it needs. You have to add one more thing to do other things in your cluster.  You need to create a logical network. This will allow the VMs and containers you run to interact withing the cluster and with the outside world.</p>
+<h2>Add a logical network to your cluster</h2>
+<p>To do this in your azure portal go to your resource group &gt; then to your cluster &gt; then to resources in the left blade &gt; then to logical networks. From there you are going to create a logical network. You might need to enter the virtual switch name the first time (I did). If you didn't change it in the deployment it should be &quot;ConvergedSwitch(compute_management)&quot; This was what I chose. Yours might be different if you chose a different topology. You can check by running the following in powershell on the cluster in hyper-v manager and logging into the the machine exiting sconfig to the CLI and running the command below. Or connecting to the node in Azure and using password verification to remote into the CLI.</p>
+<pre class="language-powershell"><code class="language-powershell">
+<span class="token function">get-vmswitch</span>
+</code></pre>
+<p>Once you have that you need to set the IP address assignment.</p>
+<p>If you have been following along, you need to set it for your whole IP address range. We figured this out at the very beginning of the guide.</p>
+<p>So if your IP address is 192.168.95.201 you would add 192.168.95.1/24 as your space then indicate the pool you want the cluster to have so like 192.168.95.210 to 192.168.95.230 for example. in this case your default gateway would be 192.168.95.1 and your DNS server would be what you set earlier 192.168.95.xxx you can also set a VLAN ID here if you want, but it isn't necessarily required.</p>
+<p>Now that we have that done you can begin to install VMs on your cluster. But first we want to walk through a VM to set up WAC on to manage it and give you a starting idea for how to do more.</p>
+<h2>Setting up a Windows Server VM on Azure Local</h2>
+<p>First you want to go to your resource group and click into your cluster &gt; resources &gt; VM images &gt; add VM image from that menu you can add an iso if you have one or download one from the marketplace. If you get one from the marketplace just make sure it isn't core, you want a GUI.</p>
+<p>Once that is downloaded you want to go back to your cluster &gt; resources &gt; virtual machines &gt; create a vm from there you can set it up like any VM Give it a username and password, chose to atomically join your domain and it will create it on your cluster.</p>
+<h2>Setting up RDP</h2>
+<p>We are finally ready to set up RDP. For easy mode you want this to be on a PC in your domain. Download the RDP app from Microsoft app store, and sign in with your Azure subscription account. (if you are like me and this isn't a corporate account you'll need to look up the long form account user name. You can find this by going to your subscription &gt; access control (IAM) &gt; role assignments &gt; your account (it will be in several places where you have given it permissions) &gt; there you can see the long username...that is what you need to sign into RDP).</p>
+<p>Once signed in you can add pc's I used the IP address of the windows server we just created. Then add it and connect using your credentials.</p>
+<h2>Congratulations you should now be in your cluster and in the server now to set up WAC</h2>
+<p>We are almost there From this point we just need to set up WAC. For this in the browser navigate to the <strong><a href="https://www.microsoft.com/en-us/evalcenter/download-windows-admin-center">evaluation center</a></strong> We've been here before. Download Windows admin center and install it. Since it's running on a server it is going to assume the role of a gateway server for WAC which offers more flexibility and the ability to add your cluster. You need to be able to log in though. If you have never done it before it took me a minute to figure it out. The easy way is to open powershell and use this command</p>
+<pre class="language-powershell"><code class="language-powershell">
+whoami <span class="token operator">/</span>user
+</code></pre>
+<p>The output will look something like this</p>
+<p>USER INFORMATION</p>
+<p>User Name                     SID
+================== =============================================
+pcname\loggedinuser     S-1-5-21-3331493666-949227554-3045976163-1001</p>
+<p>This will spit out a username and SID for you and that username is the username WAC is looking for. The password is just the password for the login to the server.</p>
+<h2>Finally to add the cluster</h2>
+<p>Since WAC is a gateway and in your AD Domain adding server running on it is easy enough, you can click the add server button and then search active directory and then use a wildcard * to see all available servers but what about adding a cluster. When you created the cluster you created a resource that managed the cluster as a whole in Azure. This same name was applied to your AD OU and so now you have cluster in your AD by that name. In my case JSVS2D. So you click add cluster, search for yours, then use your AD credentials (the full ones blank@blank.blank) and password to log into that and you are off to the races, managing your cluster in WAC.</p>
+<h1>Is that all folks?</h1>
+<p>That is where I'll end this guide. From this point on you know how to add VM images, start VMs, Manage in WAC, and you are ready to deploy containers and VMs and workloads to your cluster. From here the world is your oyster.</p>
+<p>Now that you see how easy it is once everything is set up you can do it on the full blown version as well by acquiring validated hardware from a Microsoft approved OEM vendor <a href="https://azurelocalsolutions.azure.microsoft.com/">Azure Local Catalogue and sizer</a>.</p>
+<p>I hope this guide helps, and wish you a good journey in your Azure Local adventures.</p>
+
+  </section>
+
+  <footer class="post-footer">
+    <p class="post-tags">
+      
+    </p>
+  </footer>
+</article>
+
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <div class="copyright">©  Hybridcloudhq - Disclaimer The views and opinions expressed on this website are solely my own and do not reflect the official positions of Dell Technologies, or any other affiliated organizations. All content is provided for informational purposes only.</div>
+        <div class="social">
+          
+            <a href="https://x.com/sandorvoros" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+              
+                <svg width="1200" height="1227" viewBox="0 0 1200 1227" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z"/>
+                  </svg>
+              
+            </a>
+          
+            <a href="https://github.com/josephsandorvoros" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+              
+                <svg fill="#000000" width="24px" height="24px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-name="Layer 1">
+                  <path d="M12,2.2467A10.00042,10.00042,0,0,0,8.83752,21.73419c.5.08752.6875-.21247.6875-.475,0-.23749-.01251-1.025-.01251-1.86249C7,19.85919,6.35,18.78423,6.15,18.22173A3.636,3.636,0,0,0,5.125,16.8092c-.35-.1875-.85-.65-.01251-.66248A2.00117,2.00117,0,0,1,6.65,17.17169a2.13742,2.13742,0,0,0,2.91248.825A2.10376,2.10376,0,0,1,10.2,16.65923c-2.225-.25-4.55-1.11254-4.55-4.9375a3.89187,3.89187,0,0,1,1.025-2.6875,3.59373,3.59373,0,0,1,.1-2.65s.83747-.26251,2.75,1.025a9.42747,9.42747,0,0,1,5,0c1.91248-1.3,2.75-1.025,2.75-1.025a3.59323,3.59323,0,0,1,.1,2.65,3.869,3.869,0,0,1,1.025,2.6875c0,3.83747-2.33752,4.6875-4.5625,4.9375a2.36814,2.36814,0,0,1,.675,1.85c0,1.33752-.01251,2.41248-.01251,2.75,0,.26251.1875.575.6875.475A10.0053,10.0053,0,0,0,12,2.2467Z"/>
+                  </svg>
+              
+            </a>
+          
+            <a href="https://www.linkedin.com/in/josephsvoros/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+              
+                <svg width="24px" height="24px" viewBox="0 0 24 24" role="img" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn icon</title>
+                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                  </svg>
+              
+            </a>
+          
+            <a href="https://www.instagram.com/jsvoros/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+              
+                <svg fill="#000000" width="800px" height="800px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-name="Layer 1">
+                  <path d="M17.34,5.46h0a1.2,1.2,0,1,0,1.2,1.2A1.2,1.2,0,0,0,17.34,5.46Zm4.6,2.42a7.59,7.59,0,0,0-.46-2.43,4.94,4.94,0,0,0-1.16-1.77,4.7,4.7,0,0,0-1.77-1.15,7.3,7.3,0,0,0-2.43-.47C15.06,2,14.72,2,12,2s-3.06,0-4.12.06a7.3,7.3,0,0,0-2.43.47A4.78,4.78,0,0,0,3.68,3.68,4.7,4.7,0,0,0,2.53,5.45a7.3,7.3,0,0,0-.47,2.43C2,8.94,2,9.28,2,12s0,3.06.06,4.12a7.3,7.3,0,0,0,.47,2.43,4.7,4.7,0,0,0,1.15,1.77,4.78,4.78,0,0,0,1.77,1.15,7.3,7.3,0,0,0,2.43.47C8.94,22,9.28,22,12,22s3.06,0,4.12-.06a7.3,7.3,0,0,0,2.43-.47,4.7,4.7,0,0,0,1.77-1.15,4.85,4.85,0,0,0,1.16-1.77,7.59,7.59,0,0,0,.46-2.43c0-1.06.06-1.4.06-4.12S22,8.94,21.94,7.88ZM20.14,16a5.61,5.61,0,0,1-.34,1.86,3.06,3.06,0,0,1-.75,1.15,3.19,3.19,0,0,1-1.15.75,5.61,5.61,0,0,1-1.86.34c-1,.05-1.37.06-4,.06s-3,0-4-.06A5.73,5.73,0,0,1,6.1,19.8,3.27,3.27,0,0,1,5,19.05a3,3,0,0,1-.74-1.15A5.54,5.54,0,0,1,3.86,16c0-1-.06-1.37-.06-4s0-3,.06-4A5.54,5.54,0,0,1,4.21,6.1,3,3,0,0,1,5,5,3.14,3.14,0,0,1,6.1,4.2,5.73,5.73,0,0,1,8,3.86c1,0,1.37-.06,4-.06s3,0,4,.06a5.61,5.61,0,0,1,1.86.34A3.06,3.06,0,0,1,19.05,5,3.06,3.06,0,0,1,19.8,6.1,5.61,5.61,0,0,1,20.14,8c.05,1,.06,1.37.06,4S20.19,15,20.14,16ZM12,6.87A5.13,5.13,0,1,0,17.14,12,5.12,5.12,0,0,0,12,6.87Zm0,8.46A3.33,3.33,0,1,1,15.33,12,3.33,3.33,0,0,1,12,15.33Z"/>
+                  </svg>
+              
+            </a>
+          
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

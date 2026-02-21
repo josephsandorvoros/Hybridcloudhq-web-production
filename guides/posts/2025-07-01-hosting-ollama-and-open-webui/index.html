@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Hosting Ollama and Open WebUI</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <div class="brand">
+          <a class="logo" href="/">Hybridcloudhq</a>
+          <span class="tag">Cloud tools & guides</span>
+        </div>
+        <nav class="main-nav">
+          <a href="/">Home</a>
+          <a href="/projects/">Projects</a>
+          <a href="/guides/">Guides</a>
+          <a href="/blog/">Blog</a>
+          <a href="/aboutme/">About</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      
+<p class="breadcrumb"><a href="/blog/">← Back to Blog</a></p>
+
+<article class="post container">
+  
+
+  <header>
+    <h1>Hosting Ollama and Open WebUI</h1>
+    <p class="post-meta">July 1, 2025</p>
+  </header>
+
+  <section class="post-content">
+    <h2>Why Host Your Own AI?</h2>
+<p>If you’re anything like me, you’re reading this because you’re curious about how to host your own local AI. When I first told friends I was working on this, the most common response was: “Why?” And honestly? There are a few reasons.</p>
+<p>First, I wanted to prove to myself that I could. That’s often reason enough to start any project. But beyond that, I noticed AI becoming a bigger part of my work life. My company is embracing it more and more, and I'm frequently talking to customers about AI use cases. So it made sense to dig deeper and understand it firsthand.</p>
+<p>The obvious options were:</p>
+<ul>
+<li>Use the company’s internal tools (which offer little control or learning opportunity), or</li>
+<li>Pay for a major cloud AI platform—trading money <em>and</em> data privacy in the process.</li>
+</ul>
+<p>Then I stumbled upon a third option—one I kept seeing mentioned in the homelab community: host it myself. I had enough gear to make it happen. And while my setup was limited, those constraints were part of the appeal. Constraints push you to learn. So, it became a challenge. A puzzle. And a really fun one at that.</p>
+<p>Now I’m sharing the results here, hoping this write-up helps someone else explore, learn, or get inspired to do the same.</p>
+<h2>What Do You Actually Need?</h2>
+<p>With the goal clear—run a local AI model effectively on modest hardware—it’s time to look at the setup. My environment includes:</p>
+<ul>
+<li>A Proxmox cluster with high availability (HA)</li>
+<li>A small AMD mini PC acting as a host VM (no GPU for now)</li>
+</ul>
+<p>Eventually I may move this to a dedicated host with a P40 GPU, but I started with what I had. The question was: what could I run on this setup?</p>
+<p>Like many, I watched a few excellent videos (especially <a href="https://www.youtube.com/watch?v=Wjrdr0NU4Sk&amp;t=1196s">Network Chuck &quot;host all your AI locally&quot;</a>) but his instructions didn’t map cleanly to my hardware or virtualized cluster. So I had to do a bit of digging.</p>
+<p>Thankfully, I found a helpful write-up on hardware requirements by Zack Saadioui: <a href="https://www.arsturn.com/blog/hardware-requirements-for-running-ollama">Hardware Requirements for Running Ollama</a>. That gave me the confidence to move forward, build a VM, and jump into the install process.</p>
+<h2>What Got in the Way?</h2>
+<p>Let’s be real—any good homelab project comes with a few speed bumps.</p>
+<p>I wanted the most efficient setup possible, so I spun up an Ubuntu Server VM, installed Docker, and planned to run both Ollama and Open WebUI as containers.</p>
+<p>This raised some familiar Docker pain points (hello, container networking!), but Portainer made it easier to manage and monitor everything—plus it was already running in my lab.</p>
+<p>Bonus challenge: I wanted remote access.</p>
+<p>For that, I had two solid options. I already used Tailscale (VPN/tailnet) and had Cloudflare in my environment for DNS, tunneling, and HTTPS termination. After weighing the pros and cons, I decided to roll with Cloudflare and a custom subdomain for remote access.</p>
+<h4>Tools Used</h4>
+<p>Here are the key ingredients in this build:
+<a href="https://ubuntu.com/download/server">Ubuntu Server</a>
+<a href="https://www.docker.com/">Docker</a>
+<a href="https://ollama.com/">Ollama</a>
+<a href="https://www.openwebui.com/">Open WebUI</a>
+<a href="https://www.portainer.io/">Portainer</a>
+<a href="https://tailscale.com/">Tailscale</a>
+<a href="https://www.cloudflare.com/">Cloudflare</a>
+<a href="https://www.proxmox.com/en/">Proxmox</a></p>
+<h1>Let’s Get Building</h1>
+<p>Time to dive in. I’ll walk you through each step of the setup—explaining both the “how” and the “why.” Whether you’re brand new to this or a seasoned self-hoster, I’ve tried to make this guide beginner-friendly and skippable where needed.</p>
+<p>Note: I’m not covering how to install Proxmox here. Their docs and the community videos below do a great job:</p>
+<ul>
+<li><a href="https://www.youtube.com/watch?v=hSOFshCkSys">Creating a Basic 3 Node Proxmox Cluster!</a></li>
+<li><a href="https://www.youtube.com/watch?v=08b9DDJ_yf4">ProxMox High Availability Cluster!</a>.</li>
+</ul>
+<h4>Roadmap</h4>
+<p>Here’s what we’ll cover:</p>
+<ol>
+<li><a href="#creating-a-vm">Creating a VM</a></li>
+<li><a href="#installng-ubuntu-server">Installing Ubuntu Server</a></li>
+<li><a href="#Installing-Docker">Installing Docker</a></li>
+<li><a href="#installing-portainer">Installing Portainer</a></li>
+<li><a href="#install-Ollama-+-open-webui">Install Ollama + Open WebUI</a></li>
+<li><a href="#optional:-secure-access-anywhere-with-cloudflare">Optional: Secure Access Anywhere with Cloudflare</a></li>
+<li><a href="#so...-now-what?">So Now What?</a></li>
+</ol>
+<h2>Creating a VM</h2>
+<p>I’m using my Proxmox cluster for this setup. For my particular build, I allocated:</p>
+<ul>
+<li><strong>12 cores</strong></li>
+<li><strong>32 GB of RAM</strong></li>
+<li><strong>200 GB of storage</strong></li>
+</ul>
+<p>That should give me enough room to run a few containers, store chat history, and maybe even do some light Retrieval-Augmented Generation (RAG) later on.</p>
+<p>If you're using a different virtualization platform—VirtualBox, VMware, Hyper-V—the steps will feel very familiar. Most hypervisors have roughly the same workflow and settings, so feel free to adapt this guide to fit your tooling.</p>
+<p>Let’s walk through the key setup steps in Proxmox (with plenty of screenshots to guide you along the way):</p>
+<h4>Step-by-Step Configuration</h4>
+<p><strong>🔹 Give the VM a name</strong><br>
+Start by naming your new virtual machine.
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701103713.png" alt=""/></p>
+<p><strong>🔹 Choose your operating system and ISO image</strong><br>
+I’m using Ubuntu Server, so here I select the ISO I uploaded earlier.</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701103817.png" alt=""/>
+<p><strong>🔹 Configure basic settings (do you want TPM?)</strong><br>
+Here you define some foundational settings—things like BIOS type and whether to use a Trusted Platform Module (TPM).</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701103911.png" alt=""/>
+<p><strong>🔹 Select your storage</strong><br>
+Use fast, local disks if you’ve got them. In my case, I’m running Ceph-backed NVMe storage through Proxmox, which keeps things snappy.</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701104047.png" alt=""/>
+<p><strong>🔹 Assign CPU resources</strong><br>
+Set your number of sockets and cores. The more you can allocate, the snappier your container performance will be (within reason).</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701104113.png" alt=""/>
+<p><strong>🔹 Assign memory</strong><br>
+Give it enough to breathe. Docker and Ollama aren’t lightweights, so plan accordingly.</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701104129.png" alt=""/>
+<p><strong>🔹 Configure networking</strong><br>
+Bridge your VM to your LAN so it can reach the outside world (and your other services).</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701104213.png" alt=""/>
+<p>Once all that’s done, finish creating the VM and boot it up—you’re ready to install the OS.</p>
+<h2>Installing Ubuntu Server</h2>
+<p>Ubuntu already has a solid step-by-step guide for server installations here: <a href="https://ubuntu.com/tutorials/install-ubuntu-server#15-what-next">Install Ubuntu Server</a>,so I won’t reinvent the wheel. But I’ll highlight a few specific recommendations that helped me, especially when prepping for remote access.</p>
+<h4>SSH Access Is Your Best Friend</h4>
+<p>During installation (around Step 13), Ubuntu will ask whether you want to install OpenSSH:</p>
+<p>Install SSH during setup</p>
+<p><strong>I highly recommend enabling SSH.</strong> It makes life infinitely easier—copying commands, navigating the CLI, managing from your main machine, etc. Not all hypervisor console windows (including Proxmox) support copy-paste or function keys well, so this step is totally worth it.</p>
+<p>Later in the setup, you’ll be prompted to install additional software packages. You can skip most of those for now unless you have a specific use case in mind</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701104706.png" alt=""/>
+<h4>Find Your VM’s IP Address</h4>
+<p>Once the setup completes, you’ll need the server’s IP address to connect over SSH. You might’ve seen it flash by during the install:</p>
+<p>IP shown at setup</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701104526.png" alt=""/>
+<p>If not, just log into the server’s console and run:</p>
+<pre class="language-yaml"><code class="language-yaml">ip addr</code></pre>
+<p>Look for the address that matches your network subnet (likely under <code>eth0</code> or <code>enpXsY</code>, depending on your setup):</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701105210.png" alt=""/>
+<h4>Connect via SSH</h4>
+<p>Now that you've got the IP, it’s time to connect remotely. I’m on Windows, so I use <a href="https://www.putty.org/">PuTTY</a>—but any SSH client will work. Just plug in your server’s IP and click <strong>Open</strong>:</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250627082850.png" alt=""/>
+<p>Login using the credentials you set during Ubuntu installation:</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250627082948.png" alt=""/>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250627083037.png" alt=""/>
+<p>Successful login</p>
+<p>Boom—you now have remote terminal access to your Ubuntu server.</p>
+<h2>Installing Docker</h2>
+<p>Next up: Docker. We’re about to containerize our setup, and that starts with installing Docker on Ubuntu. I’m borrowing steps from <a href="https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-22-04#introduction">this excellent Digital Ocean guide</a>, with slight tweaks for our context.</p>
+<p>Step 1: Update Your System</p>
+<p>First, let’s make sure Ubuntu is up to date. Run the following, one at a time:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt</span> update</code></pre>
+<pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt</span> upgrade</code></pre>
+<p>When prompted, press <code>y</code> to confirm and let it finish updating</p>
+<p>Step 2: Install Prerequisite Packages</p>
+<p>Now we’ll grab a few packages Docker depends on:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt</span> <span class="token function">install</span> apt-transport-https ca-certificates <span class="token function">curl</span> software-properties-common</code></pre>
+<p>Step 3: Add Docker’s GPG Key</p>
+<p>We’ll now add Docker’s official GPG key so we can verify their packages</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">curl</span> <span class="token parameter variable">-fsSL</span> https://download.docker.com/linux/ubuntu/gpg <span class="token operator">|</span> <span class="token function">sudo</span> gpg <span class="token parameter variable">--dearmor</span> <span class="token parameter variable">-o</span> /usr/share/keyrings/docker-archive-keyring.gpg</code></pre>
+<p>Step 4: Add the Docker Repository</p>
+<p>Let’s add the Docker repository to our APT sources list:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token builtin class-name">echo</span> <span class="token string">"deb [arch=<span class="token variable"><span class="token variable">$(</span>dpkg --print-architecture<span class="token variable">)</span></span> signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu <span class="token variable"><span class="token variable">$(</span>lsb_release <span class="token parameter variable">-cs</span><span class="token variable">)</span></span> stable"</span> <span class="token operator">|</span> <span class="token function">sudo</span> <span class="token function">tee</span> /etc/apt/sources.list.d/docker.list <span class="token operator">></span> /dev/null</code></pre>
+<p>Then update APT again to recognize it:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt</span> update</code></pre>
+<p>Step 5: Verify We’re Pulling from Docker (Not Ubuntu)</p>
+<p>Run this to make sure APT sees the official Docker packages</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">apt-cache</span> policy docker-ce</code></pre>
+<p>You should see output like this:</p>
+<pre class="language-yaml"><code class="language-yaml"><span class="token key atrule">docker-ce</span><span class="token punctuation">:</span>
+  <span class="token key atrule">Installed</span><span class="token punctuation">:</span> (none)
+  <span class="token key atrule">Candidate</span><span class="token punctuation">:</span> 5<span class="token punctuation">:</span>20.10.14~3<span class="token punctuation">-</span>0~ubuntu<span class="token punctuation">-</span>jammy
+  <span class="token key atrule">Version table</span><span class="token punctuation">:</span>
+     5<span class="token punctuation">:</span>20.10.14~3<span class="token punctuation">-</span>0~ubuntu<span class="token punctuation">-</span>jammy 500
+        500 https<span class="token punctuation">:</span>//download.docker.com/linux/ubuntu jammy/stable amd64 Packages
+     5<span class="token punctuation">:</span>20.10.13~3<span class="token punctuation">-</span>0~ubuntu<span class="token punctuation">-</span>jammy 500
+        500 https<span class="token punctuation">:</span>//download.docker.com/linux/ubuntu jammy/stable amd64 Packages</code></pre>
+<p>If the candidate is from <code>docker.com</code>, you're good to go.</p>
+<p>Step 6: Install Docker</p>
+<p>Now install Docker itself:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt</span> <span class="token function">install</span> docker-ce</code></pre>
+<p>Step 7: Verify Docker is Running</p>
+<p>Check Docker’s status to confirm it installed correctly</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> systemctl status <span class="token function">docker</span></code></pre>
+<p>You should see something like this:</p>
+<pre class="language-bash"><code class="language-bash">Output
+● docker.service - Docker Application Container Engine
+     Loaded: loaded <span class="token punctuation">(</span>/lib/systemd/system/docker.service<span class="token punctuation">;</span> enabled<span class="token punctuation">;</span> vendor preset: enabled<span class="token punctuation">)</span>
+     Active: active <span class="token punctuation">(</span>running<span class="token punctuation">)</span> since Fri <span class="token number">2022</span>-04-01 <span class="token number">21</span>:30:25 UTC<span class="token punctuation">;</span> 22s ago
+TriggeredBy: ● docker.socket
+       Docs: https://docs.docker.com
+   Main PID: <span class="token number">7854</span> <span class="token punctuation">(</span>dockerd<span class="token punctuation">)</span>
+      Tasks: <span class="token number">7</span>
+     Memory: <span class="token number">38</span>.3M
+        CPU: 340ms
+     CGroup: /system.slice/docker.service
+             └─7854 /usr/bin/dockerd <span class="token parameter variable">-H</span> fd:// <span class="token parameter variable">--containerd</span><span class="token operator">=</span>/run/containerd/containerd.sock</code></pre>
+<p>Press <code>q</code> to exit the status screen.</p>
+<p>Nice job—you now have Docker installed and ready to go. Up next: adding a user-friendly UI to manage your containers. Let’s install Portainer.</p>
+<h2>Installing Portainer</h2>
+<p>Now that Docker’s up and running, let’s layer in a UI to manage containers more easily. Enter: Portainer.</p>
+<p>If you haven’t already installed it, their official guide is excellent: <a href="https://docs.portainer.io/start/install/server/docker/linux">Install Portainer BE with Docker on Linux</a>. I’ll walk you through the essentials here—with a few side notes and screenshots to keep things moving.</p>
+<h4>Deployment</h4>
+<p>Start by creating a Docker volume for Portainer’s persistent data:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">docker</span> volume create portainer_data</code></pre>
+<p>Then pull and run the Portainer container itself:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">docker</span> run <span class="token parameter variable">-d</span> <span class="token parameter variable">-p</span> <span class="token number">8000</span>:8000 <span class="token parameter variable">-p</span> <span class="token number">9443</span>:9443 <span class="token parameter variable">--name</span> portainer <span class="token parameter variable">--restart</span><span class="token operator">=</span>always <span class="token parameter variable">-v</span> /var/run/docker.sock:/var/run/docker.sock <span class="token parameter variable">-v</span> portainer_data:/data portainer/portainer-ee:lts</code></pre>
+<p>By default, this enables HTTPS on port <code>9443</code> with a self-signed certificate. You’ll probably get a browser warning the first time you visit—don’t worry, that’s expected unless you upload a custom cert <a href="https://docs.portainer.io/advanced/ssl#using-your-own-ssl-certificate-on-docker-standalone">at install time</a> or <a href="https://docs.portainer.io/admin/settings#ssl-certificate">through the UI</a> later.</p>
+<p>If you want to expose Portainer over HTTP (<code>9000</code>) for compatibility reasons, just add:</p>
+<p><code>-p 9000:9000</code></p>
+<p>Want to confirm it deployed? Run <code>sudo docker ps</code>:</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701105938.png" alt=""/>
+<p>You should see <code>portainer</code> listed and running:</p>
+<h4>First Login</h4>
+<p>Time to test it in the browser. Navigate to:</p>
+<pre class="language-bash"><code class="language-bash">https://localhost:9443</code></pre>
+<p>Swap in your IP address or hostname. The initial setup screen will greet you with a prompt to create the admin user:</p>
+<p>You will be presented with the initial setup page for Portainer Server.</p>
+<h4>Creating the first user</h4>
+<p>Choose a strong password (minimum 12 characters). Username defaults to <code>admin</code>, but you can change it.</p>
+<p><img src="https://docs.portainer.io/~gitbook/image?url=https%3A%2F%2Fcontent.gitbook.com%2Fcontent%2F3roAECKwSfowCXNw8RZR%2Fblobs%2FXRgyXC3iKqcSIsdE6x5g%2F2.15-install-server-setup-user.png&amp;width=768&amp;dpr=4&amp;quality=100&amp;sign=b194845d&amp;sv=2" alt=""></p>
+<h4>Enable Usage Stats (Optional)</h4>
+<p>You’ll be asked whether to enable anonymous usage reporting via <a href="https://matomo.org/">Matomo</a> It’s up to you, and you can always toggle it later under Settings → General:</p>
+<p><img src="https://docs.portainer.io/~gitbook/image?url=https%3A%2F%2Fcontent.gitbook.com%2Fcontent%2F3roAECKwSfowCXNw8RZR%2Fblobs%2FBQJjUHA4C3DQayB40DQr%2F2.15-install-server-setup-matomo.png&amp;width=768&amp;dpr=4&amp;quality=100&amp;sign=29e83c56&amp;sv=2" alt=""></p>
+<h4>Apply a License Key</h4>
+<p>Next, you’ll be prompted for a license key. If you’ve signed up for the free Business Edition (includes up to 3 nodes), you’ll already have one. If not, click the “Don’t have a license?” link and follow the flow.</p>
+<p>Once you’ve got it, paste it in and click <strong>Submit</strong>:</p>
+<p><img src="https://docs.portainer.io/~gitbook/image?url=https%3A%2F%2Fcontent.gitbook.com%2Fcontent%2F3roAECKwSfowCXNw8RZR%2Fblobs%2Fulek0Spd0ddXkkXaWJRD%2F2.20-initial-setup-license.png&amp;width=768&amp;dpr=4&amp;quality=100&amp;sign=f7be5bf8&amp;sv=2" alt=""></p>
+<h4>Connecting Your Environment</h4>
+<p>After the admin account is created, Portainer’s <strong>Environment Wizard</strong> will walk you through connecting to your Docker instance:</p>
+<p><img src="https://docs.portainer.io/~gitbook/image?url=https%3A%2F%2Fcontent.gitbook.com%2Fcontent%2F3roAECKwSfowCXNw8RZR%2Fblobs%2FqDCRfpKdw1n5eWnhqGBA%2F2.15-install-server-setup-wizard.png&amp;width=768&amp;dpr=4&amp;quality=100&amp;sign=5ef4ff6e&amp;sv=2" alt=""></p>
+<p>For most setups, it’ll auto-detect and connect locally. If you’re managing multiple environments, just click <strong>Add Environments</strong> later on.</p>
+<p>Already using Portainer somewhere else? You can easily add another target:</p>
+<ul>
+<li>Navigate to <strong>Environments</strong></li>
+</ul>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250627115425.png" alt=""/>
+<ul>
+<li>Click <strong>Add Environment</strong></li>
+</ul>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250627115518.png" alt=""/>
+<ul>
+<li>Choose <strong>Docker Standalone</strong></li>
+</ul>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250627115550.png" alt=""/>
+<ul>
+<li>Follow the wizard</li>
+</ul>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250627115638.png" alt=""/>
+<p>And that’s it—you’ve now got a beautiful UI to explore, manage, and monitor your containers.</p>
+<h2>Install Ollama + Open WebUI</h2>
+<p>Finally, we’ve reached the fun part: standing up our local AI stack with Ollama and Open WebUI.</p>
+<p>Now, there are a few ways to do this. You could install Ollama directly on your Ubuntu server—but that means handling updates and maintenance from the command line. Since we’ve already set up Portainer, why not make life easier by running everything in containers?</p>
+<p>There’s one small challenge: Docker isolates networking by default, which can make these services harder to wire together. But there’s a simple fix—<strong>use a Docker Compose stack</strong>, and Portainer makes this incredibly easy.</p>
+<h4>Building the Stack in Portainer</h4>
+<p>When you log into Portainer, your dashboard should look something like this:</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701110641.png" alt=""/>
+<p>Click into your local environment:</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701110712.png" alt=""/>
+<p>Then go to <strong>Stacks</strong> in the left-hand menu and hit <strong>Add Stack</strong>:</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701110751.png" alt=""/>
+<p>Give your stack a name and paste this configuration into the editor</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701081935.png" alt=""/>
+<h4>Docker Compose Config</h4>
+<p>Here’s a complete <code>docker-compose.yaml</code> for running both Ollama and Open WebUI together:</p>
+<pre class="language-yaml"><code class="language-yaml"><span class="token key atrule">services</span><span class="token punctuation">:</span>
+  <span class="token key atrule">ollama</span><span class="token punctuation">:</span>
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> ollama/ollama<span class="token punctuation">:</span>latest
+    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> 11434<span class="token punctuation">:</span><span class="token number">11434</span>
+    <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> ollama<span class="token punctuation">:</span>/root/.ollama
+    <span class="token key atrule">container_name</span><span class="token punctuation">:</span> ollama2
+    <span class="token key atrule">tty</span><span class="token punctuation">:</span> <span class="token boolean important">true</span>
+    <span class="token key atrule">restart</span><span class="token punctuation">:</span> unless<span class="token punctuation">-</span>stopped
+
+  <span class="token key atrule">open-webui</span><span class="token punctuation">:</span>
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> ghcr.io/open<span class="token punctuation">-</span>webui/open<span class="token punctuation">-</span>webui<span class="token punctuation">:</span>main
+    <span class="token key atrule">container_name</span><span class="token punctuation">:</span> open<span class="token punctuation">-</span>webui2
+    <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> open<span class="token punctuation">-</span>webui<span class="token punctuation">:</span>/app/backend/data
+    <span class="token key atrule">depends_on</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> ollama
+    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> 3000<span class="token punctuation">:</span><span class="token number">8080</span>
+    <span class="token key atrule">environment</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> <span class="token string">'OLLAMA_BASE_URL=http://ollama:11434'</span>
+      <span class="token punctuation">-</span> <span class="token string">'WEBUI_SECRET_KEY='</span>
+    <span class="token key atrule">extra_hosts</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> host.docker.internal<span class="token punctuation">:</span>host<span class="token punctuation">-</span>gateway
+    <span class="token key atrule">restart</span><span class="token punctuation">:</span> unless<span class="token punctuation">-</span>stopped
+
+<span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+  <span class="token key atrule">ollama</span><span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+  <span class="token key atrule">open-webui</span><span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span></code></pre>
+<p>This stack:</p>
+<ul>
+<li>Maps Ollama to port <code>11434</code> and persists its data</li>
+<li>Spins up Open WebUI with a dependency on Ollama</li>
+<li>Sets up environmental variables and basic volume mounts</li>
+<li>Restarts containers automatically unless stopped</li>
+</ul>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701110847.png" alt=""/>
+<p>Click <strong>Deploy the stack</strong>:</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701083007.png" alt=""/>
+<p>Give it a minute—Docker needs to download the images. When finished, you’ll see a screen like this:</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701111306.png" alt=""/>
+<h4>First Login to Open WebUI</h4>
+<p>Navigate to your server’s IP on port <code>3000</code>. You should land on the Open WebUI welcome screen:</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701111358.png" alt=""/>
+<p>Click <strong>Get Started</strong> to create your admin account:</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701111443.png" alt=""/>
+Once that’s done… ta-da! You now have a functioning local AI interface—albeit one that doesn’t know anything yet:
+<h4>Pulling Your First Model</h4>
+<p>Click the hamburger menu (☰), then your username:</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701111552.pngg" alt=""/>
+<p>Now head to the <strong>Admin Panel</strong>,</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701111729.png" alt=""/>
+<p>and from the top tab bar, click <strong>Settings → Models</strong>:</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701111834.png" alt=""/>
+<p>Manage models</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701111912.png" alt=""/>
+<p>You’ll be able to search available models:</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701111951.png" alt=""/>
+<p>Model search</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701112038.png" alt=""/>
+<p>⚠️ Tip: If you're running CPU-only, stick with models 8B or smaller for better performance. In this guide, I chose <code>gemma3:4b</code>.</p>
+<p>Click it, copy the tag,</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701112235.png" alt=""/>
+<p>and paste it into the pull field</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701112305.png" alt=""/>
+<h4>Chat with Your AI</h4>
+<p>Once the model finishes downloading, click <strong>New Chat</strong>. You’ll see the selected model listed, and now…</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701121808.png" alt=""/>
+<p>ask away:</p>
+<img src="\assets\images\ollama-open-webui-post\Pasted image 20250701122235.png" alt=""/>
+<p>You’re officially hosting your own LLM. 😎</p>
+<p>There’s a <em>lot</em> more this setup can do—but I’ll save that for another post. For now, we’re ready to dive into some optional magic in the next step: external access with Cloudflare.</p>
+<h2>Optional: Secure Access Anywhere with Cloudflare</h2>
+<p>If you’re happy keeping everything local, you can absolutely stop here. You've now got a fully functional AI interface running entirely on your own hardware—no cloud dependencies, no subscriptions, no phoning home.</p>
+<p>But if you're like me, you want to use your AI assistant from <em>anywhere</em>. That means exposing it to the internet—<strong>securely</strong>—and doing it in a way that feels both safe and slick.</p>
+<p>Enter <strong>Cloudflare</strong>.</p>
+<p>Cloudflare can help you:</p>
+<ul>
+<li>Assign a subdomain (like <code>ai.mydomain.com</code>) to your local instance</li>
+<li>Handle HTTPS encryption (no manual certs!)</li>
+<li>Tunnel through NAT/firewalls without port forwarding</li>
+<li>Add extra protection like WAF, rate limiting, and access rules</li>
+</ul>
+<p>You’ll need a domain name (those usually cost a few bucks a year), but most of the Cloudflare services we’ll use are free.</p>
+<p>I won’t reinvent the wheel here—<strong>Network Chuck</strong> has a fantastic video that walks through this exact setup:
+<a href="https://www.youtube.com/watch?v=ey4u7OUAF3c">EXPOSE your home network to the INTERNET!! (it's safe)</a>.
+It’s how I learned to do it, and honestly, it’s super approachable even if you’ve never touched DNS or tunneling before.</p>
+<h2>So...Now What?</h2>
+<p>That brings us to the end of this tutorial—but hopefully just the beginning of your local AI adventure.</p>
+<p>You’ve built something powerful, personal, and privacy-respecting. And if you’ve got a GPU lying around, you’re just scratching the surface of what’s possible.</p>
+<p>Want to try:</p>
+<ul>
+<li>Building a chatbot trained on your docs?</li>
+<li>Creating your own local RAG pipeline?</li>
+<li>Running multimodal AI with image input?</li>
+</ul>
+<p>There’s so much more ahead. But for now...</p>
+<p><strong>Go forth, friends—and happy tinkering.</strong></p>
+
+  </section>
+
+  <footer class="post-footer">
+    <p class="post-tags">
+      
+    </p>
+  </footer>
+</article>
+
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <div class="copyright">©  Hybridcloudhq - Disclaimer The views and opinions expressed on this website are solely my own and do not reflect the official positions of Dell Technologies, or any other affiliated organizations. All content is provided for informational purposes only.</div>
+        <div class="social">
+          
+            <a href="https://x.com/sandorvoros" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+              
+                <svg width="1200" height="1227" viewBox="0 0 1200 1227" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z"/>
+                  </svg>
+              
+            </a>
+          
+            <a href="https://github.com/josephsandorvoros" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+              
+                <svg fill="#000000" width="24px" height="24px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-name="Layer 1">
+                  <path d="M12,2.2467A10.00042,10.00042,0,0,0,8.83752,21.73419c.5.08752.6875-.21247.6875-.475,0-.23749-.01251-1.025-.01251-1.86249C7,19.85919,6.35,18.78423,6.15,18.22173A3.636,3.636,0,0,0,5.125,16.8092c-.35-.1875-.85-.65-.01251-.66248A2.00117,2.00117,0,0,1,6.65,17.17169a2.13742,2.13742,0,0,0,2.91248.825A2.10376,2.10376,0,0,1,10.2,16.65923c-2.225-.25-4.55-1.11254-4.55-4.9375a3.89187,3.89187,0,0,1,1.025-2.6875,3.59373,3.59373,0,0,1,.1-2.65s.83747-.26251,2.75,1.025a9.42747,9.42747,0,0,1,5,0c1.91248-1.3,2.75-1.025,2.75-1.025a3.59323,3.59323,0,0,1,.1,2.65,3.869,3.869,0,0,1,1.025,2.6875c0,3.83747-2.33752,4.6875-4.5625,4.9375a2.36814,2.36814,0,0,1,.675,1.85c0,1.33752-.01251,2.41248-.01251,2.75,0,.26251.1875.575.6875.475A10.0053,10.0053,0,0,0,12,2.2467Z"/>
+                  </svg>
+              
+            </a>
+          
+            <a href="https://www.linkedin.com/in/josephsvoros/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+              
+                <svg width="24px" height="24px" viewBox="0 0 24 24" role="img" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn icon</title>
+                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                  </svg>
+              
+            </a>
+          
+            <a href="https://www.instagram.com/jsvoros/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+              
+                <svg fill="#000000" width="800px" height="800px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-name="Layer 1">
+                  <path d="M17.34,5.46h0a1.2,1.2,0,1,0,1.2,1.2A1.2,1.2,0,0,0,17.34,5.46Zm4.6,2.42a7.59,7.59,0,0,0-.46-2.43,4.94,4.94,0,0,0-1.16-1.77,4.7,4.7,0,0,0-1.77-1.15,7.3,7.3,0,0,0-2.43-.47C15.06,2,14.72,2,12,2s-3.06,0-4.12.06a7.3,7.3,0,0,0-2.43.47A4.78,4.78,0,0,0,3.68,3.68,4.7,4.7,0,0,0,2.53,5.45a7.3,7.3,0,0,0-.47,2.43C2,8.94,2,9.28,2,12s0,3.06.06,4.12a7.3,7.3,0,0,0,.47,2.43,4.7,4.7,0,0,0,1.15,1.77,4.78,4.78,0,0,0,1.77,1.15,7.3,7.3,0,0,0,2.43.47C8.94,22,9.28,22,12,22s3.06,0,4.12-.06a7.3,7.3,0,0,0,2.43-.47,4.7,4.7,0,0,0,1.77-1.15,4.85,4.85,0,0,0,1.16-1.77,7.59,7.59,0,0,0,.46-2.43c0-1.06.06-1.4.06-4.12S22,8.94,21.94,7.88ZM20.14,16a5.61,5.61,0,0,1-.34,1.86,3.06,3.06,0,0,1-.75,1.15,3.19,3.19,0,0,1-1.15.75,5.61,5.61,0,0,1-1.86.34c-1,.05-1.37.06-4,.06s-3,0-4-.06A5.73,5.73,0,0,1,6.1,19.8,3.27,3.27,0,0,1,5,19.05a3,3,0,0,1-.74-1.15A5.54,5.54,0,0,1,3.86,16c0-1-.06-1.37-.06-4s0-3,.06-4A5.54,5.54,0,0,1,4.21,6.1,3,3,0,0,1,5,5,3.14,3.14,0,0,1,6.1,4.2,5.73,5.73,0,0,1,8,3.86c1,0,1.37-.06,4-.06s3,0,4,.06a5.61,5.61,0,0,1,1.86.34A3.06,3.06,0,0,1,19.05,5,3.06,3.06,0,0,1,19.8,6.1,5.61,5.61,0,0,1,20.14,8c.05,1,.06,1.37.06,4S20.19,15,20.14,16ZM12,6.87A5.13,5.13,0,1,0,17.14,12,5.12,5.12,0,0,0,12,6.87Zm0,8.46A3.33,3.33,0,1,1,15.33,12,3.33,3.33,0,0,1,12,15.33Z"/>
+                  </svg>
+              
+            </a>
+          
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
