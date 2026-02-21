@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>My first CICD Post</title>
+    <title>New CICD Website Workflow</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="/assets/styles.css">
   </head>
@@ -32,13 +32,52 @@
   
 
   <header>
-    <h1>My first CICD Post</h1>
+    <h1>New CICD Website Workflow</h1>
     <p class="post-meta">February 21, 2026</p>
   </header>
 
   <section class="post-content">
-    <h1>SCORE!</h1>
-<p>This is the first post using my new CICD pipeline.</p>
+    <h1>Howdy, and wow - what a journey!</h1>
+<p>This is my first official <strong>CI/CD</strong> website workflow post, and I am super excited!
+What do I mean? Well, the old way I used the website was by using <a href="https://wordpress.com/">WordPress</a> on <a href="https://www.hostinger.com/">Hostinger</a>, and don’t get me wrong, that’s fine, but it required me to:</p>
+<ol>
+<li>create my post,</li>
+<li>go to Hostinger,</li>
+<li>log into the WordPress editor,</li>
+<li>fumble around making changes, and finally</li>
+<li>publish the post to my website.</li>
+</ol>
+<p>So what do I mean when I say I’ve switched to a <strong>CI/CD</strong> pipeline? Well, let me take you back to the start.</p>
+<p>I wasn’t happy with the workflow or my inability to make changes in the way I wanted without a lot of struggle. I’m learning all of this, and while WordPress is easy, it was:
+a) difficult for me,
+b) didn’t fit my preferred workflow, and
+c) I wasn’t a fan of having my website exist only on Hostinger.</p>
+<p>So I wondered: How can I solve this?</p>
+<p>I saw <a href="https://christianlempa.de/">Christian Lempa</a> do a great tutorial on using <a href="https://themes.gohugo.io/">Hugo</a> to build static sites, and it looked brilliant. However, after trying it, I realized there was just so much involved that the learning curve was going to be steep. I’ve used HTML before, but there was just so much I was unfamiliar with in Hugo. So I put it off for a while.</p>
+<p>Fast forward a few months, and I just realized I hadn’t been doing much with my website at all - in spite of doing lots with my homelab, AI machine, and learning for work, etc. So I decided to give it another go.</p>
+<p>This time, I sat down and thought about what I’d learned and what I wanted, and how my ideal workflow should be structured. I like <a href="https://obsidian.md/">Obsidian</a> and use it fairly regularly, so that’s step 1. I want to be able to create my posts in <strong>Markdown</strong> structure and in Obsidian and easily move them to a website I control. So step 2 must be that I’m able to keep the whole site structure locally and easily understandable.</p>
+<p>Now I started asking my AI about it, and <a href="https://www.11ty.dev/">11ty</a> was suggested. It seemed to fit - I can use Markdown, and <a href="https://code.visualstudio.com/">VS Code</a> to preview my website locally. Fantastic! And my VS Code is hooked into <a href="https://github.com/">GitHub</a>, so I have a new place to land my site and some tools I can use for version control and other things. We’re getting somewhere.</p>
+<p>Now the final question: Does Hostinger support uploads from GitHub? Yes, it appears so - I saw tutorials. Also, can it be automated? <strong>Wow</strong>, yes! There’s even a built-in function and webhook! I can work with this.</p>
+<p>So the new workflow is:</p>
+<ol>
+<li>Create a post in Obsidian,</li>
+<li>Move it to VS Code,</li>
+<li>Add any images in a structured manner,</li>
+<li>Test the build in VS Code,</li>
+<li>Commit to GitHub,</li>
+<li>Sync with Hostinger.</li>
+</ol>
+<p>Great - I can do this (with some help), and fortunately, AI is there to help with the gaps in my knowledge.</p>
+<p><strong>GitHub Copilot</strong> is great - it helps me set up my structure. I use 11ty to build and preview, then adjust with Copilot, and so on until I have a clean layout I can easily edit and understand. And then I run out of tokens (because I’m on the free tier and I have fallbacks). No problem - I have the basics set up…and there are tutorials. Let me link my repo to Hostinger. Follow some guides and go to my website and…nothing. <strong>Hmmm…</strong></p>
+<p>Okay, troubleshooting time. Everything looks okay - files are in the right place - but what’s going on? After some digging and whatnot, and pestering my AI…Hostinger cannot build my website, and that’s what I need with 11ty. Well, that’s not less manual - it’s the same, if not more. Shoot.</p>
+<p>Okay, AI, is there a way to do this? &quot;Sure, just build a GitHub action and create a <code>deploy.yml</code> and let GitHub build it first, then use FTP to sync to Hostinger.&quot; I feel like this is where things start to go awry. When I say the struggle can be real, and if you don’t know what you’re doing, AI can take you down a path that just won’t work - and convincingly keeps trying and adjusting and trying and adjusting…I mean, 10 hours of commits and rebuilds that land files in the wrong place, or don’t change them, or bump against commit and branch version issues and mismatches. It’s a lot. Granted, without it, this might have taken me a few weeks or more instead of a couple of days, but still.</p>
+<p>I’ve found that sometimes with AI, it’s best to stop, reassess, replan, and start fresh. So that’s what I did.</p>
+<p>After a good night’s sleep, I’m wondering…what if the plan is:
+<strong>Obsidian → VS Code → GitHub Build Repo → GitHub Action → Production Repo → Hostinger?</strong></p>
+<p>Is this possible? So I “clear” my AI and ask it about the possibility of this workflow, and it appears this may work.</p>
+<p>Okay, let’s give this a go. Set up a second public repo, move this key here and that key there, and an SSH secret over here, then point Hostinger to that repo and have AI help me rebuild the <code>deploy.yml</code>…then finally, the moment of truth…commit number 35(?) in the last day…will this work? All fingers and toes crossed...and…</p>
+<h3><strong>OMG! It Worked!</strong></h3>
+<p>It worked - it really worked. This post is coming to you from the new workflow. It is now almost as simple as creating the right structure and moving it over, and I’m good. Whew! Man, it feels good.</p>
 
   </section>
 
