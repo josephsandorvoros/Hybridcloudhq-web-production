@@ -1,0 +1,1316 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>AMP Game Servers Setup Tutorial</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/styles.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <div class="brand">
+          <a class="logo" href="/">Hybridcloudhq</a>
+          <span class="tag">Cloud tools & guides</span>
+        </div>
+        <nav class="main-nav">
+          <a href="/">Home</a>
+          <a href="/projects/">Projects</a>
+          <a href="/guides/">Guides</a>
+          <a href="/links/">Great Links</a>
+          <a href="/blog/">Blog</a>
+          <a href="/aboutme/">About</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      
+<p class="breadcrumb"><a href="/blog/">← Back to Blog</a></p>
+
+<article class="post container">
+  
+
+  <header>
+    <h1>AMP Game Servers Setup Tutorial</h1>
+    <p class="post-meta">May 16, 2026</p>
+  </header>
+
+  <section class="post-content">
+    <h1>&quot;Come in, come in, and know me better Man.&quot;</h1>
+<p>It's been a bit since I have posted. Life is always going and there is so much to learn. I have learning more about AI and infrastructure surrounding it for work. I have been using it a bit more both there and at home. I have even played with coding some apps and my own agent harness and interface.</p>
+<p>There are ups and downs. It is certainly an interesting (and often frustrating) process. There are some things it can be very helpful with though. One of them is planning and documentation. This walkthrough is a testament to that. I had to guide it and steer it, and double check it and I believe I got it to what I needed.</p>
+<p>I am a gamer, and I have several I have always wanted to host in a more persistent way. With my homelab setup, I finally have a chance to do that. In this case 7 games I play semi regularly and a couple of demo hosts I am able to take advantage of that I destroy and rebuild n a regular basis. This wasn't all done at once for me, but I have enough documented steps now from various places to make it work. And I thought this would be a good chance to share a walkthrough here.</p>
+<h2>Prerequisites</h2>
+<ul>
+<li>You need an OCI VPS (it can be small its just going to run a couple of things)</li>
+<li>You Need NGINX acting as a reverse Proxy for your on prem stuff</li>
+<li>You need some place to run your self hosted infrastructure (this can be in the cloud as well, but I am set up at home)</li>
+<li>You need a domain, and you need a DNS Provider. I use Cloudflare for these.</li>
+</ul>
+<h2>Steps</h2>
+<ol>
+<li>The first step is to follow <a href="https://www.youtube.com/watch?v=ISEP6SIrEVE">Thomas Wildes guide here</a> It's very thorough, and easy to follow. It was the first step for me in creating a way to securely serve internal apps to the outside world.</li>
+<li>You may want to set up some vLANs on network segregation to keep your Game server(s) separated from the rest of your network. I am also using a Proxmox cluster and virtualization for even further separation.</li>
+<li>You will want <a href="https://cubecoders.com/AMP">AMP server</a> for this walkthrough. Yes I use this and paid for it. You will also see I have 4 instances of the amp server running. One runs in Hybrid mode and acts as the ADS(AMP Deployment Server) and as a game host, and the other three act as target hosts. This lets me control all of my game instances and hosts from a single AMP instance that can be passed through my tunnel.</li>
+<li>I also use <a href="https://code.visualstudio.com/">VSCode</a> to do most of my editing. Particularly for my OCI VPS as it give me a nice visual picture of the file structure. But feel free to just SSH using a key and VIM or NANO if you are more comfortable there.</li>
+</ol>
+<h2>What is this?</h2>
+<p>Below is the outline and steps the LLM and I cam up with to ensure the games I wanted to run would work. You would of course modify this for whatever games you want to run, but the general idea is a good solid guide with all the right steps in place to show a clear picture of how to do this. When set up correctly you have security, multiple layers of segregation and isolation. A single management panel and TLS security for access to that. And a game or game cluster to share with your friends and family.</p>
+<h2>📋 HybridCloudHQ — Game Server Master Reference</h2>
+<blockquote>
+<p>[!abstract] Cluster Summary
+<strong>4-node Proxmox VE hyper-converged cluster</strong> · Ceph · AMP + Docker game hosting · Pangolin/OCI tunnel · NGINX + TLS
+Ceph raw: <strong>3.88 TiB</strong> · Usable (rep-3): <strong>~1.13 TiB</strong> · Utilization target: <strong>≤ 50% per node</strong></p>
+</blockquote>
+<hr>
+<h2>1 — Cluster Hardware</h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nodes</td>
+<td>4× (PVE1–PVE4)</td>
+</tr>
+<tr>
+<td>CPU (per node)</td>
+<td>AMD Ryzen 5 — 6C/12T, up to 4.0 GHz</td>
+</tr>
+<tr>
+<td>Usable host threads (per node)</td>
+<td>10 (2 reserved for Proxmox)</td>
+</tr>
+<tr>
+<td>RAM (per node)</td>
+<td>64 GB DDR4</td>
+</tr>
+<tr>
+<td>Ceph raw total</td>
+<td><strong>3.88 TiB</strong> (4 OSDs, one per node)</td>
+</tr>
+<tr>
+<td>Ceph usable (rep-2)</td>
+<td><strong>~1.13 TiB</strong></td>
+</tr>
+<tr>
+<td>Proxmox version</td>
+<td></td>
+</tr>
+<tr>
+<td>External tunnel</td>
+<td>OCI VPS → Pangolin + Traefik + Gerbil + Crowdsec</td>
+</tr>
+<tr>
+<td>TLS</td>
+<td>NGINX reverse proxy — already configured</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>2 — Node Role Map</h2>
+<table>
+<thead>
+<tr>
+<th>Node</th>
+<th>Primary Role</th>
+<th>VMs Hosted</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PVE1</td>
+<td>Heavy game (isolated)</td>
+<td>amp-conan (102)</td>
+</tr>
+<tr>
+<td>PVE2</td>
+<td>Heavy game + demo/conditional</td>
+<td>amp-enshrouded (104) · dune-awakening (107) · openshift-sno (300) · azure-local-demo (301)</td>
+</tr>
+<tr>
+<td>PVE3</td>
+<td>Medium games + services</td>
+<td>amp-medium (105) · containers-a (100)</td>
+</tr>
+<tr>
+<td>PVE4</td>
+<td>Light games + ADS + services + <strong>primary failover</strong></td>
+<td>amp-node4 (106) · containers-b (103)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>3 — Master VM Table</h2>
+<table>
+<thead>
+<tr>
+<th>VMID</th>
+<th>VM Name</th>
+<th>Node</th>
+<th>vCPUs</th>
+<th>RAM Max</th>
+<th>Balloon Min</th>
+<th>Disk</th>
+<th><code>onboot</code></th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>100</td>
+<td>containers-a</td>
+<td>PVE3</td>
+<td>3</td>
+<td>8 GB</td>
+<td>3 GB</td>
+<td>60 GB</td>
+<td>1</td>
+<td>Container services A</td>
+</tr>
+<tr>
+<td>102</td>
+<td>amp-conan</td>
+<td>PVE1</td>
+<td>6</td>
+<td>28 GB</td>
+<td>6 GB</td>
+<td>100 GB</td>
+<td>1</td>
+<td>AMP · Docker: Conan Exiles Enhanced</td>
+</tr>
+<tr>
+<td>103</td>
+<td>containers-b</td>
+<td>PVE4</td>
+<td>2</td>
+<td>8 GB</td>
+<td>3 GB</td>
+<td>60 GB</td>
+<td>1</td>
+<td>Container services B</td>
+</tr>
+<tr>
+<td>104</td>
+<td>amp-enshrouded</td>
+<td>PVE2</td>
+<td>6</td>
+<td>26 GB</td>
+<td>6 GB</td>
+<td>80 GB</td>
+<td>1</td>
+<td>AMP · Docker: Enshrouded</td>
+</tr>
+<tr>
+<td>105</td>
+<td>amp-medium</td>
+<td>PVE3</td>
+<td>5</td>
+<td>20 GB</td>
+<td>6 GB</td>
+<td>80 GB</td>
+<td>1</td>
+<td>AMP · Docker: Valheim · V Rising · Return to Moria</td>
+</tr>
+<tr>
+<td>106</td>
+<td>amp-node4</td>
+<td>PVE4</td>
+<td>6</td>
+<td>16 GB</td>
+<td>6 GB</td>
+<td>100 GB</td>
+<td>1</td>
+<td>AMP ADS (hybrid) · Docker: Minecraft · Dragonwilds</td>
+</tr>
+<tr>
+<td>107</td>
+<td>dune-awakening</td>
+<td>PVE2</td>
+<td>8</td>
+<td>24 GB</td>
+<td>8 GB</td>
+<td>120 GB</td>
+<td><strong>0</strong></td>
+<td>AMP · Docker: Dune Awakening — <strong>CONDITIONAL</strong></td>
+</tr>
+<tr>
+<td>300</td>
+<td>openshift-sno</td>
+<td>PVE2</td>
+<td>8</td>
+<td>32 GB</td>
+<td>—</td>
+<td>120 GB thin</td>
+<td><strong>0</strong></td>
+<td>RHCOS SNO — <strong>EPHEMERAL</strong></td>
+</tr>
+<tr>
+<td>301</td>
+<td>azure-local-demo</td>
+<td>PVE2</td>
+<td>6</td>
+<td>32 GB</td>
+<td>—</td>
+<td>128 GB thin</td>
+<td><strong>0</strong></td>
+<td>Azure Local — <strong>EPHEMERAL</strong></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>[!success] Node Resource Summary</p>
+<table>
+<thead>
+<tr>
+<th>Node</th>
+<th>vCPUs Allocated</th>
+<th>RAM Max</th>
+<th>RAM Balloon Min</th>
+<th>Failover Headroom</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PVE1</td>
+<td>6 / 10</td>
+<td>28 GB</td>
+<td>6 GB</td>
+<td>~36 GB free</td>
+</tr>
+<tr>
+<td>PVE2</td>
+<td>6 / 10 (base)</td>
+<td>26 GB</td>
+<td>6 GB</td>
+<td>~52 GB free at balloon min</td>
+</tr>
+<tr>
+<td>PVE3</td>
+<td>8 / 10</td>
+<td>28 GB</td>
+<td>9 GB</td>
+<td>~36 GB free</td>
+</tr>
+<tr>
+<td>PVE4</td>
+<td>8 / 10</td>
+<td>24 GB</td>
+<td>9 GB</td>
+<td><strong>~40 GB free — primary failover target</strong></td>
+</tr>
+</tbody>
+</table>
+</blockquote>
+<hr>
+<h2>4 — Master Port Reference</h2>
+<blockquote>
+<p>[!info] AMP SFTP — LAN/VPN Only, Never Internet Exposed
+AMP assigns a unique SFTP port per game instance for admin file management (mods, configs, world saves). <strong>Players never use SFTP — do not add these ports to OCI, iptables, Traefik, or Pangolin.</strong> Access SFTP via your local LAN or VPN when remote. Each instance on amp-medium gets its own port so they don't collide on the same VM.</p>
+</blockquote>
+<blockquote>
+<p>[!warning] This Table Is the Single Source of Truth
+OCI Security List, iptables, <code>traefik_config.yml</code>, <code>docker-compose.yml</code>, Pangolin UI, and AMP instance config must all match the <strong>Internet</strong> ports in this table exactly.</p>
+</blockquote>
+<h3>4.1 — Game Ports (Internet Exposed via Pangolin)</h3>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>VM (VMID)</th>
+<th>Proto</th>
+<th>Port</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Conan Exiles Game</td>
+<td>amp-conan (102)</td>
+<td>TCP</td>
+<td>7777</td>
+<td>Both TCP and UDP required</td>
+</tr>
+<tr>
+<td>Conan Exiles Game</td>
+<td>amp-conan (102)</td>
+<td>UDP</td>
+<td>7777</td>
+<td>Must match end-to-end — NO remap ever</td>
+</tr>
+<tr>
+<td>Conan Pinger</td>
+<td>amp-conan (102)</td>
+<td>UDP</td>
+<td>7778</td>
+<td>Must match end-to-end</td>
+</tr>
+<tr>
+<td>Conan Steam Query</td>
+<td>amp-conan (102)</td>
+<td>UDP</td>
+<td>27015</td>
+<td>Must match end-to-end</td>
+</tr>
+<tr>
+<td>Enshrouded Query</td>
+<td>amp-enshrouded (104)</td>
+<td>TCP</td>
+<td>15637</td>
+<td>AMP-confirmed port</td>
+</tr>
+<tr>
+<td>Enshrouded Query</td>
+<td>amp-enshrouded (104)</td>
+<td>UDP</td>
+<td>15637</td>
+<td>AMP-confirmed port</td>
+</tr>
+<tr>
+<td>Valheim Game</td>
+<td>amp-medium (105)</td>
+<td>UDP</td>
+<td>2456</td>
+<td></td>
+</tr>
+<tr>
+<td>Valheim Query</td>
+<td>amp-medium (105)</td>
+<td>UDP</td>
+<td>2457</td>
+<td></td>
+</tr>
+<tr>
+<td>V Rising Game</td>
+<td>amp-medium (105)</td>
+<td>UDP</td>
+<td>9876</td>
+<td></td>
+</tr>
+<tr>
+<td>V Rising Query</td>
+<td>amp-medium (105)</td>
+<td>UDP</td>
+<td>9877</td>
+<td></td>
+</tr>
+<tr>
+<td>Return to Moria Game</td>
+<td>amp-medium (105)</td>
+<td>UDP</td>
+<td><strong>7780</strong></td>
+<td>Remapped from default 7777 inside AMP</td>
+</tr>
+<tr>
+<td>Minecraft Java</td>
+<td>amp-node4 (106)</td>
+<td>TCP</td>
+<td>25565</td>
+<td></td>
+</tr>
+<tr>
+<td>Minecraft Java</td>
+<td>amp-node4 (106)</td>
+<td>UDP</td>
+<td>25565</td>
+<td></td>
+</tr>
+<tr>
+<td>RuneScape: Dragonwilds</td>
+<td>amp-node4 (106)</td>
+<td>UDP</td>
+<td><strong>7779</strong></td>
+<td>Remapped from default 7777 via AMP launch flag</td>
+</tr>
+<tr>
+<td>Dune: Awakening</td>
+<td>dune-awakening (107)</td>
+<td>—</td>
+<td>—</td>
+<td>Server browser discovery only (PTC) — no Pangolin needed</td>
+</tr>
+</tbody>
+</table>
+<h3>4.2 — Admin Ports (LAN/VPN Only — never through Pangolin)</h3>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>VM (VMID)</th>
+<th>Proto</th>
+<th>Port</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Conan SFTP</td>
+<td>amp-conan (102)</td>
+<td>TCP</td>
+<td>2224</td>
+<td>Admin file access — LAN/VPN only</td>
+</tr>
+<tr>
+<td>Conan RCON</td>
+<td>amp-conan (102)</td>
+<td>TCP</td>
+<td>25575</td>
+<td>LAN/VPN only</td>
+</tr>
+<tr>
+<td>Enshrouded SFTP</td>
+<td>amp-enshrouded (104)</td>
+<td>TCP</td>
+<td>2224</td>
+<td>Admin file access — LAN/VPN only</td>
+</tr>
+<tr>
+<td>Enshrouded RCON</td>
+<td>amp-enshrouded (104)</td>
+<td>TCP</td>
+<td>25575</td>
+<td>LAN/VPN only</td>
+</tr>
+<tr>
+<td>Valheim SFTP</td>
+<td>amp-medium (105)</td>
+<td>TCP</td>
+<td>2224</td>
+<td>Per-instance port — LAN/VPN only</td>
+</tr>
+<tr>
+<td>Valheim RCON</td>
+<td>amp-medium (105)</td>
+<td>TCP</td>
+<td>25575</td>
+<td>LAN/VPN only</td>
+</tr>
+<tr>
+<td>V Rising SFTP</td>
+<td>amp-medium (105)</td>
+<td>TCP</td>
+<td>2225</td>
+<td>Per-instance port — LAN/VPN only</td>
+</tr>
+<tr>
+<td>V Rising RCON</td>
+<td>amp-medium (105)</td>
+<td>TCP</td>
+<td>25575</td>
+<td>LAN/VPN only</td>
+</tr>
+<tr>
+<td>Return to Moria SFTP</td>
+<td>amp-medium (105)</td>
+<td>TCP</td>
+<td>2226</td>
+<td>Per-instance port — LAN/VPN only</td>
+</tr>
+<tr>
+<td>Moria RCON</td>
+<td>amp-medium (105)</td>
+<td>TCP</td>
+<td>25577</td>
+<td>LAN/VPN only</td>
+</tr>
+<tr>
+<td>Minecraft SFTP</td>
+<td>amp-node4 (106)</td>
+<td>TCP</td>
+<td>2224</td>
+<td>Admin file access — LAN/VPN only</td>
+</tr>
+<tr>
+<td>Minecraft RCON</td>
+<td>amp-node4 (106)</td>
+<td>TCP</td>
+<td>25575</td>
+<td>LAN/VPN only</td>
+</tr>
+<tr>
+<td>Dragonwilds SFTP</td>
+<td>amp-node4 (106)</td>
+<td>TCP</td>
+<td>2225</td>
+<td>Admin file access — LAN/VPN only</td>
+</tr>
+<tr>
+<td>Dragonwilds RCON</td>
+<td>amp-node4 (106)</td>
+<td>TCP</td>
+<td>25578</td>
+<td>LAN/VPN only</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>[!danger] Conan Exiles — TCP+UDP 7777 Cannot Be Remapped. Ever.
+Conan Exiles uses UE4 networking which hardwires the advertised port to the bound port. BattlEye validates port consistency on <strong>both TCP and UDP 7777</strong> during the authentication handshake. A remap was attempted and confirmed broken. TCP 7777, UDP 7777, UDP 7778, and UDP 27015 must pass end-to-end with zero translation through iptables, Traefik, Pangolin, and AMP. Do not revisit this.</p>
+</blockquote>
+<blockquote>
+<p>[!warning] Return to Moria — Default 7777 Fixed by Internal Remap
+Moria defaults to UDP 7777, conflicting with Conan at the Pangolin layer. Moria has no BattlEye — safe to remap. Fix inside AMP → Moria01 → Configuration:</p>
+<ul>
+<li><code>ListenPort = 7780</code></li>
+<li><code>AdvertisePort = 7780</code></li>
+</ul>
+<p>Pangolin exposes 7780 → 7780 with no translation. Restart instance after saving.</p>
+</blockquote>
+<blockquote>
+<p>[!warning] RuneScape: Dragonwilds — Default 7777 Fixed by Launch Flag Follow a pattern. 7777, 7778, 7779, etc...
+Dragonwilds defaults to UDP 7777 — no BattlEye, safe to remap. Fix inside AMP → Dragonwilds01 → GenericModule → Launch Parameters: add <code>-port=7779</code>. Pangolin exposes 7779 → 7779. Restart instance after saving.</p>
+</blockquote>
+<blockquote>
+<p>[!tip] Enshrouded — Verify Additional Ports if Needed
+AMP confirms TCP+UDP 15637. If players report connection issues, also test opening 15636 (game) and 15638 (stream) — add to OCI, iptables, and Pangolin if required.</p>
+</blockquote>
+<blockquote>
+<p>[!tip] TCP and UDP 7777 Are Different Sockets
+Conan requires both. Traefik treats <code>tcp-7777</code> and <code>udp-7777</code> as completely independent entryPoints — both must be defined in <code>traefik_config.yml</code> and mapped in <code>docker-compose.yml</code>.</p>
+</blockquote>
+<blockquote>
+<p>[!info] Pangolin — One Backend Per External Port + Protocol
+Traefik binds one OS socket per entryPoint. A second Pangolin target on the same port+protocol crashes Traefik on next restart. All game ports in this cluster are unique per protocol — do not reuse them.</p>
+</blockquote>
+<hr>
+<h2>5 — OCI VPS Setup</h2>
+<h3>5.1 Security List Ingress Rules</h3>
+<p>Navigate: <strong>Networking → VCN → Security Lists → Default Security List</strong>
+Source CIDR: <code>0.0.0.0/0</code> for all game ports. <strong>Do not add SFTP or RCON ports.</strong></p>
+<ul>
+<li>[ ] TCP 7777 — Conan game (TCP required alongside UDP)</li>
+<li>[ ] UDP 7777 — Conan game</li>
+<li>[ ] UDP 7778 — Conan pinger</li>
+<li>[ ] UDP 27015 — Conan Steam query</li>
+<li>[ ] TCP 15637 — Enshrouded query</li>
+<li>[ ] UDP 15637 — Enshrouded query</li>
+<li>[ ] UDP 2456 — Valheim game</li>
+<li>[ ] UDP 2457 — Valheim query</li>
+<li>[ ] UDP 9876 — V Rising game</li>
+<li>[ ] UDP 9877 — V Rising query</li>
+<li>[ ] UDP 7780 — Return to Moria game</li>
+<li>[ ] TCP 25565 — Minecraft Java</li>
+<li>[ ] UDP 25565 — Minecraft Java</li>
+<li>[ ] UDP 7779 — RuneScape: Dragonwilds</li>
+<li>[ ] TCP 443 — Pangolin HTTPS</li>
+<li>[ ] TCP 80 — Pangolin HTTP redirect</li>
+</ul>
+<h3>5.2 OCI VPS iptables</h3>
+<pre class="language-bash"><code class="language-bash"><span class="token comment"># TCP game ports</span>
+<span class="token function">sudo</span> iptables <span class="token parameter variable">-I</span> INPUT <span class="token number">6</span> <span class="token parameter variable">-p</span> tcp <span class="token parameter variable">-m</span> multiport <span class="token punctuation">\</span>
+  <span class="token parameter variable">--dports</span> <span class="token number">80,443</span>,7777,15637,25565 <span class="token parameter variable">-j</span> ACCEPT
+
+<span class="token comment"># UDP game ports</span>
+<span class="token function">sudo</span> iptables <span class="token parameter variable">-I</span> INPUT <span class="token number">6</span> <span class="token parameter variable">-p</span> udp <span class="token parameter variable">-m</span> multiport <span class="token punctuation">\</span>
+  <span class="token parameter variable">--dports</span> <span class="token number">7777,7778</span>,7779, <span class="token number">7780,2456</span>,2457,9876,9877,15637,25565,27015 <span class="token parameter variable">-j</span> ACCEPT
+
+<span class="token comment"># Persist</span>
+<span class="token function">sudo</span> netfilter-persistent save
+
+<span class="token comment"># Verify</span>
+<span class="token function">sudo</span> iptables <span class="token parameter variable">-L</span> INPUT <span class="token parameter variable">-n</span> <span class="token parameter variable">-v</span> --line-numbers</code></pre>
+<hr>
+<h2>6 — Pangolin Setup</h2>
+<blockquote>
+<p>[!tip] NGINX + TLS Is Already In Place
+HTTP resources (AMP ADS, Portainer, Forgejo, Stirling PDF) are handled by your existing NGINX reverse proxy. Only Raw TCP/UDP game server ports need Pangolin entryPoints. SFTP and RCON are never added here.</p>
+</blockquote>
+<h3>6.1 <code>traefik_config.yml</code> — Add Under <code>entryPoints:</code></h3>
+<p><strong>File:</strong> <code>/opt/pangolin/config/traefik/traefik_config.yml</code></p>
+<pre class="language-yaml"><code class="language-yaml"><span class="token key atrule">entryPoints</span><span class="token punctuation">:</span>
+  <span class="token comment"># Pangolin system — do not modify existing entries</span>
+  <span class="token key atrule">websecure</span><span class="token punctuation">:</span>
+    <span class="token key atrule">address</span><span class="token punctuation">:</span> <span class="token punctuation">:</span><span class="token number">443</span>
+  <span class="token key atrule">web</span><span class="token punctuation">:</span>
+    <span class="token key atrule">address</span><span class="token punctuation">:</span> <span class="token punctuation">:</span><span class="token number">80</span>
+
+  <span class="token comment"># Conan Exiles — TCP AND UDP 7777, no remapping ever</span>
+  <span class="token key atrule">tcp-7777</span><span class="token punctuation">:</span>
+    <span class="token key atrule">address</span><span class="token punctuation">:</span> <span class="token punctuation">:</span>7777/tcp
+  <span class="token key atrule">udp-7777</span><span class="token punctuation">:</span>
+    <span class="token key atrule">address</span><span class="token punctuation">:</span> <span class="token punctuation">:</span>7777/udp
+  <span class="token key atrule">udp-7778</span><span class="token punctuation">:</span>
+    <span class="token key atrule">address</span><span class="token punctuation">:</span> <span class="token punctuation">:</span>7778/udp
+  <span class="token key atrule">udp-27015</span><span class="token punctuation">:</span>
+    <span class="token key atrule">address</span><span class="token punctuation">:</span> <span class="token punctuation">:</span>27015/udp
+
+  <span class="token comment"># Enshrouded — query port TCP + UDP</span>
+  <span class="token key atrule">tcp-15637</span><span class="token punctuation">:</span>
+    <span class="token key atrule">address</span><span class="token punctuation">:</span> <span class="token punctuation">:</span>15637/tcp
+  <span class="token key atrule">udp-15637</span><span class="token punctuation">:</span>
+    <span class="token key atrule">address</span><span class="token punctuation">:</span> <span class="token punctuation">:</span>15637/udp
+
+  <span class="token comment"># Valheim</span>
+  <span class="token key atrule">udp-2456</span><span class="token punctuation">:</span>
+    <span class="token key atrule">address</span><span class="token punctuation">:</span> <span class="token punctuation">:</span>2456/udp
+  <span class="token key atrule">udp-2457</span><span class="token punctuation">:</span>
+    <span class="token key atrule">address</span><span class="token punctuation">:</span> <span class="token punctuation">:</span>2457/udp
+
+  <span class="token comment"># V Rising</span>
+  <span class="token key atrule">udp-9876</span><span class="token punctuation">:</span>
+    <span class="token key atrule">address</span><span class="token punctuation">:</span> <span class="token punctuation">:</span>9876/udp
+  <span class="token key atrule">udp-9877</span><span class="token punctuation">:</span>
+    <span class="token key atrule">address</span><span class="token punctuation">:</span> <span class="token punctuation">:</span>9877/udp
+
+  <span class="token comment"># Return to Moria — internal port also 7780 (changed in AMP)</span>
+  <span class="token key atrule">udp-7780</span><span class="token punctuation">:</span>
+    <span class="token key atrule">address</span><span class="token punctuation">:</span> <span class="token punctuation">:</span>7780/udp
+  <span class="token key atrule">tcp-7780</span><span class="token punctuation">:</span>
+    <span class="token key atrule">address</span><span class="token punctuation">:</span> <span class="token punctuation">:</span>7780/tcp
+
+  <span class="token comment"># Minecraft</span>
+  <span class="token key atrule">udp-25565</span><span class="token punctuation">:</span>
+    <span class="token key atrule">address</span><span class="token punctuation">:</span> <span class="token punctuation">:</span>25565/udp
+
+  <span class="token comment"># RuneScape: Dragonwilds — internal port also 7785 (AMP launch flag)</span>
+  <span class="token key atrule">udp-7779</span><span class="token punctuation">:</span>
+    <span class="token key atrule">address</span><span class="token punctuation">:</span> <span class="token punctuation">:</span>7779/udp
+
+  <span class="token comment"># SFTP ports — NOT added here (LAN/VPN access only)</span>
+  <span class="token comment"># Dune: Awakening — NOT added here (PTC server-list discovery only)</span></code></pre>
+<h3>6.2 <code>docker-compose.yml</code> — Add Under <code>services: gerbil: ports:</code></h3>
+<p><strong>File:</strong> <code>/opt/pangolin/docker-compose.yml</code></p>
+<pre class="language-yaml"><code class="language-yaml">    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+
+      <span class="token punctuation">-</span> 443<span class="token punctuation">:</span><span class="token number">443</span>
+      <span class="token punctuation">-</span> <span class="token datetime number">80:80</span>
+      <span class="token comment"># Conan Exiles — both TCP and UDP 7777 required</span>
+      <span class="token punctuation">-</span> 7777<span class="token punctuation">:</span>7777/tcp
+      <span class="token punctuation">-</span> 7777<span class="token punctuation">:</span>7777/udp
+      <span class="token punctuation">-</span> 7778<span class="token punctuation">:</span>7778/udp
+      <span class="token punctuation">-</span> 27015<span class="token punctuation">:</span>27015/udp
+      <span class="token comment"># Enshrouded</span>
+      <span class="token punctuation">-</span> 15637<span class="token punctuation">:</span>15637/tcp
+      <span class="token punctuation">-</span> 15637<span class="token punctuation">:</span>15637/udp
+      <span class="token comment"># Valheim</span>
+      <span class="token punctuation">-</span> 2456<span class="token punctuation">:</span>2456/udp
+      <span class="token punctuation">-</span> 2457<span class="token punctuation">:</span>2457/udp
+      <span class="token comment"># V Rising</span>
+      <span class="token punctuation">-</span> 9876<span class="token punctuation">:</span>9876/udp
+      <span class="token punctuation">-</span> 9877<span class="token punctuation">:</span>9877/udp
+      <span class="token comment"># Return to Moria</span>
+      <span class="token punctuation">-</span> 7780<span class="token punctuation">:</span>7780/udp
+      <span class="token punctuation">-</span> 7780<span class="token punctuation">:</span>7780/tcp
+      <span class="token comment"># Minecraft</span>
+      <span class="token punctuation">-</span> 25565<span class="token punctuation">:</span>25565/udp
+      <span class="token comment"># RuneScape: Dragonwilds</span>
+      <span class="token punctuation">-</span> 7779<span class="token punctuation">:</span>7779/udp
+      <span class="token comment"># SFTP NOT mapped here — LAN/VPN only</span>
+      <span class="token comment"># Dune: Awakening NOT mapped here — server-list only</span></code></pre>
+<p>This is what I mean by easy for me to visualize the editing here</p>
+<img src="\assets\images\amp-game-servers-setup-tutorial\AMP Game Servers Tutorial VS Code.png" alt="VS Code view of configuring the yaml files"/>
+<h3>6.3 Apply and Verify</h3>
+<pre class="language-bash"><code class="language-bash"><span class="token builtin class-name">cd</span> /opt/pangolin
+<span class="token function">docker</span> compose up <span class="token parameter variable">-d</span>
+<span class="token function">docker</span> compose restart traefik
+
+<span class="token comment"># Check UDP listeners</span>
+ss <span class="token parameter variable">-lunp</span> <span class="token operator">|</span> <span class="token function">grep</span> <span class="token parameter variable">-E</span> <span class="token string">'7777|7778|7779|7780|2456|2457|9876|9877|15637|25565|27015'</span>
+
+<span class="token comment"># Check TCP listeners — 7777 and 15637 are both TCP now</span>
+ss <span class="token parameter variable">-ltnp</span> <span class="token operator">|</span> <span class="token function">grep</span> <span class="token parameter variable">-E</span> <span class="token string">'7777|15637|443|80'</span>
+
+<span class="token comment"># Check Traefik — no crash loops, no "address already in use"</span>
+<span class="token function">docker</span> <span class="token function">ps</span>
+<span class="token function">docker</span> logs traefik <span class="token parameter variable">--tail</span><span class="token operator">=</span><span class="token number">50</span></code></pre>
+<h3>6.4 Pangolin Raw TCP/UDP Resources</h3>
+<p>Create one resource per row. <strong>Do not create resources for SFTP or RCON ports.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Resource Name</th>
+<th>Protocol</th>
+<th>External Port</th>
+<th>Target Address</th>
+<th>Target Port</th>
+<th>VM</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>conan-game-tcp</td>
+<td>TCP</td>
+<td>7777</td>
+<td>amp-conan LAN IP</td>
+<td>7777</td>
+<td>102</td>
+</tr>
+<tr>
+<td>conan-game-udp</td>
+<td>UDP</td>
+<td>7777</td>
+<td>amp-conan LAN IP</td>
+<td>7777</td>
+<td>102</td>
+</tr>
+<tr>
+<td>conan-pinger</td>
+<td>UDP</td>
+<td>7778</td>
+<td>amp-conan LAN IP</td>
+<td>7778</td>
+<td>102</td>
+</tr>
+<tr>
+<td>conan-query</td>
+<td>UDP</td>
+<td>27015</td>
+<td>amp-conan LAN IP</td>
+<td>27015</td>
+<td>102</td>
+</tr>
+<tr>
+<td>enshrouded-query-tcp</td>
+<td>TCP</td>
+<td>15637</td>
+<td>amp-enshrouded LAN IP</td>
+<td>15637</td>
+<td>104</td>
+</tr>
+<tr>
+<td>enshrouded-query-udp</td>
+<td>UDP</td>
+<td>15637</td>
+<td>amp-enshrouded LAN IP</td>
+<td>15637</td>
+<td>104</td>
+</tr>
+<tr>
+<td>valheim-game</td>
+<td>UDP</td>
+<td>2456</td>
+<td>amp-medium LAN IP</td>
+<td>2456</td>
+<td>105</td>
+</tr>
+<tr>
+<td>valheim-query</td>
+<td>UDP</td>
+<td>2457</td>
+<td>amp-medium LAN IP</td>
+<td>2457</td>
+<td>105</td>
+</tr>
+<tr>
+<td>vrising-game</td>
+<td>UDP</td>
+<td>9876</td>
+<td>amp-medium LAN IP</td>
+<td>9876</td>
+<td>105</td>
+</tr>
+<tr>
+<td>vrising-query</td>
+<td>UDP</td>
+<td>9877</td>
+<td>amp-medium LAN IP</td>
+<td>9877</td>
+<td>105</td>
+</tr>
+<tr>
+<td>moria-game</td>
+<td>UDP</td>
+<td>7780</td>
+<td>amp-medium LAN IP</td>
+<td>7780</td>
+<td>105</td>
+</tr>
+<tr>
+<td>minecraft-tcp</td>
+<td>TCP</td>
+<td>25565</td>
+<td>amp-node4 LAN IP</td>
+<td>25565</td>
+<td>106</td>
+</tr>
+<tr>
+<td>minecraft-udp</td>
+<td>UDP</td>
+<td>25565</td>
+<td>amp-node4 LAN IP</td>
+<td>25565</td>
+<td>106</td>
+</tr>
+<tr>
+<td>dragonwilds</td>
+<td>UDP</td>
+<td>7779</td>
+<td>amp-node4 LAN IP</td>
+<td>7785</td>
+<td>106</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>7 — AMP Installation &amp; Configuration</h2>
+<blockquote>
+<p>[!info] AMP Architecture
+AMP is installed <strong>bare metal on the VM OS</strong>. During install, answer YES to Docker isolation. AMP then manages each game server as a Docker container internally — handling Wine, SteamCMD, and dependencies per-container automatically.</p>
+</blockquote>
+<h3>7.1 AMP Install Command (all AMP VMs)</h3>
+<pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">su</span>
+<span class="token function">bash</span> <span class="token operator">&lt;</span><span class="token punctuation">(</span><span class="token function">wget</span> -qO- getamp.sh<span class="token punctuation">)</span>
+<span class="token comment"># Prompts:</span>
+<span class="token comment">#   Username / password → set strong credentials</span>
+<span class="token comment">#   Docker isolation    → YES  ← critical</span>
+<span class="token comment">#   HTTPS               → No  (NGINX handles TLS)</span></code></pre>
+<p>Apply licence key in the web UI at <code>http://&lt;vm-ip&gt;:xxxx</code> → restart when prompted.</p>
+<h3>7.2 AMP Instance Registry</h3>
+<table>
+<thead>
+<tr>
+<th>AMP Instance</th>
+<th>VMID</th>
+<th>VM Name</th>
+<th>Node</th>
+<th>AMP Role</th>
+<th>Game</th>
+<th>Internet Port(s)</th>
+<th>SFTP Port</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ADS01</td>
+<td>106</td>
+<td>amp-node4</td>
+<td>PVE4</td>
+<td>ADS Controller</td>
+<td>—</td>
+<td>TCP xxxx (UI)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Conan01</td>
+<td>102</td>
+<td>amp-conan</td>
+<td>PVE1</td>
+<td>Target</td>
+<td>Conan Exiles Enhanced</td>
+<td>TCP+UDP 7777 · UDP 7778 · UDP 27015</td>
+<td>TCP 2224</td>
+</tr>
+<tr>
+<td>Enshrouded01</td>
+<td>104</td>
+<td>amp-enshrouded</td>
+<td>PVE2</td>
+<td>Target</td>
+<td>Enshrouded</td>
+<td>TCP+UDP 15637</td>
+<td>TCP 2224</td>
+</tr>
+<tr>
+<td>Valheim01</td>
+<td>105</td>
+<td>amp-medium</td>
+<td>PVE3</td>
+<td>Target</td>
+<td>Valheim</td>
+<td>UDP 2456 · UDP 2457</td>
+<td>TCP 2224</td>
+</tr>
+<tr>
+<td>VRising01</td>
+<td>105</td>
+<td>amp-medium</td>
+<td>PVE3</td>
+<td>Target</td>
+<td>V Rising</td>
+<td>UDP 9876 · UDP 9877</td>
+<td>TCP 2225</td>
+</tr>
+<tr>
+<td>Moria01</td>
+<td>105</td>
+<td>amp-medium</td>
+<td>PVE3</td>
+<td>Target</td>
+<td>Return to Moria</td>
+<td>UDP 7780</td>
+<td>TCP 2226</td>
+</tr>
+<tr>
+<td>Minecraft01</td>
+<td>106</td>
+<td>amp-node4</td>
+<td>PVE4</td>
+<td>Via ADS</td>
+<td>Minecraft Java</td>
+<td>TCP+UDP 25565</td>
+<td>TCP 2224</td>
+</tr>
+<tr>
+<td>Dragonwilds01</td>
+<td>106</td>
+<td>amp-node4</td>
+<td>PVE4</td>
+<td>Via ADS</td>
+<td>RuneScape: Dragonwilds</td>
+<td>UDP 7779</td>
+<td>TCP 2225</td>
+</tr>
+<tr>
+<td>Dune01</td>
+<td>107</td>
+<td>dune-awakening</td>
+<td>PVE2</td>
+<td>Target</td>
+<td>Dune: Awakening</td>
+<td>Server list (PTC)</td>
+<td>TCP 2224</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>[!note] amp-medium Hosts Three Game Servers
+Valheim01, VRising01, and Moria01 all run as separate Docker containers inside VMID 105. AMP assigns each its own SFTP port (2224, 2225, 2226) so they don't collide. Manage all three through ADS01.</p>
+</blockquote>
+<blockquote>
+<p>[!note] amp-node4 Is a Hybrid VM
+VMID 106 runs AMP ADS <strong>and</strong> hosts Minecraft and Dragonwilds via that same ADS instance. No network hop needed — ADS and its instances communicate internally on the same VM.</p>
+</blockquote>
+<h3>7.3 Critical AMP Port Configurations</h3>
+<h4>Return to Moria — Must Remap From Default 7777</h4>
+<p>AMP → Moria01 → <strong>Configuration → Network</strong>:</p>
+<pre><code>ListenPort    = 7780
+AdvertisePort = 7780
+</code></pre>
+<p>Restart instance after saving. Verify in instance logs that it reports binding to 7780.</p>
+<p>There was also a challenge here getting everything to apply 100% correctly so I edited the MoriaServerConfig.ini directly and imported the config to AMP to ensure it grabbed all of the settings (advertise address and advertise port were the most important here as it was hitting my home internet public IP and I needed it to hit the IP of the AMP host.)</p>
+<pre class="language-C++"><code class="language-C++">[Host]
+ListenAddress=0.0.0.0
+ListenPort=7780
+AdvertiseAddress=[your.host.ip.address]
+AdvertisePort=7780
+InitialConnectionRetryTime=60
+AfterDisconnectionRetryTime=600</code></pre>
+<p><strong>If the instance ever resets to defaults:</strong> re-apply the above and restart.</p>
+<h4>RuneScape: Dragonwilds — Must Remap From Default 7777</h4>
+<p>AMP → Dragonwilds01 → <strong>GenericModule → Launch Parameters</strong>, add:</p>
+<pre><code>-port=7779
+</code></pre>
+<p>Restart instance after saving.</p>
+<p><strong>If the instance ever resets to defaults:</strong> re-apply the above and restart.</p>
+<h4>Minecraft Java — JVM Heap &amp; GC Flags</h4>
+<p>AMP → Minecraft01 → <strong>Java Settings → Memory</strong>: Min 4 GB / Max 10 GB</p>
+<p>JVM Arguments:</p>
+<pre><code>-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M -XX:G1ReservePercent=20 -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4 -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1
+</code></pre>
+<hr>
+<h2>8 — Demo &amp; Conditional VMs (PVE2)</h2>
+<blockquote>
+<p>[!danger] PVE2 One-at-a-Time Rule
+VMIDs 107, 300, and 301 all live on PVE2 alongside amp-enshrouded (104).
+amp-enshrouded balloon min = 6 GB · host reserve = 6 GB · free at idle = <strong>~52 GB</strong>
+Any two ephemeral/conditional VMs together consume 48–64 GB — <strong>exceeds node capacity</strong>.
+<strong>Run only ONE of 107, 300, or 301 at any time.</strong></p>
+</blockquote>
+<h3>VMID 300 — openshift-sno (Ephemeral)</h3>
+<pre class="language-bash"><code class="language-bash">qm start <span class="token number">300</span>    <span class="token comment"># verify 107 and 301 are stopped first</span>
+qm <span class="token function">shutdown</span> <span class="token number">300</span></code></pre>
+<h3>VMID 301 — azure-local-demo (Ephemeral)</h3>
+<pre class="language-bash"><code class="language-bash">qm start <span class="token number">301</span>    <span class="token comment"># verify 107 and 300 are stopped first</span>
+qm <span class="token function">shutdown</span> <span class="token number">301</span></code></pre>
+<h3>VMID 107 — dune-awakening (Conditional)</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OS</td>
+<td>Ubuntu Server 24.04 LTS</td>
+</tr>
+<tr>
+<td>AMP</td>
+<td>Bare metal + Docker isolation</td>
+</tr>
+<tr>
+<td>CPU requirement</td>
+<td>AVX2 — satisfied by <code>cpu: host</code> on Ryzen 5</td>
+</tr>
+<tr>
+<td>Specs</td>
+<td>8 vCPU · 24 GB / 8 GB balloon · 120 GB CephPool</td>
+</tr>
+<tr>
+<td><code>onboot</code></td>
+<td>0 — start manually only</td>
+</tr>
+<tr>
+<td>Connection method</td>
+<td><strong>In-game server browser only</strong> (PTC phase)</td>
+</tr>
+<tr>
+<td>Pangolin resources</td>
+<td>None needed</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>[!danger] Dune: Awakening — Token Required Before First Start</p>
+<ol>
+<li>Own Dune: Awakening on Steam</li>
+<li>Install and <strong>run the PTC client at least once</strong></li>
+<li>Get your token: <strong><code>https://account-pts.duneawakening.com/</code></strong> (sign in with Steam)</li>
+<li>AMP → Dune01 → <strong>Configuration → Dune Awakening → Identity → Self-Host Service Token</strong> → paste → save</li>
+<li>Do <strong>NOT</strong> touch &quot;FLS World Name&quot; unless Funcom has specifically issued you one</li>
+</ol>
+</blockquote>
+<blockquote>
+<p>[!warning] Dune: Awakening Known Issues (PTC — May 2026)
+Confirmed bugs — not setup errors:</p>
+<ul>
+<li><strong>Resource monitoring shows 0</strong> — server is running, ignore it</li>
+<li><strong>Player tracking broken</strong> — AMP cannot detect player joins/leaves</li>
+<li><strong>&quot;Missing Configuration&quot; on first update</strong> — run the update a <strong>second time</strong>, it will succeed</li>
+<li><strong>Several minutes to appear in server browser</strong> after startup — wait patiently</li>
+<li><strong>PTC world data</strong> not guaranteed to persist after full release</li>
+</ul>
+</blockquote>
+<pre class="language-bash"><code class="language-bash">qm start <span class="token number">107</span>    <span class="token comment"># verify 300 and 301 are stopped first</span>
+<span class="token comment"># Stop the instance in AMP first for graceful world save, then:</span>
+qm <span class="token function">shutdown</span> <span class="token number">107</span></code></pre>
+<hr>
+<h2>9 — Operational Gotchas &amp; Tips</h2>
+<blockquote>
+<p>[!danger] Conan Exiles — TCP AND UDP 7777. No Remap. Ever.
+TCP 7777, UDP 7777, UDP 7778, and UDP 27015 must be identical at OCI, iptables, Traefik, Pangolin, and AMP. BattlEye + UE4 hardwire port advertising across both protocols. Remap = broken auth = zero players. Confirmed by prior failed attempt.</p>
+</blockquote>
+<blockquote>
+<p>[!danger] PVE2 — Never Run Multiple Ephemeral/Conditional VMs Simultaneously
+107 + 300 = 56 GB · 107 + 301 = 56 GB · 300 + 301 = 64 GB. All exceed available headroom when amp-enshrouded is at its balloon minimum. Check PVE2 free RAM before starting any of 107, 300, 301.</p>
+</blockquote>
+<blockquote>
+<p>[!danger] Pangolin — One Port+Protocol = One Backend
+Traefik crashes on next restart if two resources share an external port+protocol. Change the internal port of the conflicting service first.</p>
+</blockquote>
+<blockquote>
+<p>[!warning] SFTP Ports — LAN/VPN Only, Always
+Never add SFTP ports (2224, 2225, 2226) to OCI Security List, iptables, Traefik, or Pangolin. Access via WireGuard/Tailscale when remote. Players do not need SFTP.</p>
+</blockquote>
+<blockquote>
+<p>[!warning] Moria Remap — If Instance Resets to Defaults
+Re-apply: AMP → Moria01 → Configuration → <code>ListenPort=7780</code>, <code>AdvertisePort=7780</code> → restart.</p>
+</blockquote>
+<blockquote>
+<p>[!warning] Dragonwilds Remap — If Instance Resets to Defaults
+Re-apply: AMP → Dragonwilds01 → GenericModule → Launch Parameters → <code>-port=7779</code> → restart.</p>
+</blockquote>
+<blockquote>
+<p>[!warning] Enshrouded — Confirm Port Coverage if Players Can't Connect
+AMP confirms TCP+UDP 15637. If players have issues, also test 15636 (game) and 15638 (stream) — add to OCI, iptables, and Pangolin if needed.</p>
+</blockquote>
+<blockquote>
+<p>[!warning] Dune: Awakening — Token Is Per-Instance
+Each separate Dune server instance needs its own unique self-host token from <code>https://account-pts.duneawakening.com/</code>.</p>
+</blockquote>
+<blockquote>
+<p>[!tip] cpu: host on Every VM — Always
+Passes AVX2, AES-NI, SHA, and vmx/svm. AVX2 is specifically required by Dune: Awakening. Never use <code>kvm64</code>.</p>
+</blockquote>
+<blockquote>
+<p>[!tip] Balloon Min Is Intentionally Low
+Game containers idle at 2–6 GB. The balloon driver reclaims unused RAM for live migrations. Raise balloon min only if swap is observed after 72 hours of real load:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">ssh</span> <span class="token operator">&lt;</span>vm-ip<span class="token operator">></span> <span class="token string">'vmstat -s | grep swap'</span></code></pre>
+</blockquote>
+<blockquote>
+<p>[!tip] AMP Docker Isolation — Why It Was Chosen
+Docker isolation (YES during install) means AMP handles Wine, SteamCMD, and per-game dependencies automatically. Return to Moria's Wine layer and Dune's dependencies are both managed this way. Changing it requires a full AMP reinstall.</p>
+</blockquote>
+<blockquote>
+<p>[!tip] Crowdsec on OCI VPS
+High UDP packet rates from game clients can trigger false-positive bans. Whitelist game server IPs and port ranges in Crowdsec rules or add custom scenario exclusions.</p>
+</blockquote>
+<hr>
+<h2>10 — Quick Reference Commands</h2>
+<h3>Verify Game Ports (OCI VPS)</h3>
+<pre class="language-bash"><code class="language-bash"><span class="token comment"># UDP game ports</span>
+ss <span class="token parameter variable">-lunp</span> <span class="token operator">|</span> <span class="token function">grep</span> <span class="token parameter variable">-E</span> <span class="token string">'7777|7778|7779|7780|2456|2457|9876|9877|15637|25565|27015'</span>
+
+<span class="token comment"># TCP game ports — 7777 and 15637 are both TCP</span>
+ss <span class="token parameter variable">-ltnp</span> <span class="token operator">|</span> <span class="token function">grep</span> <span class="token parameter variable">-E</span> <span class="token string">'7777|15637|25565|443|80'</span></code></pre>
+<h3>Pangolin</h3>
+<pre class="language-bash"><code class="language-bash"><span class="token builtin class-name">cd</span> /opt/pangolin
+<span class="token function">docker</span> compose up <span class="token parameter variable">-d</span>
+<span class="token function">docker</span> compose restart traefik
+<span class="token function">docker</span> logs traefik <span class="token parameter variable">--tail</span><span class="token operator">=</span><span class="token number">50</span>    <span class="token comment"># Check for errors</span>
+ss <span class="token parameter variable">-lunp</span> <span class="token operator">|</span> <span class="token function">grep</span> <span class="token operator">&lt;</span>port<span class="token operator">></span>           <span class="token comment"># Verify a specific port</span></code></pre>
+<h3>VM Lifecycle</h3>
+<pre class="language-bash"><code class="language-bash">qm start <span class="token operator">&lt;</span>VMID<span class="token operator">></span>
+qm <span class="token function">shutdown</span> <span class="token operator">&lt;</span>VMID<span class="token operator">></span>
+qm status <span class="token operator">&lt;</span>VMID<span class="token operator">></span>
+qm migrate <span class="token operator">&lt;</span>VMID<span class="token operator">></span> <span class="token operator">&lt;</span>target-node<span class="token operator">></span> <span class="token parameter variable">--online</span>
+qm snapshot <span class="token operator">&lt;</span>VMID<span class="token operator">></span> <span class="token operator">&lt;</span>name<span class="token operator">></span> <span class="token string">"&lt;description>"</span>
+qm listsnapshot <span class="token operator">&lt;</span>VMID<span class="token operator">></span>
+qm rollback <span class="token operator">&lt;</span>VMID<span class="token operator">></span> <span class="token operator">&lt;</span>snapname<span class="token operator">></span></code></pre>
+<h3>AMP</h3>
+<pre class="language-bash"><code class="language-bash">ampinstmgr status
+ampinstmgr startall
+ampinstmgr stopall
+journalctl <span class="token parameter variable">-u</span> ampinstmgr <span class="token parameter variable">-f</span></code></pre>
+<hr>
+<h2>11 — Game Server Status Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Game</th>
+<th>VM (VMID)</th>
+<th>AMP</th>
+<th>Internet Port(s)</th>
+<th>SFTP</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Conan Exiles Enhanced</td>
+<td>amp-conan (102)</td>
+<td>✅ Docker</td>
+<td>TCP+UDP 7777 · UDP 7778 · UDP 27015</td>
+<td>2224 LAN</td>
+<td>🟢 Active — no remap ever</td>
+</tr>
+<tr>
+<td>Enshrouded</td>
+<td>amp-enshrouded (104)</td>
+<td>✅ Docker</td>
+<td>TCP+UDP 15637</td>
+<td>2224 LAN</td>
+<td>🟢 Active</td>
+</tr>
+<tr>
+<td>Valheim</td>
+<td>amp-medium (105)</td>
+<td>✅ Docker</td>
+<td>UDP 2456 · UDP 2457</td>
+<td>2224 LAN</td>
+<td>🟢 Active</td>
+</tr>
+<tr>
+<td>V Rising</td>
+<td>amp-medium (105)</td>
+<td>✅ Docker</td>
+<td>UDP 9876 · UDP 9877</td>
+<td>2225 LAN</td>
+<td>🟢 Active</td>
+</tr>
+<tr>
+<td>Return to Moria</td>
+<td>amp-medium (105)</td>
+<td>✅ Docker + Wine</td>
+<td>UDP 7780</td>
+<td>2226 LAN</td>
+<td>🟢 Active — remapped from 7777</td>
+</tr>
+<tr>
+<td>Minecraft Java</td>
+<td>amp-node4 (106)</td>
+<td>✅ Docker via ADS</td>
+<td>TCP+UDP 25565</td>
+<td>2224 LAN</td>
+<td>🟢 Active</td>
+</tr>
+<tr>
+<td>RuneScape: Dragonwilds</td>
+<td>amp-node4 (106)</td>
+<td>✅ Docker via ADS</td>
+<td>UDP 7779</td>
+<td>2225 LAN</td>
+<td>🟢 Active — remapped from 7777</td>
+</tr>
+<tr>
+<td>Dune: Awakening</td>
+<td>dune-awakening (107)</td>
+<td>✅ Docker</td>
+<td>Server list (PTC)</td>
+<td>2224 LAN</td>
+<td>🟠 Conditional · token required · <code>onboot: 0</code></td>
+</tr>
+<tr>
+<td>OpenShift SNO</td>
+<td>openshift-sno (300)</td>
+<td>❌</td>
+<td>—</td>
+<td>—</td>
+<td>⚪ Ephemeral · <code>onboot: 0</code></td>
+</tr>
+<tr>
+<td>Azure Local</td>
+<td>azure-local-demo (301)</td>
+<td>❌</td>
+<td>—</td>
+<td>—</td>
+<td>⚪ Ephemeral · <code>onboot: 0</code></td>
+</tr>
+</tbody>
+</table>
+<p>Here is what you wind up with. I think it's fantastic.</p>
+<img src="\assets\images\amp-game-servers-setup-tutorial\AMP Game Servers image.png" alt="vies of the setup dashboard"/>
+<p>Anyway, I hope it help someone, and as always wishing you all the best.</p>
+
+  </section>
+
+  <footer class="post-footer">
+    <h4>Author - Joseph Sándor Voros</h4>
+    <p class="post-tags">
+      
+    </p>
+  </footer>
+</article>
+
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <div class="copyright">©  Hybridcloudhq - Disclaimer The views and opinions expressed on this website are solely my own and do not reflect the official positions of Dell Technologies, or any other affiliated organizations. All content is provided for informational purposes only.</div>
+        <a href="https://smallcounter.com"><img src="https://smallcounter.com/count.php?c_style=104&id=1771869804" border=0 alt="web counter"></a><br>
+        <div class="social">
+          
+            <a href="https://x.com/sandorvoros" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+              
+                <svg width="1200" height="1227" viewBox="0 0 1200 1227" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z"/>
+                  </svg>
+              
+            </a>
+          
+            <a href="https://github.com/josephsandorvoros" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+              
+                <svg fill="#000000" width="24px" height="24px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-name="Layer 1">
+                  <path d="M12,2.2467A10.00042,10.00042,0,0,0,8.83752,21.73419c.5.08752.6875-.21247.6875-.475,0-.23749-.01251-1.025-.01251-1.86249C7,19.85919,6.35,18.78423,6.15,18.22173A3.636,3.636,0,0,0,5.125,16.8092c-.35-.1875-.85-.65-.01251-.66248A2.00117,2.00117,0,0,1,6.65,17.17169a2.13742,2.13742,0,0,0,2.91248.825A2.10376,2.10376,0,0,1,10.2,16.65923c-2.225-.25-4.55-1.11254-4.55-4.9375a3.89187,3.89187,0,0,1,1.025-2.6875,3.59373,3.59373,0,0,1,.1-2.65s.83747-.26251,2.75,1.025a9.42747,9.42747,0,0,1,5,0c1.91248-1.3,2.75-1.025,2.75-1.025a3.59323,3.59323,0,0,1,.1,2.65,3.869,3.869,0,0,1,1.025,2.6875c0,3.83747-2.33752,4.6875-4.5625,4.9375a2.36814,2.36814,0,0,1,.675,1.85c0,1.33752-.01251,2.41248-.01251,2.75,0,.26251.1875.575.6875.475A10.0053,10.0053,0,0,0,12,2.2467Z"/>
+                  </svg>
+              
+            </a>
+          
+            <a href="https://www.linkedin.com/in/josephsvoros/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+              
+                <svg width="24px" height="24px" viewBox="0 0 24 24" role="img" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn icon</title>
+                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                  </svg>
+              
+            </a>
+          
+            <a href="https://www.instagram.com/jsvoros/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+              
+                <svg fill="#000000" width="800px" height="800px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-name="Layer 1">
+                  <path d="M17.34,5.46h0a1.2,1.2,0,1,0,1.2,1.2A1.2,1.2,0,0,0,17.34,5.46Zm4.6,2.42a7.59,7.59,0,0,0-.46-2.43,4.94,4.94,0,0,0-1.16-1.77,4.7,4.7,0,0,0-1.77-1.15,7.3,7.3,0,0,0-2.43-.47C15.06,2,14.72,2,12,2s-3.06,0-4.12.06a7.3,7.3,0,0,0-2.43.47A4.78,4.78,0,0,0,3.68,3.68,4.7,4.7,0,0,0,2.53,5.45a7.3,7.3,0,0,0-.47,2.43C2,8.94,2,9.28,2,12s0,3.06.06,4.12a7.3,7.3,0,0,0,.47,2.43,4.7,4.7,0,0,0,1.15,1.77,4.78,4.78,0,0,0,1.77,1.15,7.3,7.3,0,0,0,2.43.47C8.94,22,9.28,22,12,22s3.06,0,4.12-.06a7.3,7.3,0,0,0,2.43-.47,4.7,4.7,0,0,0,1.77-1.15,4.85,4.85,0,0,0,1.16-1.77,7.59,7.59,0,0,0,.46-2.43c0-1.06.06-1.4.06-4.12S22,8.94,21.94,7.88ZM20.14,16a5.61,5.61,0,0,1-.34,1.86,3.06,3.06,0,0,1-.75,1.15,3.19,3.19,0,0,1-1.15.75,5.61,5.61,0,0,1-1.86.34c-1,.05-1.37.06-4,.06s-3,0-4-.06A5.73,5.73,0,0,1,6.1,19.8,3.27,3.27,0,0,1,5,19.05a3,3,0,0,1-.74-1.15A5.54,5.54,0,0,1,3.86,16c0-1-.06-1.37-.06-4s0-3,.06-4A5.54,5.54,0,0,1,4.21,6.1,3,3,0,0,1,5,5,3.14,3.14,0,0,1,6.1,4.2,5.73,5.73,0,0,1,8,3.86c1,0,1.37-.06,4-.06s3,0,4,.06a5.61,5.61,0,0,1,1.86.34A3.06,3.06,0,0,1,19.05,5,3.06,3.06,0,0,1,19.8,6.1,5.61,5.61,0,0,1,20.14,8c.05,1,.06,1.37.06,4S20.19,15,20.14,16ZM12,6.87A5.13,5.13,0,1,0,17.14,12,5.12,5.12,0,0,0,12,6.87Zm0,8.46A3.33,3.33,0,1,1,15.33,12,3.33,3.33,0,0,1,12,15.33Z"/>
+                  </svg>
+              
+            </a>
+          
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
