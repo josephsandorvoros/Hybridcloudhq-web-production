@@ -40,7 +40,7 @@
 
   <section class="post-content">
     <h1>&quot;Come in, come in, and know me better Man.&quot;</h1>
-<p>It's been a bit since I have posted. Life is always going and there is so much to learn. I have learning more about AI and infrastructure surrounding it for work. I have been using it a bit more both there and at home. I have even played with coding some apps and my own agent harness and interface.</p>
+<p>It's been a bit since I have posted. Life is always going and there is so much to learn. I have been learning more about AI and infrastructure surrounding it for work. I have been using it a bit more both there and at home. I have even played with coding some apps and my own agent harness and interface.</p>
 <p>There are ups and downs. It is certainly an interesting (and often frustrating) process. There are some things it can be very helpful with though. One of them is planning and documentation. This walkthrough is a testament to that. I had to guide it and steer it, and double check it and I believe I got it to what I needed.</p>
 <p>I am a gamer, and I have several I have always wanted to host in a more persistent way. With my homelab setup, I finally have a chance to do that. In this case 7 games I play semi regularly and a couple of demo hosts I am able to take advantage of that I destroy and rebuild n a regular basis. This wasn't all done at once for me, but I have enough documented steps now from various places to make it work. And I thought this would be a good chance to share a walkthrough here.</p>
 <h2>Prerequisites</h2>
@@ -67,52 +67,18 @@ Ceph raw: <strong>3.88 TiB</strong> · Usable (rep-3): <strong>~1.13 TiB</strong
 </blockquote>
 <hr>
 <h2>1 — Cluster Hardware</h2>
-<table>
-<thead>
-<tr>
-<th>Property</th>
-<th>Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Nodes</td>
-<td>4× (PVE1–PVE4)</td>
-</tr>
-<tr>
-<td>CPU (per node)</td>
-<td>AMD Ryzen 5 — 6C/12T, up to 4.0 GHz</td>
-</tr>
-<tr>
-<td>Usable host threads (per node)</td>
-<td>10 (2 reserved for Proxmox)</td>
-</tr>
-<tr>
-<td>RAM (per node)</td>
-<td>64 GB DDR4</td>
-</tr>
-<tr>
-<td>Ceph raw total</td>
-<td><strong>3.88 TiB</strong> (4 OSDs, one per node)</td>
-</tr>
-<tr>
-<td>Ceph usable (rep-2)</td>
-<td><strong>~1.13 TiB</strong></td>
-</tr>
-<tr>
-<td>Proxmox version</td>
-<td></td>
-</tr>
-<tr>
-<td>External tunnel</td>
-<td>OCI VPS → Pangolin + Traefik + Gerbil + Crowdsec</td>
-</tr>
-<tr>
-<td>TLS</td>
-<td>NGINX reverse proxy — already configured</td>
-</tr>
-</tbody>
-</table>
+<pre><code>| Property                       | Value                                            |
+| ------------------------------ | ------------------------------------------------ |
+| Nodes                          | 4× (PVE1–PVE4)                                   |
+| CPU (per node)                 | AMD Ryzen 5 — 6C/12T, up to 4.0 GHz              |
+| Usable host threads (per node) | 10 (2 reserved for Proxmox)                      |
+| RAM (per node)                 | 64 GB DDR4                                       |
+| Ceph raw total                 | **3.88 TiB** (4 OSDs, one per node)              |
+| Ceph usable (rep-2)            | **~1.13 TiB**                                    |
+| Proxmox version                |                                                  |
+| External tunnel                | OCI VPS → Pangolin + Traefik + Gerbil + Crowdsec |
+| TLS                            | NGINX reverse proxy — already configured         |
+</code></pre>
 <hr>
 <h2>2 — Node Role Map</h2>
 <table>
