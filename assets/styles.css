@@ -71,33 +71,37 @@ td{padding:.55rem .9rem;border:1px solid #2e2e3e;vertical-align:top}
 tr:nth-child(even){background:#181820}
 tr:hover{background:#1e1530}
 
-/* Callouts (Obsidian-style > [!type] blocks) */
-.callout{border-radius:6px;margin:1.25rem 0;overflow:hidden;border-left:4px solid #555}
-.callout-title{display:flex;align-items:center;gap:.5rem;font-weight:700;padding:.55rem .9rem;font-size:.95rem}
-.callout-icon{font-size:.85rem;font-weight:700;flex-shrink:0;opacity:.8}
-.callout-body{padding:.55rem .9rem .75rem;font-size:.95rem;color:#dfe6f6}
-.callout-body p:first-child{margin-top:0}
-.callout-body p:last-child{margin-bottom:0}
-.callout-body table{margin:.5rem 0}
+/* Callouts (Obsidian/GitHub-style > [!type] blocks via markdown-it-github-alerts) */
+.markdown-alert{border-radius:6px;margin:1.25rem 0;padding:.6rem .9rem .75rem;border-left:4px solid #555}
+.markdown-alert-title{display:flex;align-items:center;gap:.5rem;font-weight:700;font-size:.95rem;margin:0 0 .5rem 0;padding:0}
+.markdown-alert-title svg{width:16px;height:16px;flex-shrink:0}
+.markdown-alert p:last-child{margin-bottom:0}
+.markdown-alert p:first-of-type{margin-top:0}
 
 /* note / abstract — blue */
-.callout-note,.callout-abstract{background:#0d1b35;border-left-color:#3b82f6}
-.callout-note .callout-title,.callout-abstract .callout-title{color:#60a5fa}
+.markdown-alert-note,.markdown-alert-abstract{background:#0d1b35;border-left-color:#3b82f6}
+.markdown-alert-note .markdown-alert-title,.markdown-alert-abstract .markdown-alert-title{color:#60a5fa}
+.markdown-alert-note .markdown-alert-title svg,.markdown-alert-abstract .markdown-alert-title svg{fill:#60a5fa}
 /* info — cyan */
-.callout-info{background:#0b2030;border-left-color:#06b6d4}
-.callout-info .callout-title{color:#22d3ee}
+.markdown-alert-info{background:#0b2030;border-left-color:#06b6d4}
+.markdown-alert-info .markdown-alert-title{color:#22d3ee}
+.markdown-alert-info .markdown-alert-title svg{fill:#22d3ee}
 /* tip / success — green */
-.callout-tip,.callout-success{background:#0d2218;border-left-color:#22c55e}
-.callout-tip .callout-title,.callout-success .callout-title{color:#4ade80}
+.markdown-alert-tip,.markdown-alert-success{background:#0d2218;border-left-color:#22c55e}
+.markdown-alert-tip .markdown-alert-title,.markdown-alert-success .markdown-alert-title{color:#4ade80}
+.markdown-alert-tip .markdown-alert-title svg,.markdown-alert-success .markdown-alert-title svg{fill:#4ade80}
 /* warning / caution — amber */
-.callout-warning,.callout-caution{background:#2a1f0a;border-left-color:#f59e0b}
-.callout-warning .callout-title,.callout-caution .callout-title{color:#fbbf24}
+.markdown-alert-warning,.markdown-alert-caution{background:#2a1f0a;border-left-color:#f59e0b}
+.markdown-alert-warning .markdown-alert-title,.markdown-alert-caution .markdown-alert-title{color:#fbbf24}
+.markdown-alert-warning .markdown-alert-title svg,.markdown-alert-caution .markdown-alert-title svg{fill:#fbbf24}
 /* danger / important / failure / bug — red */
-.callout-danger,.callout-important,.callout-failure,.callout-bug{background:#2a0d0d;border-left-color:#ef4444}
-.callout-danger .callout-title,.callout-important .callout-title,.callout-failure .callout-title,.callout-bug .callout-title{color:#f87171}
+.markdown-alert-danger,.markdown-alert-important,.markdown-alert-failure,.markdown-alert-bug{background:#2a0d0d;border-left-color:#ef4444}
+.markdown-alert-danger .markdown-alert-title,.markdown-alert-important .markdown-alert-title,.markdown-alert-failure .markdown-alert-title,.markdown-alert-bug .markdown-alert-title{color:#f87171}
+.markdown-alert-danger .markdown-alert-title svg,.markdown-alert-important .markdown-alert-title svg,.markdown-alert-failure .markdown-alert-title svg,.markdown-alert-bug .markdown-alert-title svg{fill:#f87171}
 /* question / example / quote — purple */
-.callout-question,.callout-example,.callout-quote{background:#1a0d2e;border-left-color:#a855f7}
-.callout-question .callout-title,.callout-example .callout-title,.callout-quote .callout-title{color:#c084fc}
+.markdown-alert-question,.markdown-alert-example,.markdown-alert-quote{background:#1a0d2e;border-left-color:#a855f7}
+.markdown-alert-question .markdown-alert-title,.markdown-alert-example .markdown-alert-title,.markdown-alert-quote .markdown-alert-title{color:#c084fc}
+.markdown-alert-question .markdown-alert-title svg,.markdown-alert-example .markdown-alert-title svg,.markdown-alert-quote .markdown-alert-title svg{fill:#c084fc}
 
 pre{background:#0b0c0d;padding:1rem;border-radius:8px;overflow:auto;color:#e6eefc}
 code{background:rgba(255,255,255,0.03);padding:.2rem .4rem;border-radius:4px;color:#ffb6e6}

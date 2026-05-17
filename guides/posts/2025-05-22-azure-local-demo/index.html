@@ -84,7 +84,7 @@
 <p>Anyway enough about me lets get into the project.</p>
 <h2>Know your Local IP information</h2>
 <p>This is important for a few parts of the setup and deployment. I am outlining it here and have put detailed notes in the other places it comes up later in the guide.</p>
-<p>This assumes you are on a home network. If you are in a corporate environment you can get this information from your network administrator. If you are on a home network you'll have an internal ip address range and your router typically does ip assignment, but you'll take that over here. This also means you need to keep track of your IP assignments. I would suggest keeping an excel table and filling it out and so you know what you have and haven't assigned. Your router will assign around what you have set, so just dodge the lower ip addresses and you should be fine. You can also use some auto discovery tools if you want, those can feel daunting if you aren't used to them, so if you are new, just a spreadsheet is fine for small networks. typically for a home network your ip address will be 192.168.xxx.xxx/24 your subnet mask 255.255.255.0 your default gateway 192.168.xxx.1 and your DNS server we set up earlier but as always checking is best.</p>
+<p>This assumes you are on a home network. If you are in a corporate environment you can get this information from your network administrator. If you are on a home network you'll have an internal ip address range and your router typically does ip assignment, but you'll take that over here. This also means you need to keep track of your IP assignments. I would suggest keeping an excel table and filling it out and so you know what you have and haven't assigned. Your router will assign around what you have set, so just dodge the lower ip addresses and you should be fine. You can also use some auto discovery tools if you want, those can feel daunting if you aren't used to them, so if you are new, just a spreadsheet is fine for small networks. typically for a home network your ip address will be <a href="http://192.168.xxx.xxx/24">192.168.xxx.xxx/24</a> your subnet mask 255.255.255.0 your default gateway 192.168.xxx.1 and your DNS server we set up earlier but as always checking is best.</p>
 <ul>
 <li>
 <p><strong>Windows:</strong></p>
@@ -415,7 +415,7 @@ w32tm <span class="token operator">/</span>query <span class="token operator">/<
 <p>Next we have the variables you can change if you would like to call them something other than what is outlined.</p>
 <p>- Node(n) (if you are creating more than one node you have to adjust this or at the least the number for each node you create)
 - NIC(n)
-- ip address (xxx.xxx.xxx.xxx)</p>
+- ip address (<a href="http://xxx.xxx.xxx.xxx">xxx.xxx.xxx.xxx</a>)</p>
 <h2>On The Host node</h2>
 <p>Open Hyper-V manager</p>
 <p>To enable Hyper-V and install the Hyper-V Manager, go to Control Panel &gt; Programs &gt; Programs and Features, click &quot;Turn Windows features on or off,&quot; select &quot;Hyper-V,&quot; and then click &quot;OK&quot;.</p>
@@ -641,7 +641,7 @@ you'll be asked for an admin password. <strong>Make sure that the password meets
 <li>
 <p>Sign in to the Azure Portal:</p>
 <ul>
-<li>Go to the Azure portal: https://portal.azure.com/</li>
+<li>Go to the Azure portal: <a href="https://portal.azure.com/">https://portal.azure.com/</a></li>
 </ul>
 </li>
 <li>
@@ -822,7 +822,7 @@ w32tm <span class="token operator">/</span>query <span class="token operator">/<
 </code></pre>
 <p>Once you have that you need to set the IP address assignment.</p>
 <p>If you have been following along, you need to set it for your whole IP address range. We figured this out at the very beginning of the guide.</p>
-<p>So if your IP address is 192.168.95.201 you would add 192.168.95.1/24 as your space then indicate the pool you want the cluster to have so like 192.168.95.210 to 192.168.95.230 for example. in this case your default gateway would be 192.168.95.1 and your DNS server would be what you set earlier 192.168.95.xxx you can also set a VLAN ID here if you want, but it isn't necessarily required.</p>
+<p>So if your IP address is 192.168.95.201 you would add 192.168.95.1/24 as your space then indicate the pool you want the cluster to have so like 192.168.95.210 to 192.168.95.230 for example. in this case your default gateway would be 192.168.95.1 and your DNS server would be what you set earlier <a href="http://192.168.95.xxx">192.168.95.xxx</a> you can also set a VLAN ID here if you want, but it isn't necessarily required.</p>
 <p>Now that we have that done you can begin to install VMs on your cluster. But first we want to walk through a VM to set up WAC on to manage it and give you a starting idea for how to do more.</p>
 <h2>Setting up a Windows Server VM on Azure Local</h2>
 <p>First you want to go to your resource group and click into your cluster &gt; resources &gt; VM images &gt; add VM image from that menu you can add an iso if you have one or download one from the marketplace. If you get one from the marketplace just make sure it isn't core, you want a GUI.</p>
