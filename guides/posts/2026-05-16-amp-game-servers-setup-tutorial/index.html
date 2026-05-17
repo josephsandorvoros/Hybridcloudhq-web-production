@@ -60,11 +60,9 @@
 <h2>What is this?</h2>
 <p>Below is the outline and steps the LLM and I cam up with to ensure the games I wanted to run would work. You would of course modify this for whatever games you want to run, but the general idea is a good solid guide with all the right steps in place to show a clear picture of how to do this. When set up correctly you have security, multiple layers of segregation and isolation. A single management panel and TLS security for access to that. And a game or game cluster to share with your friends and family.</p>
 <h2>📋 HybridCloudHQ — Game Server Master Reference</h2>
-<blockquote>
-<p>[!abstract] Cluster Summary
-<strong>4-node Proxmox VE hyper-converged cluster</strong> · Ceph · AMP + Docker game hosting · Pangolin/OCI tunnel · NGINX + TLS
+<div class="callout callout-abstract"><div class="callout-title"><span class="callout-icon">📋</span>Cluster Summary</div><div class="callout-body"><p><strong>4-node Proxmox VE hyper-converged cluster</strong> · Ceph · AMP + Docker game hosting · Pangolin/OCI tunnel · NGINX + TLS
 Ceph raw: <strong>3.88 TiB</strong> · Usable (rep-3): <strong>~1.13 TiB</strong> · Utilization target: <strong>≤ 50% per node</strong></p>
-</blockquote>
+</div></div>
 <hr>
 <h2>1 — Cluster Hardware</h2>
 <table>
@@ -264,8 +262,7 @@ Ceph raw: <strong>3.88 TiB</strong> · Usable (rep-3): <strong>~1.13 TiB</strong
 </tr>
 </tbody>
 </table>
-<blockquote>
-<p>[!success] Node Resource Summary</p>
+<div class="callout callout-success"><div class="callout-title"><span class="callout-icon">✅</span>Node Resource Summary</div><div class="callout-body">
 <table>
 <thead>
 <tr>
@@ -307,17 +304,13 @@ Ceph raw: <strong>3.88 TiB</strong> · Usable (rep-3): <strong>~1.13 TiB</strong
 </tr>
 </tbody>
 </table>
-</blockquote>
+</div></div>
 <hr>
 <h2>4 — Master Port Reference</h2>
-<blockquote>
-<p>[!info] AMP SFTP — LAN/VPN Only, Never Internet Exposed
-AMP assigns a unique SFTP port per game instance for admin file management (mods, configs, world saves). <strong>Players never use SFTP — do not add these ports to OCI, iptables, Traefik, or Pangolin.</strong> Access SFTP via your local LAN or VPN when remote. Each instance on amp-medium gets its own port so they don't collide on the same VM.</p>
-</blockquote>
-<blockquote>
-<p>[!warning] This Table Is the Single Source of Truth
-OCI Security List, iptables, <code>traefik_config.yml</code>, <code>docker-compose.yml</code>, Pangolin UI, and AMP instance config must all match the <strong>Internet</strong> ports in this table exactly.</p>
-</blockquote>
+<div class="callout callout-info"><div class="callout-title"><span class="callout-icon">ℹ️</span>AMP SFTP — LAN/VPN Only, Never Internet Exposed</div><div class="callout-body"><p>AMP assigns a unique SFTP port per game instance for admin file management (mods, configs, world saves). <strong>Players never use SFTP — do not add these ports to OCI, iptables, Traefik, or Pangolin.</strong> Access SFTP via your local LAN or VPN when remote. Each instance on amp-medium gets its own port so they don't collide on the same VM.</p>
+</div></div>
+<div class="callout callout-warning"><div class="callout-title"><span class="callout-icon">⚠️</span>This Table Is the Single Source of Truth</div><div class="callout-body"><p>OCI Security List, iptables, <code>traefik_config.yml</code>, <code>docker-compose.yml</code>, Pangolin UI, and AMP instance config must all match the <strong>Internet</strong> ports in this table exactly.</p>
+</div></div>
 <h3>4.1 — Game Ports (Internet Exposed via Pangolin)</h3>
 <table>
 <thead>
@@ -549,35 +542,23 @@ OCI Security List, iptables, <code>traefik_config.yml</code>, <code>docker-compo
 </tr>
 </tbody>
 </table>
-<blockquote>
-<p>[!danger] Conan Exiles — TCP+UDP 7777 Cannot Be Remapped. Ever.
-Conan Exiles uses UE4 networking which hardwires the advertised port to the bound port. BattlEye validates port consistency on <strong>both TCP and UDP 7777</strong> during the authentication handshake. A remap was attempted and confirmed broken. TCP 7777, UDP 7777, UDP 7778, and UDP 27015 must pass end-to-end with zero translation through iptables, Traefik, Pangolin, and AMP. Do not revisit this.</p>
-</blockquote>
-<blockquote>
-<p>[!warning] Return to Moria — Default 7777 Fixed by Internal Remap
-Moria defaults to UDP 7777, conflicting with Conan at the Pangolin layer. Moria has no BattlEye — safe to remap. Fix inside AMP → Moria01 → Configuration:</p>
+<div class="callout callout-danger"><div class="callout-title"><span class="callout-icon">🔴</span>Conan Exiles — TCP+UDP 7777 Cannot Be Remapped. Ever.</div><div class="callout-body"><p>Conan Exiles uses UE4 networking which hardwires the advertised port to the bound port. BattlEye validates port consistency on <strong>both TCP and UDP 7777</strong> during the authentication handshake. A remap was attempted and confirmed broken. TCP 7777, UDP 7777, UDP 7778, and UDP 27015 must pass end-to-end with zero translation through iptables, Traefik, Pangolin, and AMP. Do not revisit this.</p>
+</div></div>
+<div class="callout callout-warning"><div class="callout-title"><span class="callout-icon">⚠️</span>Return to Moria — Default 7777 Fixed by Internal Remap</div><div class="callout-body"><p>Moria defaults to UDP 7777, conflicting with Conan at the Pangolin layer. Moria has no BattlEye — safe to remap. Fix inside AMP → Moria01 → Configuration:</p>
 <ul>
 <li><code>ListenPort = 7780</code></li>
 <li><code>AdvertisePort = 7780</code></li>
 </ul>
 <p>Pangolin exposes 7780 → 7780 with no translation. Restart instance after saving.</p>
-</blockquote>
-<blockquote>
-<p>[!warning] RuneScape: Dragonwilds — Default 7777 Fixed by Launch Flag Follow a pattern. 7777, 7778, 7779, etc...
-Dragonwilds defaults to UDP 7777 — no BattlEye, safe to remap. Fix inside AMP → Dragonwilds01 → GenericModule → Launch Parameters: add <code>-port=7779</code>. Pangolin exposes 7779 → 7779. Restart instance after saving.</p>
-</blockquote>
-<blockquote>
-<p>[!tip] Enshrouded — Verify Additional Ports if Needed
-AMP confirms TCP+UDP 15637. If players report connection issues, also test opening 15636 (game) and 15638 (stream) — add to OCI, iptables, and Pangolin if required.</p>
-</blockquote>
-<blockquote>
-<p>[!tip] TCP and UDP 7777 Are Different Sockets
-Conan requires both. Traefik treats <code>tcp-7777</code> and <code>udp-7777</code> as completely independent entryPoints — both must be defined in <code>traefik_config.yml</code> and mapped in <code>docker-compose.yml</code>.</p>
-</blockquote>
-<blockquote>
-<p>[!info] Pangolin — One Backend Per External Port + Protocol
-Traefik binds one OS socket per entryPoint. A second Pangolin target on the same port+protocol crashes Traefik on next restart. All game ports in this cluster are unique per protocol — do not reuse them.</p>
-</blockquote>
+</div></div>
+<div class="callout callout-warning"><div class="callout-title"><span class="callout-icon">⚠️</span>RuneScape: Dragonwilds — Default 7777 Fixed by Launch Flag Follow a pattern. 7777, 7778, 7779, etc...</div><div class="callout-body"><p>Dragonwilds defaults to UDP 7777 — no BattlEye, safe to remap. Fix inside AMP → Dragonwilds01 → GenericModule → Launch Parameters: add <code>-port=7779</code>. Pangolin exposes 7779 → 7779. Restart instance after saving.</p>
+</div></div>
+<div class="callout callout-tip"><div class="callout-title"><span class="callout-icon">💡</span>Enshrouded — Verify Additional Ports if Needed</div><div class="callout-body"><p>AMP confirms TCP+UDP 15637. If players report connection issues, also test opening 15636 (game) and 15638 (stream) — add to OCI, iptables, and Pangolin if required.</p>
+</div></div>
+<div class="callout callout-tip"><div class="callout-title"><span class="callout-icon">💡</span>TCP and UDP 7777 Are Different Sockets</div><div class="callout-body"><p>Conan requires both. Traefik treats <code>tcp-7777</code> and <code>udp-7777</code> as completely independent entryPoints — both must be defined in <code>traefik_config.yml</code> and mapped in <code>docker-compose.yml</code>.</p>
+</div></div>
+<div class="callout callout-info"><div class="callout-title"><span class="callout-icon">ℹ️</span>Pangolin — One Backend Per External Port + Protocol</div><div class="callout-body"><p>Traefik binds one OS socket per entryPoint. A second Pangolin target on the same port+protocol crashes Traefik on next restart. All game ports in this cluster are unique per protocol — do not reuse them.</p>
+</div></div>
 <hr>
 <h2>5 — OCI VPS Setup</h2>
 <h3>5.1 Security List Ingress Rules</h3>
@@ -617,10 +598,8 @@ Source CIDR: <code>0.0.0.0/0</code> for all game ports. <strong>Do not add SFTP 
 <span class="token function">sudo</span> iptables <span class="token parameter variable">-L</span> INPUT <span class="token parameter variable">-n</span> <span class="token parameter variable">-v</span> --line-numbers</code></pre>
 <hr>
 <h2>6 — Pangolin Setup</h2>
-<blockquote>
-<p>[!tip] NGINX + TLS Is Already In Place
-HTTP resources (AMP ADS, Portainer, Forgejo, Stirling PDF) are handled by your existing NGINX reverse proxy. Only Raw TCP/UDP game server ports need Pangolin entryPoints. SFTP and RCON are never added here.</p>
-</blockquote>
+<div class="callout callout-tip"><div class="callout-title"><span class="callout-icon">💡</span>NGINX + TLS Is Already In Place</div><div class="callout-body"><p>HTTP resources (AMP ADS, Portainer, Forgejo, Stirling PDF) are handled by your existing NGINX reverse proxy. Only Raw TCP/UDP game server ports need Pangolin entryPoints. SFTP and RCON are never added here.</p>
+</div></div>
 <h3>6.1 <code>traefik_config.yml</code> — Add Under <code>entryPoints:</code></h3>
 <p><strong>File:</strong> <code>/opt/pangolin/config/traefik/traefik_config.yml</code></p>
 <pre class="language-yaml"><code class="language-yaml"><span class="token key atrule">entryPoints</span><span class="token punctuation">:</span>
@@ -849,10 +828,8 @@ ss <span class="token parameter variable">-ltnp</span> <span class="token operat
 </table>
 <hr>
 <h2>7 — AMP Installation &amp; Configuration</h2>
-<blockquote>
-<p>[!info] AMP Architecture
-AMP is installed <strong>bare metal on the VM OS</strong>. During install, answer YES to Docker isolation. AMP then manages each game server as a Docker container internally — handling Wine, SteamCMD, and dependencies per-container automatically.</p>
-</blockquote>
+<div class="callout callout-info"><div class="callout-title"><span class="callout-icon">ℹ️</span>AMP Architecture</div><div class="callout-body"><p>AMP is installed <strong>bare metal on the VM OS</strong>. During install, answer YES to Docker isolation. AMP then manages each game server as a Docker container internally — handling Wine, SteamCMD, and dependencies per-container automatically.</p>
+</div></div>
 <h3>7.1 AMP Install Command (all AMP VMs)</h3>
 <pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">su</span>
 <span class="token function">bash</span> <span class="token operator">&lt;</span><span class="token punctuation">(</span><span class="token function">wget</span> -qO- getamp.sh<span class="token punctuation">)</span>
@@ -968,14 +945,10 @@ AMP is installed <strong>bare metal on the VM OS</strong>. During install, answe
 </tr>
 </tbody>
 </table>
-<blockquote>
-<p>[!note] amp-medium Hosts Three Game Servers
-Valheim01, VRising01, and Moria01 all run as separate Docker containers inside VMID 105. AMP assigns each its own SFTP port (2224, 2225, 2226) so they don't collide. Manage all three through ADS01.</p>
-</blockquote>
-<blockquote>
-<p>[!note] amp-node4 Is a Hybrid VM
-VMID 106 runs AMP ADS <strong>and</strong> hosts Minecraft and Dragonwilds via that same ADS instance. No network hop needed — ADS and its instances communicate internally on the same VM.</p>
-</blockquote>
+<div class="callout callout-note"><div class="callout-title"><span class="callout-icon">📝</span>amp-medium Hosts Three Game Servers</div><div class="callout-body"><p>Valheim01, VRising01, and Moria01 all run as separate Docker containers inside VMID 105. AMP assigns each its own SFTP port (2224, 2225, 2226) so they don't collide. Manage all three through ADS01.</p>
+</div></div>
+<div class="callout callout-note"><div class="callout-title"><span class="callout-icon">📝</span>amp-node4 Is a Hybrid VM</div><div class="callout-body"><p>VMID 106 runs AMP ADS <strong>and</strong> hosts Minecraft and Dragonwilds via that same ADS instance. No network hop needed — ADS and its instances communicate internally on the same VM.</p>
+</div></div>
 <h3>7.3 Critical AMP Port Configurations</h3>
 <h4>Return to Moria — Must Remap From Default 7777</h4>
 <p>AMP → Moria01 → <strong>Configuration → Network</strong>:</p>
@@ -1005,13 +978,11 @@ AfterDisconnectionRetryTime=600</code></pre>
 </code></pre>
 <hr>
 <h2>8 — Demo &amp; Conditional VMs (PVE2)</h2>
-<blockquote>
-<p>[!danger] PVE2 One-at-a-Time Rule
-VMIDs 107, 300, and 301 all live on PVE2 alongside amp-enshrouded (104).
+<div class="callout callout-danger"><div class="callout-title"><span class="callout-icon">🔴</span>PVE2 One-at-a-Time Rule</div><div class="callout-body"><p>VMIDs 107, 300, and 301 all live on PVE2 alongside amp-enshrouded (104).
 amp-enshrouded balloon min = 6 GB · host reserve = 6 GB · free at idle = <strong>~52 GB</strong>
 Any two ephemeral/conditional VMs together consume 48–64 GB — <strong>exceeds node capacity</strong>.
 <strong>Run only ONE of 107, 300, or 301 at any time.</strong></p>
-</blockquote>
+</div></div>
 <h3>VMID 300 — openshift-sno (Ephemeral)</h3>
 <pre class="language-bash"><code class="language-bash">qm start <span class="token number">300</span>    <span class="token comment"># verify 107 and 301 are stopped first</span>
 qm <span class="token function">shutdown</span> <span class="token number">300</span></code></pre>
@@ -1057,8 +1028,7 @@ qm <span class="token function">shutdown</span> <span class="token number">301</
 </tr>
 </tbody>
 </table>
-<blockquote>
-<p>[!danger] Dune: Awakening — Token Required Before First Start</p>
+<div class="callout callout-danger"><div class="callout-title"><span class="callout-icon">🔴</span>Dune: Awakening — Token Required Before First Start</div><div class="callout-body">
 <ol>
 <li>Own Dune: Awakening on Steam</li>
 <li>Install and <strong>run the PTC client at least once</strong></li>
@@ -1066,10 +1036,8 @@ qm <span class="token function">shutdown</span> <span class="token number">301</
 <li>AMP → Dune01 → <strong>Configuration → Dune Awakening → Identity → Self-Host Service Token</strong> → paste → save</li>
 <li>Do <strong>NOT</strong> touch &quot;FLS World Name&quot; unless Funcom has specifically issued you one</li>
 </ol>
-</blockquote>
-<blockquote>
-<p>[!warning] Dune: Awakening Known Issues (PTC — May 2026)
-Confirmed bugs — not setup errors:</p>
+</div></div>
+<div class="callout callout-warning"><div class="callout-title"><span class="callout-icon">⚠️</span>Dune: Awakening Known Issues (PTC — May 2026)</div><div class="callout-body"><p>Confirmed bugs — not setup errors:</p>
 <ul>
 <li><strong>Resource monitoring shows 0</strong> — server is running, ignore it</li>
 <li><strong>Player tracking broken</strong> — AMP cannot detect player joins/leaves</li>
@@ -1077,61 +1045,37 @@ Confirmed bugs — not setup errors:</p>
 <li><strong>Several minutes to appear in server browser</strong> after startup — wait patiently</li>
 <li><strong>PTC world data</strong> not guaranteed to persist after full release</li>
 </ul>
-</blockquote>
+</div></div>
 <pre class="language-bash"><code class="language-bash">qm start <span class="token number">107</span>    <span class="token comment"># verify 300 and 301 are stopped first</span>
 <span class="token comment"># Stop the instance in AMP first for graceful world save, then:</span>
 qm <span class="token function">shutdown</span> <span class="token number">107</span></code></pre>
 <hr>
 <h2>9 — Operational Gotchas &amp; Tips</h2>
-<blockquote>
-<p>[!danger] Conan Exiles — TCP AND UDP 7777. No Remap. Ever.
-TCP 7777, UDP 7777, UDP 7778, and UDP 27015 must be identical at OCI, iptables, Traefik, Pangolin, and AMP. BattlEye + UE4 hardwire port advertising across both protocols. Remap = broken auth = zero players. Confirmed by prior failed attempt.</p>
-</blockquote>
-<blockquote>
-<p>[!danger] PVE2 — Never Run Multiple Ephemeral/Conditional VMs Simultaneously
-107 + 300 = 56 GB · 107 + 301 = 56 GB · 300 + 301 = 64 GB. All exceed available headroom when amp-enshrouded is at its balloon minimum. Check PVE2 free RAM before starting any of 107, 300, 301.</p>
-</blockquote>
-<blockquote>
-<p>[!danger] Pangolin — One Port+Protocol = One Backend
-Traefik crashes on next restart if two resources share an external port+protocol. Change the internal port of the conflicting service first.</p>
-</blockquote>
-<blockquote>
-<p>[!warning] SFTP Ports — LAN/VPN Only, Always
-Never add SFTP ports (2224, 2225, 2226) to OCI Security List, iptables, Traefik, or Pangolin. Access via WireGuard/Tailscale when remote. Players do not need SFTP.</p>
-</blockquote>
-<blockquote>
-<p>[!warning] Moria Remap — If Instance Resets to Defaults
-Re-apply: AMP → Moria01 → Configuration → <code>ListenPort=7780</code>, <code>AdvertisePort=7780</code> → restart.</p>
-</blockquote>
-<blockquote>
-<p>[!warning] Dragonwilds Remap — If Instance Resets to Defaults
-Re-apply: AMP → Dragonwilds01 → GenericModule → Launch Parameters → <code>-port=7779</code> → restart.</p>
-</blockquote>
-<blockquote>
-<p>[!warning] Enshrouded — Confirm Port Coverage if Players Can't Connect
-AMP confirms TCP+UDP 15637. If players have issues, also test 15636 (game) and 15638 (stream) — add to OCI, iptables, and Pangolin if needed.</p>
-</blockquote>
-<blockquote>
-<p>[!warning] Dune: Awakening — Token Is Per-Instance
-Each separate Dune server instance needs its own unique self-host token from <code>https://account-pts.duneawakening.com/</code>.</p>
-</blockquote>
-<blockquote>
-<p>[!tip] cpu: host on Every VM — Always
-Passes AVX2, AES-NI, SHA, and vmx/svm. AVX2 is specifically required by Dune: Awakening. Never use <code>kvm64</code>.</p>
-</blockquote>
-<blockquote>
-<p>[!tip] Balloon Min Is Intentionally Low
-Game containers idle at 2–6 GB. The balloon driver reclaims unused RAM for live migrations. Raise balloon min only if swap is observed after 72 hours of real load:</p>
+<div class="callout callout-danger"><div class="callout-title"><span class="callout-icon">🔴</span>Conan Exiles — TCP AND UDP 7777. No Remap. Ever.</div><div class="callout-body"><p>TCP 7777, UDP 7777, UDP 7778, and UDP 27015 must be identical at OCI, iptables, Traefik, Pangolin, and AMP. BattlEye + UE4 hardwire port advertising across both protocols. Remap = broken auth = zero players. Confirmed by prior failed attempt.</p>
+</div></div>
+<div class="callout callout-danger"><div class="callout-title"><span class="callout-icon">🔴</span>PVE2 — Never Run Multiple Ephemeral/Conditional VMs Simultaneously</div><div class="callout-body"><p>107 + 300 = 56 GB · 107 + 301 = 56 GB · 300 + 301 = 64 GB. All exceed available headroom when amp-enshrouded is at its balloon minimum. Check PVE2 free RAM before starting any of 107, 300, 301.</p>
+</div></div>
+<div class="callout callout-danger"><div class="callout-title"><span class="callout-icon">🔴</span>Pangolin — One Port+Protocol = One Backend</div><div class="callout-body"><p>Traefik crashes on next restart if two resources share an external port+protocol. Change the internal port of the conflicting service first.</p>
+</div></div>
+<div class="callout callout-warning"><div class="callout-title"><span class="callout-icon">⚠️</span>SFTP Ports — LAN/VPN Only, Always</div><div class="callout-body"><p>Never add SFTP ports (2224, 2225, 2226) to OCI Security List, iptables, Traefik, or Pangolin. Access via WireGuard/Tailscale when remote. Players do not need SFTP.</p>
+</div></div>
+<div class="callout callout-warning"><div class="callout-title"><span class="callout-icon">⚠️</span>Moria Remap — If Instance Resets to Defaults</div><div class="callout-body"><p>Re-apply: AMP → Moria01 → Configuration → <code>ListenPort=7780</code>, <code>AdvertisePort=7780</code> → restart.</p>
+</div></div>
+<div class="callout callout-warning"><div class="callout-title"><span class="callout-icon">⚠️</span>Dragonwilds Remap — If Instance Resets to Defaults</div><div class="callout-body"><p>Re-apply: AMP → Dragonwilds01 → GenericModule → Launch Parameters → <code>-port=7779</code> → restart.</p>
+</div></div>
+<div class="callout callout-warning"><div class="callout-title"><span class="callout-icon">⚠️</span>Enshrouded — Confirm Port Coverage if Players Can't Connect</div><div class="callout-body"><p>AMP confirms TCP+UDP 15637. If players have issues, also test 15636 (game) and 15638 (stream) — add to OCI, iptables, and Pangolin if needed.</p>
+</div></div>
+<div class="callout callout-warning"><div class="callout-title"><span class="callout-icon">⚠️</span>Dune: Awakening — Token Is Per-Instance</div><div class="callout-body"><p>Each separate Dune server instance needs its own unique self-host token from <code>https://account-pts.duneawakening.com/</code>.</p>
+</div></div>
+<div class="callout callout-tip"><div class="callout-title"><span class="callout-icon">💡</span>cpu: host on Every VM — Always</div><div class="callout-body"><p>Passes AVX2, AES-NI, SHA, and vmx/svm. AVX2 is specifically required by Dune: Awakening. Never use <code>kvm64</code>.</p>
+</div></div>
+<div class="callout callout-tip"><div class="callout-title"><span class="callout-icon">💡</span>Balloon Min Is Intentionally Low</div><div class="callout-body"><p>Game containers idle at 2–6 GB. The balloon driver reclaims unused RAM for live migrations. Raise balloon min only if swap is observed after 72 hours of real load:</p>
 <pre class="language-bash"><code class="language-bash"><span class="token function">ssh</span> <span class="token operator">&lt;</span>vm-ip<span class="token operator">></span> <span class="token string">'vmstat -s | grep swap'</span></code></pre>
-</blockquote>
-<blockquote>
-<p>[!tip] AMP Docker Isolation — Why It Was Chosen
-Docker isolation (YES during install) means AMP handles Wine, SteamCMD, and per-game dependencies automatically. Return to Moria's Wine layer and Dune's dependencies are both managed this way. Changing it requires a full AMP reinstall.</p>
-</blockquote>
-<blockquote>
-<p>[!tip] Crowdsec on OCI VPS
-High UDP packet rates from game clients can trigger false-positive bans. Whitelist game server IPs and port ranges in Crowdsec rules or add custom scenario exclusions.</p>
-</blockquote>
+</div></div>
+<div class="callout callout-tip"><div class="callout-title"><span class="callout-icon">💡</span>AMP Docker Isolation — Why It Was Chosen</div><div class="callout-body"><p>Docker isolation (YES during install) means AMP handles Wine, SteamCMD, and per-game dependencies automatically. Return to Moria's Wine layer and Dune's dependencies are both managed this way. Changing it requires a full AMP reinstall.</p>
+</div></div>
+<div class="callout callout-tip"><div class="callout-title"><span class="callout-icon">💡</span>Crowdsec on OCI VPS</div><div class="callout-body"><p>High UDP packet rates from game clients can trigger false-positive bans. Whitelist game server IPs and port ranges in Crowdsec rules or add custom scenario exclusions.</p>
+</div></div>
 <hr>
 <h2>10 — Quick Reference Commands</h2>
 <h3>Verify Game Ports (OCI VPS)</h3>
