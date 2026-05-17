@@ -67,48 +67,82 @@ Ceph raw: <strong>3.88 TiB</strong> · Usable (rep-3): <strong>~1.13 TiB</strong
 </blockquote>
 <hr>
 <h2>1 — Cluster Hardware</h2>
-<pre><code>| Property                       | Value                                            |
-| ------------------------------ | ------------------------------------------------ |
-| Nodes                          | 4× (PVE1–PVE4)                                   |
-| CPU (per node)                 | AMD Ryzen 5 — 6C/12T, up to 4.0 GHz              |
-| Usable host threads (per node) | 10 (2 reserved for Proxmox)                      |
-| RAM (per node)                 | 64 GB DDR4                                       |
-| Ceph raw total                 | **3.88 TiB** (4 OSDs, one per node)              |
-| Ceph usable (rep-2)            | **~1.13 TiB**                                    |
-| Proxmox version                |                                                  |
-| External tunnel                | OCI VPS → Pangolin + Traefik + Gerbil + Crowdsec |
-| TLS                            | NGINX reverse proxy — already configured         |
-</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Property</th>
+<th style="text-align:left">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Nodes</td>
+<td style="text-align:left">4× (PVE1–PVE4)</td>
+</tr>
+<tr>
+<td style="text-align:left">CPU (per node)</td>
+<td style="text-align:left">AMD Ryzen 5 — 6C/12T, up to 4.0 GHz</td>
+</tr>
+<tr>
+<td style="text-align:left">Usable host threads (per node)</td>
+<td style="text-align:left">10 (2 reserved for Proxmox)</td>
+</tr>
+<tr>
+<td style="text-align:left">RAM (per node)</td>
+<td style="text-align:left">64 GB DDR4</td>
+</tr>
+<tr>
+<td style="text-align:left">Ceph raw total</td>
+<td style="text-align:left"><strong>3.88 TiB</strong> (4 OSDs, one per node)</td>
+</tr>
+<tr>
+<td style="text-align:left">Ceph usable (rep-2)</td>
+<td style="text-align:left"><strong>~1.13 TiB</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">Proxmox version</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">External tunnel</td>
+<td style="text-align:left">OCI VPS → Pangolin + Traefik + Gerbil + Crowdsec</td>
+</tr>
+<tr>
+<td style="text-align:left">TLS</td>
+<td style="text-align:left">NGINX reverse proxy — already configured</td>
+</tr>
+</tbody>
+</table>
 <hr>
 <h2>2 — Node Role Map</h2>
 <table>
 <thead>
 <tr>
-<th>Node</th>
-<th>Primary Role</th>
-<th>VMs Hosted</th>
+<th style="text-align:left">Node</th>
+<th style="text-align:left">Primary Role</th>
+<th style="text-align:left">VMs Hosted</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>PVE1</td>
-<td>Heavy game (isolated)</td>
-<td>amp-conan (102)</td>
+<td style="text-align:left">PVE1</td>
+<td style="text-align:left">Heavy game (isolated)</td>
+<td style="text-align:left">amp-conan (102)</td>
 </tr>
 <tr>
-<td>PVE2</td>
-<td>Heavy game + demo/conditional</td>
-<td>amp-enshrouded (104) · dune-awakening (107) · openshift-sno (300) · azure-local-demo (301)</td>
+<td style="text-align:left">PVE2</td>
+<td style="text-align:left">Heavy game + demo/conditional</td>
+<td style="text-align:left">amp-enshrouded (104) · dune-awakening (107) · openshift-sno (300) · azure-local-demo (301)</td>
 </tr>
 <tr>
-<td>PVE3</td>
-<td>Medium games + services</td>
-<td>amp-medium (105) · containers-a (100)</td>
+<td style="text-align:left">PVE3</td>
+<td style="text-align:left">Medium games + services</td>
+<td style="text-align:left">amp-medium (105) · containers-a (100)</td>
 </tr>
 <tr>
-<td>PVE4</td>
-<td>Light games + ADS + services + <strong>primary failover</strong></td>
-<td>amp-node4 (106) · containers-b (103)</td>
+<td style="text-align:left">PVE4</td>
+<td style="text-align:left">Light games + ADS + services + <strong>primary failover</strong></td>
+<td style="text-align:left">amp-node4 (106) · containers-b (103)</td>
 </tr>
 </tbody>
 </table>
@@ -117,116 +151,116 @@ Ceph raw: <strong>3.88 TiB</strong> · Usable (rep-3): <strong>~1.13 TiB</strong
 <table>
 <thead>
 <tr>
-<th>VMID</th>
-<th>VM Name</th>
-<th>Node</th>
-<th>vCPUs</th>
-<th>RAM Max</th>
-<th>Balloon Min</th>
-<th>Disk</th>
-<th><code>onboot</code></th>
-<th>Purpose</th>
+<th style="text-align:left">VMID</th>
+<th style="text-align:left">VM Name</th>
+<th style="text-align:left">Node</th>
+<th style="text-align:left">vCPUs</th>
+<th style="text-align:left">RAM Max</th>
+<th style="text-align:left">Balloon Min</th>
+<th style="text-align:left">Disk</th>
+<th style="text-align:left"><code>onboot</code></th>
+<th style="text-align:left">Purpose</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>100</td>
-<td>containers-a</td>
-<td>PVE3</td>
-<td>3</td>
-<td>8 GB</td>
-<td>3 GB</td>
-<td>60 GB</td>
-<td>1</td>
-<td>Container services A</td>
+<td style="text-align:left">100</td>
+<td style="text-align:left">containers-a</td>
+<td style="text-align:left">PVE3</td>
+<td style="text-align:left">3</td>
+<td style="text-align:left">8 GB</td>
+<td style="text-align:left">3 GB</td>
+<td style="text-align:left">60 GB</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">Container services A</td>
 </tr>
 <tr>
-<td>102</td>
-<td>amp-conan</td>
-<td>PVE1</td>
-<td>6</td>
-<td>28 GB</td>
-<td>6 GB</td>
-<td>100 GB</td>
-<td>1</td>
-<td>AMP · Docker: Conan Exiles Enhanced</td>
+<td style="text-align:left">102</td>
+<td style="text-align:left">amp-conan</td>
+<td style="text-align:left">PVE1</td>
+<td style="text-align:left">6</td>
+<td style="text-align:left">28 GB</td>
+<td style="text-align:left">6 GB</td>
+<td style="text-align:left">100 GB</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">AMP · Docker: Conan Exiles Enhanced</td>
 </tr>
 <tr>
-<td>103</td>
-<td>containers-b</td>
-<td>PVE4</td>
-<td>2</td>
-<td>8 GB</td>
-<td>3 GB</td>
-<td>60 GB</td>
-<td>1</td>
-<td>Container services B</td>
+<td style="text-align:left">103</td>
+<td style="text-align:left">containers-b</td>
+<td style="text-align:left">PVE4</td>
+<td style="text-align:left">2</td>
+<td style="text-align:left">8 GB</td>
+<td style="text-align:left">3 GB</td>
+<td style="text-align:left">60 GB</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">Container services B</td>
 </tr>
 <tr>
-<td>104</td>
-<td>amp-enshrouded</td>
-<td>PVE2</td>
-<td>6</td>
-<td>26 GB</td>
-<td>6 GB</td>
-<td>80 GB</td>
-<td>1</td>
-<td>AMP · Docker: Enshrouded</td>
+<td style="text-align:left">104</td>
+<td style="text-align:left">amp-enshrouded</td>
+<td style="text-align:left">PVE2</td>
+<td style="text-align:left">6</td>
+<td style="text-align:left">26 GB</td>
+<td style="text-align:left">6 GB</td>
+<td style="text-align:left">80 GB</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">AMP · Docker: Enshrouded</td>
 </tr>
 <tr>
-<td>105</td>
-<td>amp-medium</td>
-<td>PVE3</td>
-<td>5</td>
-<td>20 GB</td>
-<td>6 GB</td>
-<td>80 GB</td>
-<td>1</td>
-<td>AMP · Docker: Valheim · V Rising · Return to Moria</td>
+<td style="text-align:left">105</td>
+<td style="text-align:left">amp-medium</td>
+<td style="text-align:left">PVE3</td>
+<td style="text-align:left">5</td>
+<td style="text-align:left">20 GB</td>
+<td style="text-align:left">6 GB</td>
+<td style="text-align:left">80 GB</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">AMP · Docker: Valheim · V Rising · Return to Moria</td>
 </tr>
 <tr>
-<td>106</td>
-<td>amp-node4</td>
-<td>PVE4</td>
-<td>6</td>
-<td>16 GB</td>
-<td>6 GB</td>
-<td>100 GB</td>
-<td>1</td>
-<td>AMP ADS (hybrid) · Docker: Minecraft · Dragonwilds</td>
+<td style="text-align:left">106</td>
+<td style="text-align:left">amp-node4</td>
+<td style="text-align:left">PVE4</td>
+<td style="text-align:left">6</td>
+<td style="text-align:left">16 GB</td>
+<td style="text-align:left">6 GB</td>
+<td style="text-align:left">100 GB</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">AMP ADS (hybrid) · Docker: Minecraft · Dragonwilds</td>
 </tr>
 <tr>
-<td>107</td>
-<td>dune-awakening</td>
-<td>PVE2</td>
-<td>8</td>
-<td>24 GB</td>
-<td>8 GB</td>
-<td>120 GB</td>
-<td><strong>0</strong></td>
-<td>AMP · Docker: Dune Awakening — <strong>CONDITIONAL</strong></td>
+<td style="text-align:left">107</td>
+<td style="text-align:left">dune-awakening</td>
+<td style="text-align:left">PVE2</td>
+<td style="text-align:left">8</td>
+<td style="text-align:left">24 GB</td>
+<td style="text-align:left">8 GB</td>
+<td style="text-align:left">120 GB</td>
+<td style="text-align:left"><strong>0</strong></td>
+<td style="text-align:left">AMP · Docker: Dune Awakening — <strong>CONDITIONAL</strong></td>
 </tr>
 <tr>
-<td>300</td>
-<td>openshift-sno</td>
-<td>PVE2</td>
-<td>8</td>
-<td>32 GB</td>
-<td>—</td>
-<td>120 GB thin</td>
-<td><strong>0</strong></td>
-<td>RHCOS SNO — <strong>EPHEMERAL</strong></td>
+<td style="text-align:left">300</td>
+<td style="text-align:left">openshift-sno</td>
+<td style="text-align:left">PVE2</td>
+<td style="text-align:left">8</td>
+<td style="text-align:left">32 GB</td>
+<td style="text-align:left">—</td>
+<td style="text-align:left">120 GB thin</td>
+<td style="text-align:left"><strong>0</strong></td>
+<td style="text-align:left">RHCOS SNO — <strong>EPHEMERAL</strong></td>
 </tr>
 <tr>
-<td>301</td>
-<td>azure-local-demo</td>
-<td>PVE2</td>
-<td>6</td>
-<td>32 GB</td>
-<td>—</td>
-<td>128 GB thin</td>
-<td><strong>0</strong></td>
-<td>Azure Local — <strong>EPHEMERAL</strong></td>
+<td style="text-align:left">301</td>
+<td style="text-align:left">azure-local-demo</td>
+<td style="text-align:left">PVE2</td>
+<td style="text-align:left">6</td>
+<td style="text-align:left">32 GB</td>
+<td style="text-align:left">—</td>
+<td style="text-align:left">128 GB thin</td>
+<td style="text-align:left"><strong>0</strong></td>
+<td style="text-align:left">Azure Local — <strong>EPHEMERAL</strong></td>
 </tr>
 </tbody>
 </table>
@@ -235,41 +269,41 @@ Ceph raw: <strong>3.88 TiB</strong> · Usable (rep-3): <strong>~1.13 TiB</strong
 <table>
 <thead>
 <tr>
-<th>Node</th>
-<th>vCPUs Allocated</th>
-<th>RAM Max</th>
-<th>RAM Balloon Min</th>
-<th>Failover Headroom</th>
+<th style="text-align:left">Node</th>
+<th style="text-align:left">vCPUs Allocated</th>
+<th style="text-align:left">RAM Max</th>
+<th style="text-align:left">RAM Balloon Min</th>
+<th style="text-align:left">Failover Headroom</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>PVE1</td>
-<td>6 / 10</td>
-<td>28 GB</td>
-<td>6 GB</td>
-<td>~36 GB free</td>
+<td style="text-align:left">PVE1</td>
+<td style="text-align:left">6 / 10</td>
+<td style="text-align:left">28 GB</td>
+<td style="text-align:left">6 GB</td>
+<td style="text-align:left">~36 GB free</td>
 </tr>
 <tr>
-<td>PVE2</td>
-<td>6 / 10 (base)</td>
-<td>26 GB</td>
-<td>6 GB</td>
-<td>~52 GB free at balloon min</td>
+<td style="text-align:left">PVE2</td>
+<td style="text-align:left">6 / 10 (base)</td>
+<td style="text-align:left">26 GB</td>
+<td style="text-align:left">6 GB</td>
+<td style="text-align:left">~52 GB free at balloon min</td>
 </tr>
 <tr>
-<td>PVE3</td>
-<td>8 / 10</td>
-<td>28 GB</td>
-<td>9 GB</td>
-<td>~36 GB free</td>
+<td style="text-align:left">PVE3</td>
+<td style="text-align:left">8 / 10</td>
+<td style="text-align:left">28 GB</td>
+<td style="text-align:left">9 GB</td>
+<td style="text-align:left">~36 GB free</td>
 </tr>
 <tr>
-<td>PVE4</td>
-<td>8 / 10</td>
-<td>24 GB</td>
-<td>9 GB</td>
-<td><strong>~40 GB free — primary failover target</strong></td>
+<td style="text-align:left">PVE4</td>
+<td style="text-align:left">8 / 10</td>
+<td style="text-align:left">24 GB</td>
+<td style="text-align:left">9 GB</td>
+<td style="text-align:left"><strong>~40 GB free — primary failover target</strong></td>
 </tr>
 </tbody>
 </table>
@@ -288,118 +322,118 @@ OCI Security List, iptables, <code>traefik_config.yml</code>, <code>docker-compo
 <table>
 <thead>
 <tr>
-<th>Service</th>
-<th>VM (VMID)</th>
-<th>Proto</th>
-<th>Port</th>
-<th>Notes</th>
+<th style="text-align:left">Service</th>
+<th style="text-align:left">VM (VMID)</th>
+<th style="text-align:left">Proto</th>
+<th style="text-align:left">Port</th>
+<th style="text-align:left">Notes</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Conan Exiles Game</td>
-<td>amp-conan (102)</td>
-<td>TCP</td>
-<td>7777</td>
-<td>Both TCP and UDP required</td>
+<td style="text-align:left">Conan Exiles Game</td>
+<td style="text-align:left">amp-conan (102)</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">7777</td>
+<td style="text-align:left">Both TCP and UDP required</td>
 </tr>
 <tr>
-<td>Conan Exiles Game</td>
-<td>amp-conan (102)</td>
-<td>UDP</td>
-<td>7777</td>
-<td>Must match end-to-end — NO remap ever</td>
+<td style="text-align:left">Conan Exiles Game</td>
+<td style="text-align:left">amp-conan (102)</td>
+<td style="text-align:left">UDP</td>
+<td style="text-align:left">7777</td>
+<td style="text-align:left">Must match end-to-end — NO remap ever</td>
 </tr>
 <tr>
-<td>Conan Pinger</td>
-<td>amp-conan (102)</td>
-<td>UDP</td>
-<td>7778</td>
-<td>Must match end-to-end</td>
+<td style="text-align:left">Conan Pinger</td>
+<td style="text-align:left">amp-conan (102)</td>
+<td style="text-align:left">UDP</td>
+<td style="text-align:left">7778</td>
+<td style="text-align:left">Must match end-to-end</td>
 </tr>
 <tr>
-<td>Conan Steam Query</td>
-<td>amp-conan (102)</td>
-<td>UDP</td>
-<td>27015</td>
-<td>Must match end-to-end</td>
+<td style="text-align:left">Conan Steam Query</td>
+<td style="text-align:left">amp-conan (102)</td>
+<td style="text-align:left">UDP</td>
+<td style="text-align:left">27015</td>
+<td style="text-align:left">Must match end-to-end</td>
 </tr>
 <tr>
-<td>Enshrouded Query</td>
-<td>amp-enshrouded (104)</td>
-<td>TCP</td>
-<td>15637</td>
-<td>AMP-confirmed port</td>
+<td style="text-align:left">Enshrouded Query</td>
+<td style="text-align:left">amp-enshrouded (104)</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">15637</td>
+<td style="text-align:left">AMP-confirmed port</td>
 </tr>
 <tr>
-<td>Enshrouded Query</td>
-<td>amp-enshrouded (104)</td>
-<td>UDP</td>
-<td>15637</td>
-<td>AMP-confirmed port</td>
+<td style="text-align:left">Enshrouded Query</td>
+<td style="text-align:left">amp-enshrouded (104)</td>
+<td style="text-align:left">UDP</td>
+<td style="text-align:left">15637</td>
+<td style="text-align:left">AMP-confirmed port</td>
 </tr>
 <tr>
-<td>Valheim Game</td>
-<td>amp-medium (105)</td>
-<td>UDP</td>
-<td>2456</td>
-<td></td>
+<td style="text-align:left">Valheim Game</td>
+<td style="text-align:left">amp-medium (105)</td>
+<td style="text-align:left">UDP</td>
+<td style="text-align:left">2456</td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td>Valheim Query</td>
-<td>amp-medium (105)</td>
-<td>UDP</td>
-<td>2457</td>
-<td></td>
+<td style="text-align:left">Valheim Query</td>
+<td style="text-align:left">amp-medium (105)</td>
+<td style="text-align:left">UDP</td>
+<td style="text-align:left">2457</td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td>V Rising Game</td>
-<td>amp-medium (105)</td>
-<td>UDP</td>
-<td>9876</td>
-<td></td>
+<td style="text-align:left">V Rising Game</td>
+<td style="text-align:left">amp-medium (105)</td>
+<td style="text-align:left">UDP</td>
+<td style="text-align:left">9876</td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td>V Rising Query</td>
-<td>amp-medium (105)</td>
-<td>UDP</td>
-<td>9877</td>
-<td></td>
+<td style="text-align:left">V Rising Query</td>
+<td style="text-align:left">amp-medium (105)</td>
+<td style="text-align:left">UDP</td>
+<td style="text-align:left">9877</td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td>Return to Moria Game</td>
-<td>amp-medium (105)</td>
-<td>UDP</td>
-<td><strong>7780</strong></td>
-<td>Remapped from default 7777 inside AMP</td>
+<td style="text-align:left">Return to Moria Game</td>
+<td style="text-align:left">amp-medium (105)</td>
+<td style="text-align:left">UDP</td>
+<td style="text-align:left"><strong>7780</strong></td>
+<td style="text-align:left">Remapped from default 7777 inside AMP</td>
 </tr>
 <tr>
-<td>Minecraft Java</td>
-<td>amp-node4 (106)</td>
-<td>TCP</td>
-<td>25565</td>
-<td></td>
+<td style="text-align:left">Minecraft Java</td>
+<td style="text-align:left">amp-node4 (106)</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">25565</td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td>Minecraft Java</td>
-<td>amp-node4 (106)</td>
-<td>UDP</td>
-<td>25565</td>
-<td></td>
+<td style="text-align:left">Minecraft Java</td>
+<td style="text-align:left">amp-node4 (106)</td>
+<td style="text-align:left">UDP</td>
+<td style="text-align:left">25565</td>
+<td style="text-align:left"></td>
 </tr>
 <tr>
-<td>RuneScape: Dragonwilds</td>
-<td>amp-node4 (106)</td>
-<td>UDP</td>
-<td><strong>7779</strong></td>
-<td>Remapped from default 7777 via AMP launch flag</td>
+<td style="text-align:left">RuneScape: Dragonwilds</td>
+<td style="text-align:left">amp-node4 (106)</td>
+<td style="text-align:left">UDP</td>
+<td style="text-align:left"><strong>7779</strong></td>
+<td style="text-align:left">Remapped from default 7777 via AMP launch flag</td>
 </tr>
 <tr>
-<td>Dune: Awakening</td>
-<td>dune-awakening (107)</td>
-<td>—</td>
-<td>—</td>
-<td>Server browser discovery only (PTC) — no Pangolin needed</td>
+<td style="text-align:left">Dune: Awakening</td>
+<td style="text-align:left">dune-awakening (107)</td>
+<td style="text-align:left">—</td>
+<td style="text-align:left">—</td>
+<td style="text-align:left">Server browser discovery only (PTC) — no Pangolin needed</td>
 </tr>
 </tbody>
 </table>
@@ -407,111 +441,111 @@ OCI Security List, iptables, <code>traefik_config.yml</code>, <code>docker-compo
 <table>
 <thead>
 <tr>
-<th>Service</th>
-<th>VM (VMID)</th>
-<th>Proto</th>
-<th>Port</th>
-<th>Notes</th>
+<th style="text-align:left">Service</th>
+<th style="text-align:left">VM (VMID)</th>
+<th style="text-align:left">Proto</th>
+<th style="text-align:left">Port</th>
+<th style="text-align:left">Notes</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Conan SFTP</td>
-<td>amp-conan (102)</td>
-<td>TCP</td>
-<td>2224</td>
-<td>Admin file access — LAN/VPN only</td>
+<td style="text-align:left">Conan SFTP</td>
+<td style="text-align:left">amp-conan (102)</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">2224</td>
+<td style="text-align:left">Admin file access — LAN/VPN only</td>
 </tr>
 <tr>
-<td>Conan RCON</td>
-<td>amp-conan (102)</td>
-<td>TCP</td>
-<td>25575</td>
-<td>LAN/VPN only</td>
+<td style="text-align:left">Conan RCON</td>
+<td style="text-align:left">amp-conan (102)</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">25575</td>
+<td style="text-align:left">LAN/VPN only</td>
 </tr>
 <tr>
-<td>Enshrouded SFTP</td>
-<td>amp-enshrouded (104)</td>
-<td>TCP</td>
-<td>2224</td>
-<td>Admin file access — LAN/VPN only</td>
+<td style="text-align:left">Enshrouded SFTP</td>
+<td style="text-align:left">amp-enshrouded (104)</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">2224</td>
+<td style="text-align:left">Admin file access — LAN/VPN only</td>
 </tr>
 <tr>
-<td>Enshrouded RCON</td>
-<td>amp-enshrouded (104)</td>
-<td>TCP</td>
-<td>25575</td>
-<td>LAN/VPN only</td>
+<td style="text-align:left">Enshrouded RCON</td>
+<td style="text-align:left">amp-enshrouded (104)</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">25575</td>
+<td style="text-align:left">LAN/VPN only</td>
 </tr>
 <tr>
-<td>Valheim SFTP</td>
-<td>amp-medium (105)</td>
-<td>TCP</td>
-<td>2224</td>
-<td>Per-instance port — LAN/VPN only</td>
+<td style="text-align:left">Valheim SFTP</td>
+<td style="text-align:left">amp-medium (105)</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">2224</td>
+<td style="text-align:left">Per-instance port — LAN/VPN only</td>
 </tr>
 <tr>
-<td>Valheim RCON</td>
-<td>amp-medium (105)</td>
-<td>TCP</td>
-<td>25575</td>
-<td>LAN/VPN only</td>
+<td style="text-align:left">Valheim RCON</td>
+<td style="text-align:left">amp-medium (105)</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">25575</td>
+<td style="text-align:left">LAN/VPN only</td>
 </tr>
 <tr>
-<td>V Rising SFTP</td>
-<td>amp-medium (105)</td>
-<td>TCP</td>
-<td>2225</td>
-<td>Per-instance port — LAN/VPN only</td>
+<td style="text-align:left">V Rising SFTP</td>
+<td style="text-align:left">amp-medium (105)</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">2225</td>
+<td style="text-align:left">Per-instance port — LAN/VPN only</td>
 </tr>
 <tr>
-<td>V Rising RCON</td>
-<td>amp-medium (105)</td>
-<td>TCP</td>
-<td>25575</td>
-<td>LAN/VPN only</td>
+<td style="text-align:left">V Rising RCON</td>
+<td style="text-align:left">amp-medium (105)</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">25575</td>
+<td style="text-align:left">LAN/VPN only</td>
 </tr>
 <tr>
-<td>Return to Moria SFTP</td>
-<td>amp-medium (105)</td>
-<td>TCP</td>
-<td>2226</td>
-<td>Per-instance port — LAN/VPN only</td>
+<td style="text-align:left">Return to Moria SFTP</td>
+<td style="text-align:left">amp-medium (105)</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">2226</td>
+<td style="text-align:left">Per-instance port — LAN/VPN only</td>
 </tr>
 <tr>
-<td>Moria RCON</td>
-<td>amp-medium (105)</td>
-<td>TCP</td>
-<td>25577</td>
-<td>LAN/VPN only</td>
+<td style="text-align:left">Moria RCON</td>
+<td style="text-align:left">amp-medium (105)</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">25577</td>
+<td style="text-align:left">LAN/VPN only</td>
 </tr>
 <tr>
-<td>Minecraft SFTP</td>
-<td>amp-node4 (106)</td>
-<td>TCP</td>
-<td>2224</td>
-<td>Admin file access — LAN/VPN only</td>
+<td style="text-align:left">Minecraft SFTP</td>
+<td style="text-align:left">amp-node4 (106)</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">2224</td>
+<td style="text-align:left">Admin file access — LAN/VPN only</td>
 </tr>
 <tr>
-<td>Minecraft RCON</td>
-<td>amp-node4 (106)</td>
-<td>TCP</td>
-<td>25575</td>
-<td>LAN/VPN only</td>
+<td style="text-align:left">Minecraft RCON</td>
+<td style="text-align:left">amp-node4 (106)</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">25575</td>
+<td style="text-align:left">LAN/VPN only</td>
 </tr>
 <tr>
-<td>Dragonwilds SFTP</td>
-<td>amp-node4 (106)</td>
-<td>TCP</td>
-<td>2225</td>
-<td>Admin file access — LAN/VPN only</td>
+<td style="text-align:left">Dragonwilds SFTP</td>
+<td style="text-align:left">amp-node4 (106)</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">2225</td>
+<td style="text-align:left">Admin file access — LAN/VPN only</td>
 </tr>
 <tr>
-<td>Dragonwilds RCON</td>
-<td>amp-node4 (106)</td>
-<td>TCP</td>
-<td>25578</td>
-<td>LAN/VPN only</td>
+<td style="text-align:left">Dragonwilds RCON</td>
+<td style="text-align:left">amp-node4 (106)</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">25578</td>
+<td style="text-align:left">LAN/VPN only</td>
 </tr>
 </tbody>
 </table>
@@ -690,126 +724,126 @@ ss <span class="token parameter variable">-ltnp</span> <span class="token operat
 <table>
 <thead>
 <tr>
-<th>Resource Name</th>
-<th>Protocol</th>
-<th>External Port</th>
-<th>Target Address</th>
-<th>Target Port</th>
-<th>VM</th>
+<th style="text-align:left">Resource Name</th>
+<th style="text-align:left">Protocol</th>
+<th style="text-align:left">External Port</th>
+<th style="text-align:left">Target Address</th>
+<th style="text-align:left">Target Port</th>
+<th style="text-align:left">VM</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>conan-game-tcp</td>
-<td>TCP</td>
-<td>7777</td>
-<td>amp-conan LAN IP</td>
-<td>7777</td>
-<td>102</td>
+<td style="text-align:left">conan-game-tcp</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">7777</td>
+<td style="text-align:left">amp-conan LAN IP</td>
+<td style="text-align:left">7777</td>
+<td style="text-align:left">102</td>
 </tr>
 <tr>
-<td>conan-game-udp</td>
-<td>UDP</td>
-<td>7777</td>
-<td>amp-conan LAN IP</td>
-<td>7777</td>
-<td>102</td>
+<td style="text-align:left">conan-game-udp</td>
+<td style="text-align:left">UDP</td>
+<td style="text-align:left">7777</td>
+<td style="text-align:left">amp-conan LAN IP</td>
+<td style="text-align:left">7777</td>
+<td style="text-align:left">102</td>
 </tr>
 <tr>
-<td>conan-pinger</td>
-<td>UDP</td>
-<td>7778</td>
-<td>amp-conan LAN IP</td>
-<td>7778</td>
-<td>102</td>
+<td style="text-align:left">conan-pinger</td>
+<td style="text-align:left">UDP</td>
+<td style="text-align:left">7778</td>
+<td style="text-align:left">amp-conan LAN IP</td>
+<td style="text-align:left">7778</td>
+<td style="text-align:left">102</td>
 </tr>
 <tr>
-<td>conan-query</td>
-<td>UDP</td>
-<td>27015</td>
-<td>amp-conan LAN IP</td>
-<td>27015</td>
-<td>102</td>
+<td style="text-align:left">conan-query</td>
+<td style="text-align:left">UDP</td>
+<td style="text-align:left">27015</td>
+<td style="text-align:left">amp-conan LAN IP</td>
+<td style="text-align:left">27015</td>
+<td style="text-align:left">102</td>
 </tr>
 <tr>
-<td>enshrouded-query-tcp</td>
-<td>TCP</td>
-<td>15637</td>
-<td>amp-enshrouded LAN IP</td>
-<td>15637</td>
-<td>104</td>
+<td style="text-align:left">enshrouded-query-tcp</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">15637</td>
+<td style="text-align:left">amp-enshrouded LAN IP</td>
+<td style="text-align:left">15637</td>
+<td style="text-align:left">104</td>
 </tr>
 <tr>
-<td>enshrouded-query-udp</td>
-<td>UDP</td>
-<td>15637</td>
-<td>amp-enshrouded LAN IP</td>
-<td>15637</td>
-<td>104</td>
+<td style="text-align:left">enshrouded-query-udp</td>
+<td style="text-align:left">UDP</td>
+<td style="text-align:left">15637</td>
+<td style="text-align:left">amp-enshrouded LAN IP</td>
+<td style="text-align:left">15637</td>
+<td style="text-align:left">104</td>
 </tr>
 <tr>
-<td>valheim-game</td>
-<td>UDP</td>
-<td>2456</td>
-<td>amp-medium LAN IP</td>
-<td>2456</td>
-<td>105</td>
+<td style="text-align:left">valheim-game</td>
+<td style="text-align:left">UDP</td>
+<td style="text-align:left">2456</td>
+<td style="text-align:left">amp-medium LAN IP</td>
+<td style="text-align:left">2456</td>
+<td style="text-align:left">105</td>
 </tr>
 <tr>
-<td>valheim-query</td>
-<td>UDP</td>
-<td>2457</td>
-<td>amp-medium LAN IP</td>
-<td>2457</td>
-<td>105</td>
+<td style="text-align:left">valheim-query</td>
+<td style="text-align:left">UDP</td>
+<td style="text-align:left">2457</td>
+<td style="text-align:left">amp-medium LAN IP</td>
+<td style="text-align:left">2457</td>
+<td style="text-align:left">105</td>
 </tr>
 <tr>
-<td>vrising-game</td>
-<td>UDP</td>
-<td>9876</td>
-<td>amp-medium LAN IP</td>
-<td>9876</td>
-<td>105</td>
+<td style="text-align:left">vrising-game</td>
+<td style="text-align:left">UDP</td>
+<td style="text-align:left">9876</td>
+<td style="text-align:left">amp-medium LAN IP</td>
+<td style="text-align:left">9876</td>
+<td style="text-align:left">105</td>
 </tr>
 <tr>
-<td>vrising-query</td>
-<td>UDP</td>
-<td>9877</td>
-<td>amp-medium LAN IP</td>
-<td>9877</td>
-<td>105</td>
+<td style="text-align:left">vrising-query</td>
+<td style="text-align:left">UDP</td>
+<td style="text-align:left">9877</td>
+<td style="text-align:left">amp-medium LAN IP</td>
+<td style="text-align:left">9877</td>
+<td style="text-align:left">105</td>
 </tr>
 <tr>
-<td>moria-game</td>
-<td>UDP</td>
-<td>7780</td>
-<td>amp-medium LAN IP</td>
-<td>7780</td>
-<td>105</td>
+<td style="text-align:left">moria-game</td>
+<td style="text-align:left">UDP</td>
+<td style="text-align:left">7780</td>
+<td style="text-align:left">amp-medium LAN IP</td>
+<td style="text-align:left">7780</td>
+<td style="text-align:left">105</td>
 </tr>
 <tr>
-<td>minecraft-tcp</td>
-<td>TCP</td>
-<td>25565</td>
-<td>amp-node4 LAN IP</td>
-<td>25565</td>
-<td>106</td>
+<td style="text-align:left">minecraft-tcp</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">25565</td>
+<td style="text-align:left">amp-node4 LAN IP</td>
+<td style="text-align:left">25565</td>
+<td style="text-align:left">106</td>
 </tr>
 <tr>
-<td>minecraft-udp</td>
-<td>UDP</td>
-<td>25565</td>
-<td>amp-node4 LAN IP</td>
-<td>25565</td>
-<td>106</td>
+<td style="text-align:left">minecraft-udp</td>
+<td style="text-align:left">UDP</td>
+<td style="text-align:left">25565</td>
+<td style="text-align:left">amp-node4 LAN IP</td>
+<td style="text-align:left">25565</td>
+<td style="text-align:left">106</td>
 </tr>
 <tr>
-<td>dragonwilds</td>
-<td>UDP</td>
-<td>7779</td>
-<td>amp-node4 LAN IP</td>
-<td>7785</td>
-<td>106</td>
+<td style="text-align:left">dragonwilds</td>
+<td style="text-align:left">UDP</td>
+<td style="text-align:left">7779</td>
+<td style="text-align:left">amp-node4 LAN IP</td>
+<td style="text-align:left">7785</td>
+<td style="text-align:left">106</td>
 </tr>
 </tbody>
 </table>
@@ -831,106 +865,106 @@ AMP is installed <strong>bare metal on the VM OS</strong>. During install, answe
 <table>
 <thead>
 <tr>
-<th>AMP Instance</th>
-<th>VMID</th>
-<th>VM Name</th>
-<th>Node</th>
-<th>AMP Role</th>
-<th>Game</th>
-<th>Internet Port(s)</th>
-<th>SFTP Port</th>
+<th style="text-align:left">AMP Instance</th>
+<th style="text-align:left">VMID</th>
+<th style="text-align:left">VM Name</th>
+<th style="text-align:left">Node</th>
+<th style="text-align:left">AMP Role</th>
+<th style="text-align:left">Game</th>
+<th style="text-align:left">Internet Port(s)</th>
+<th style="text-align:left">SFTP Port</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>ADS01</td>
-<td>106</td>
-<td>amp-node4</td>
-<td>PVE4</td>
-<td>ADS Controller</td>
-<td>—</td>
-<td>TCP xxxx (UI)</td>
-<td>—</td>
+<td style="text-align:left">ADS01</td>
+<td style="text-align:left">106</td>
+<td style="text-align:left">amp-node4</td>
+<td style="text-align:left">PVE4</td>
+<td style="text-align:left">ADS Controller</td>
+<td style="text-align:left">—</td>
+<td style="text-align:left">TCP xxxx (UI)</td>
+<td style="text-align:left">—</td>
 </tr>
 <tr>
-<td>Conan01</td>
-<td>102</td>
-<td>amp-conan</td>
-<td>PVE1</td>
-<td>Target</td>
-<td>Conan Exiles Enhanced</td>
-<td>TCP+UDP 7777 · UDP 7778 · UDP 27015</td>
-<td>TCP 2224</td>
+<td style="text-align:left">Conan01</td>
+<td style="text-align:left">102</td>
+<td style="text-align:left">amp-conan</td>
+<td style="text-align:left">PVE1</td>
+<td style="text-align:left">Target</td>
+<td style="text-align:left">Conan Exiles Enhanced</td>
+<td style="text-align:left">TCP+UDP 7777 · UDP 7778 · UDP 27015</td>
+<td style="text-align:left">TCP 2224</td>
 </tr>
 <tr>
-<td>Enshrouded01</td>
-<td>104</td>
-<td>amp-enshrouded</td>
-<td>PVE2</td>
-<td>Target</td>
-<td>Enshrouded</td>
-<td>TCP+UDP 15637</td>
-<td>TCP 2224</td>
+<td style="text-align:left">Enshrouded01</td>
+<td style="text-align:left">104</td>
+<td style="text-align:left">amp-enshrouded</td>
+<td style="text-align:left">PVE2</td>
+<td style="text-align:left">Target</td>
+<td style="text-align:left">Enshrouded</td>
+<td style="text-align:left">TCP+UDP 15637</td>
+<td style="text-align:left">TCP 2224</td>
 </tr>
 <tr>
-<td>Valheim01</td>
-<td>105</td>
-<td>amp-medium</td>
-<td>PVE3</td>
-<td>Target</td>
-<td>Valheim</td>
-<td>UDP 2456 · UDP 2457</td>
-<td>TCP 2224</td>
+<td style="text-align:left">Valheim01</td>
+<td style="text-align:left">105</td>
+<td style="text-align:left">amp-medium</td>
+<td style="text-align:left">PVE3</td>
+<td style="text-align:left">Target</td>
+<td style="text-align:left">Valheim</td>
+<td style="text-align:left">UDP 2456 · UDP 2457</td>
+<td style="text-align:left">TCP 2224</td>
 </tr>
 <tr>
-<td>VRising01</td>
-<td>105</td>
-<td>amp-medium</td>
-<td>PVE3</td>
-<td>Target</td>
-<td>V Rising</td>
-<td>UDP 9876 · UDP 9877</td>
-<td>TCP 2225</td>
+<td style="text-align:left">VRising01</td>
+<td style="text-align:left">105</td>
+<td style="text-align:left">amp-medium</td>
+<td style="text-align:left">PVE3</td>
+<td style="text-align:left">Target</td>
+<td style="text-align:left">V Rising</td>
+<td style="text-align:left">UDP 9876 · UDP 9877</td>
+<td style="text-align:left">TCP 2225</td>
 </tr>
 <tr>
-<td>Moria01</td>
-<td>105</td>
-<td>amp-medium</td>
-<td>PVE3</td>
-<td>Target</td>
-<td>Return to Moria</td>
-<td>UDP 7780</td>
-<td>TCP 2226</td>
+<td style="text-align:left">Moria01</td>
+<td style="text-align:left">105</td>
+<td style="text-align:left">amp-medium</td>
+<td style="text-align:left">PVE3</td>
+<td style="text-align:left">Target</td>
+<td style="text-align:left">Return to Moria</td>
+<td style="text-align:left">UDP 7780</td>
+<td style="text-align:left">TCP 2226</td>
 </tr>
 <tr>
-<td>Minecraft01</td>
-<td>106</td>
-<td>amp-node4</td>
-<td>PVE4</td>
-<td>Via ADS</td>
-<td>Minecraft Java</td>
-<td>TCP+UDP 25565</td>
-<td>TCP 2224</td>
+<td style="text-align:left">Minecraft01</td>
+<td style="text-align:left">106</td>
+<td style="text-align:left">amp-node4</td>
+<td style="text-align:left">PVE4</td>
+<td style="text-align:left">Via ADS</td>
+<td style="text-align:left">Minecraft Java</td>
+<td style="text-align:left">TCP+UDP 25565</td>
+<td style="text-align:left">TCP 2224</td>
 </tr>
 <tr>
-<td>Dragonwilds01</td>
-<td>106</td>
-<td>amp-node4</td>
-<td>PVE4</td>
-<td>Via ADS</td>
-<td>RuneScape: Dragonwilds</td>
-<td>UDP 7779</td>
-<td>TCP 2225</td>
+<td style="text-align:left">Dragonwilds01</td>
+<td style="text-align:left">106</td>
+<td style="text-align:left">amp-node4</td>
+<td style="text-align:left">PVE4</td>
+<td style="text-align:left">Via ADS</td>
+<td style="text-align:left">RuneScape: Dragonwilds</td>
+<td style="text-align:left">UDP 7779</td>
+<td style="text-align:left">TCP 2225</td>
 </tr>
 <tr>
-<td>Dune01</td>
-<td>107</td>
-<td>dune-awakening</td>
-<td>PVE2</td>
-<td>Target</td>
-<td>Dune: Awakening</td>
-<td>Server list (PTC)</td>
-<td>TCP 2224</td>
+<td style="text-align:left">Dune01</td>
+<td style="text-align:left">107</td>
+<td style="text-align:left">dune-awakening</td>
+<td style="text-align:left">PVE2</td>
+<td style="text-align:left">Target</td>
+<td style="text-align:left">Dune: Awakening</td>
+<td style="text-align:left">Server list (PTC)</td>
+<td style="text-align:left">TCP 2224</td>
 </tr>
 </tbody>
 </table>
@@ -988,38 +1022,38 @@ qm <span class="token function">shutdown</span> <span class="token number">301</
 <table>
 <thead>
 <tr>
-<th>Property</th>
-<th>Value</th>
+<th style="text-align:left">Property</th>
+<th style="text-align:left">Value</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>OS</td>
-<td>Ubuntu Server 24.04 LTS</td>
+<td style="text-align:left">OS</td>
+<td style="text-align:left">Ubuntu Server 24.04 LTS</td>
 </tr>
 <tr>
-<td>AMP</td>
-<td>Bare metal + Docker isolation</td>
+<td style="text-align:left">AMP</td>
+<td style="text-align:left">Bare metal + Docker isolation</td>
 </tr>
 <tr>
-<td>CPU requirement</td>
-<td>AVX2 — satisfied by <code>cpu: host</code> on Ryzen 5</td>
+<td style="text-align:left">CPU requirement</td>
+<td style="text-align:left">AVX2 — satisfied by <code>cpu: host</code> on Ryzen 5</td>
 </tr>
 <tr>
-<td>Specs</td>
-<td>8 vCPU · 24 GB / 8 GB balloon · 120 GB CephPool</td>
+<td style="text-align:left">Specs</td>
+<td style="text-align:left">8 vCPU · 24 GB / 8 GB balloon · 120 GB CephPool</td>
 </tr>
 <tr>
-<td><code>onboot</code></td>
-<td>0 — start manually only</td>
+<td style="text-align:left"><code>onboot</code></td>
+<td style="text-align:left">0 — start manually only</td>
 </tr>
 <tr>
-<td>Connection method</td>
-<td><strong>In-game server browser only</strong> (PTC phase)</td>
+<td style="text-align:left">Connection method</td>
+<td style="text-align:left"><strong>In-game server browser only</strong> (PTC phase)</td>
 </tr>
 <tr>
-<td>Pangolin resources</td>
-<td>None needed</td>
+<td style="text-align:left">Pangolin resources</td>
+<td style="text-align:left">None needed</td>
 </tr>
 </tbody>
 </table>
@@ -1130,94 +1164,94 @@ journalctl <span class="token parameter variable">-u</span> ampinstmgr <span cla
 <table>
 <thead>
 <tr>
-<th>Game</th>
-<th>VM (VMID)</th>
-<th>AMP</th>
-<th>Internet Port(s)</th>
-<th>SFTP</th>
-<th>Status</th>
+<th style="text-align:left">Game</th>
+<th style="text-align:left">VM (VMID)</th>
+<th style="text-align:left">AMP</th>
+<th style="text-align:left">Internet Port(s)</th>
+<th style="text-align:left">SFTP</th>
+<th style="text-align:left">Status</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Conan Exiles Enhanced</td>
-<td>amp-conan (102)</td>
-<td>✅ Docker</td>
-<td>TCP+UDP 7777 · UDP 7778 · UDP 27015</td>
-<td>2224 LAN</td>
-<td>🟢 Active — no remap ever</td>
+<td style="text-align:left">Conan Exiles Enhanced</td>
+<td style="text-align:left">amp-conan (102)</td>
+<td style="text-align:left">✅ Docker</td>
+<td style="text-align:left">TCP+UDP 7777 · UDP 7778 · UDP 27015</td>
+<td style="text-align:left">2224 LAN</td>
+<td style="text-align:left">🟢 Active — no remap ever</td>
 </tr>
 <tr>
-<td>Enshrouded</td>
-<td>amp-enshrouded (104)</td>
-<td>✅ Docker</td>
-<td>TCP+UDP 15637</td>
-<td>2224 LAN</td>
-<td>🟢 Active</td>
+<td style="text-align:left">Enshrouded</td>
+<td style="text-align:left">amp-enshrouded (104)</td>
+<td style="text-align:left">✅ Docker</td>
+<td style="text-align:left">TCP+UDP 15637</td>
+<td style="text-align:left">2224 LAN</td>
+<td style="text-align:left">🟢 Active</td>
 </tr>
 <tr>
-<td>Valheim</td>
-<td>amp-medium (105)</td>
-<td>✅ Docker</td>
-<td>UDP 2456 · UDP 2457</td>
-<td>2224 LAN</td>
-<td>🟢 Active</td>
+<td style="text-align:left">Valheim</td>
+<td style="text-align:left">amp-medium (105)</td>
+<td style="text-align:left">✅ Docker</td>
+<td style="text-align:left">UDP 2456 · UDP 2457</td>
+<td style="text-align:left">2224 LAN</td>
+<td style="text-align:left">🟢 Active</td>
 </tr>
 <tr>
-<td>V Rising</td>
-<td>amp-medium (105)</td>
-<td>✅ Docker</td>
-<td>UDP 9876 · UDP 9877</td>
-<td>2225 LAN</td>
-<td>🟢 Active</td>
+<td style="text-align:left">V Rising</td>
+<td style="text-align:left">amp-medium (105)</td>
+<td style="text-align:left">✅ Docker</td>
+<td style="text-align:left">UDP 9876 · UDP 9877</td>
+<td style="text-align:left">2225 LAN</td>
+<td style="text-align:left">🟢 Active</td>
 </tr>
 <tr>
-<td>Return to Moria</td>
-<td>amp-medium (105)</td>
-<td>✅ Docker + Wine</td>
-<td>UDP 7780</td>
-<td>2226 LAN</td>
-<td>🟢 Active — remapped from 7777</td>
+<td style="text-align:left">Return to Moria</td>
+<td style="text-align:left">amp-medium (105)</td>
+<td style="text-align:left">✅ Docker + Wine</td>
+<td style="text-align:left">UDP 7780</td>
+<td style="text-align:left">2226 LAN</td>
+<td style="text-align:left">🟢 Active — remapped from 7777</td>
 </tr>
 <tr>
-<td>Minecraft Java</td>
-<td>amp-node4 (106)</td>
-<td>✅ Docker via ADS</td>
-<td>TCP+UDP 25565</td>
-<td>2224 LAN</td>
-<td>🟢 Active</td>
+<td style="text-align:left">Minecraft Java</td>
+<td style="text-align:left">amp-node4 (106)</td>
+<td style="text-align:left">✅ Docker via ADS</td>
+<td style="text-align:left">TCP+UDP 25565</td>
+<td style="text-align:left">2224 LAN</td>
+<td style="text-align:left">🟢 Active</td>
 </tr>
 <tr>
-<td>RuneScape: Dragonwilds</td>
-<td>amp-node4 (106)</td>
-<td>✅ Docker via ADS</td>
-<td>UDP 7779</td>
-<td>2225 LAN</td>
-<td>🟢 Active — remapped from 7777</td>
+<td style="text-align:left">RuneScape: Dragonwilds</td>
+<td style="text-align:left">amp-node4 (106)</td>
+<td style="text-align:left">✅ Docker via ADS</td>
+<td style="text-align:left">UDP 7779</td>
+<td style="text-align:left">2225 LAN</td>
+<td style="text-align:left">🟢 Active — remapped from 7777</td>
 </tr>
 <tr>
-<td>Dune: Awakening</td>
-<td>dune-awakening (107)</td>
-<td>✅ Docker</td>
-<td>Server list (PTC)</td>
-<td>2224 LAN</td>
-<td>🟠 Conditional · token required · <code>onboot: 0</code></td>
+<td style="text-align:left">Dune: Awakening</td>
+<td style="text-align:left">dune-awakening (107)</td>
+<td style="text-align:left">✅ Docker</td>
+<td style="text-align:left">Server list (PTC)</td>
+<td style="text-align:left">2224 LAN</td>
+<td style="text-align:left">🟠 Conditional · token required · <code>onboot: 0</code></td>
 </tr>
 <tr>
-<td>OpenShift SNO</td>
-<td>openshift-sno (300)</td>
-<td>❌</td>
-<td>—</td>
-<td>—</td>
-<td>⚪ Ephemeral · <code>onboot: 0</code></td>
+<td style="text-align:left">OpenShift SNO</td>
+<td style="text-align:left">openshift-sno (300)</td>
+<td style="text-align:left">❌</td>
+<td style="text-align:left">—</td>
+<td style="text-align:left">—</td>
+<td style="text-align:left">⚪ Ephemeral · <code>onboot: 0</code></td>
 </tr>
 <tr>
-<td>Azure Local</td>
-<td>azure-local-demo (301)</td>
-<td>❌</td>
-<td>—</td>
-<td>—</td>
-<td>⚪ Ephemeral · <code>onboot: 0</code></td>
+<td style="text-align:left">Azure Local</td>
+<td style="text-align:left">azure-local-demo (301)</td>
+<td style="text-align:left">❌</td>
+<td style="text-align:left">—</td>
+<td style="text-align:left">—</td>
+<td style="text-align:left">⚪ Ephemeral · <code>onboot: 0</code></td>
 </tr>
 </tbody>
 </table>
