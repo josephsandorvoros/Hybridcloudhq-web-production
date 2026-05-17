@@ -66,10 +66,10 @@ a:hover, a:focus{color:var(--accent2);text-decoration:none}
 
 /* Tables */
 table{width:100%;border-collapse:collapse;margin:1.25rem 0;font-size:.95rem;color:#e6eefc}
-th{background:#2a1f4a;color:#fff;font-weight:600;text-align:left;padding:.6rem .9rem;border:1px solid #4a3a6a}
-td{padding:.55rem .9rem;border:1px solid #2e2e3e;vertical-align:top}
-tr:nth-child(even){background:#181820}
-tr:hover{background:#1e1530}
+th{background:#252830;color:#c8cdd8;font-weight:600;text-align:left;padding:.6rem .9rem;border:1px solid #2a2a3a}
+td{padding:.55rem .9rem;border:1px solid #2a2a3a;background:var(--bg);vertical-align:top}
+tr:nth-child(even) td{background:var(--bg)}
+tr:hover td{background:var(--bg)}
 
 /* Callouts (Obsidian/GitHub-style > [!type] blocks via markdown-it-github-alerts) */
 .markdown-alert{border-radius:6px;margin:1.25rem 0;padding:.6rem .9rem .75rem;border-left:4px solid #555}
@@ -79,29 +79,29 @@ tr:hover{background:#1e1530}
 .markdown-alert p:first-of-type{margin-top:0}
 
 /* note / abstract — blue */
-.markdown-alert-note,.markdown-alert-abstract{background:#0d1b35;border-left-color:#3b82f6}
-.markdown-alert-note .markdown-alert-title,.markdown-alert-abstract .markdown-alert-title{color:#60a5fa}
-.markdown-alert-note .markdown-alert-title svg,.markdown-alert-abstract .markdown-alert-title svg{fill:#60a5fa}
+.markdown-alert-note,.markdown-alert-abstract{background:#162747;border-left-color:#3b82f6}
+.markdown-alert-note .markdown-alert-title,.markdown-alert-abstract .markdown-alert-title{color:#93c5fd}
+.markdown-alert-note .markdown-alert-title svg,.markdown-alert-abstract .markdown-alert-title svg{fill:#93c5fd}
 /* info — cyan */
-.markdown-alert-info{background:#0b2030;border-left-color:#06b6d4}
-.markdown-alert-info .markdown-alert-title{color:#22d3ee}
-.markdown-alert-info .markdown-alert-title svg{fill:#22d3ee}
+.markdown-alert-info{background:#0d2e42;border-left-color:#06b6d4}
+.markdown-alert-info .markdown-alert-title{color:#67e8f9}
+.markdown-alert-info .markdown-alert-title svg{fill:#67e8f9}
 /* tip / success — green */
-.markdown-alert-tip,.markdown-alert-success{background:#0d2218;border-left-color:#22c55e}
-.markdown-alert-tip .markdown-alert-title,.markdown-alert-success .markdown-alert-title{color:#4ade80}
-.markdown-alert-tip .markdown-alert-title svg,.markdown-alert-success .markdown-alert-title svg{fill:#4ade80}
+.markdown-alert-tip,.markdown-alert-success{background:#0f3322;border-left-color:#22c55e}
+.markdown-alert-tip .markdown-alert-title,.markdown-alert-success .markdown-alert-title{color:#86efac}
+.markdown-alert-tip .markdown-alert-title svg,.markdown-alert-success .markdown-alert-title svg{fill:#86efac}
 /* warning / caution — amber */
-.markdown-alert-warning,.markdown-alert-caution{background:#2a1f0a;border-left-color:#f59e0b}
-.markdown-alert-warning .markdown-alert-title,.markdown-alert-caution .markdown-alert-title{color:#fbbf24}
-.markdown-alert-warning .markdown-alert-title svg,.markdown-alert-caution .markdown-alert-title svg{fill:#fbbf24}
+.markdown-alert-warning,.markdown-alert-caution{background:#3b2a0a;border-left-color:#f59e0b}
+.markdown-alert-warning .markdown-alert-title,.markdown-alert-caution .markdown-alert-title{color:#fcd34d}
+.markdown-alert-warning .markdown-alert-title svg,.markdown-alert-caution .markdown-alert-title svg{fill:#fcd34d}
 /* danger / important / failure / bug — red */
-.markdown-alert-danger,.markdown-alert-important,.markdown-alert-failure,.markdown-alert-bug{background:#2a0d0d;border-left-color:#ef4444}
-.markdown-alert-danger .markdown-alert-title,.markdown-alert-important .markdown-alert-title,.markdown-alert-failure .markdown-alert-title,.markdown-alert-bug .markdown-alert-title{color:#f87171}
-.markdown-alert-danger .markdown-alert-title svg,.markdown-alert-important .markdown-alert-title svg,.markdown-alert-failure .markdown-alert-title svg,.markdown-alert-bug .markdown-alert-title svg{fill:#f87171}
+.markdown-alert-danger,.markdown-alert-important,.markdown-alert-failure,.markdown-alert-bug{background:#3d1010;border-left-color:#ef4444}
+.markdown-alert-danger .markdown-alert-title,.markdown-alert-important .markdown-alert-title,.markdown-alert-failure .markdown-alert-title,.markdown-alert-bug .markdown-alert-title{color:#fca5a5}
+.markdown-alert-danger .markdown-alert-title svg,.markdown-alert-important .markdown-alert-title svg,.markdown-alert-failure .markdown-alert-title svg,.markdown-alert-bug .markdown-alert-title svg{fill:#fca5a5}
 /* question / example / quote — purple */
-.markdown-alert-question,.markdown-alert-example,.markdown-alert-quote{background:#1a0d2e;border-left-color:#a855f7}
-.markdown-alert-question .markdown-alert-title,.markdown-alert-example .markdown-alert-title,.markdown-alert-quote .markdown-alert-title{color:#c084fc}
-.markdown-alert-question .markdown-alert-title svg,.markdown-alert-example .markdown-alert-title svg,.markdown-alert-quote .markdown-alert-title svg{fill:#c084fc}
+.markdown-alert-question,.markdown-alert-example,.markdown-alert-quote{background:#251242;border-left-color:#a855f7}
+.markdown-alert-question .markdown-alert-title,.markdown-alert-example .markdown-alert-title,.markdown-alert-quote .markdown-alert-title{color:#d8b4fe}
+.markdown-alert-question .markdown-alert-title svg,.markdown-alert-example .markdown-alert-title svg,.markdown-alert-quote .markdown-alert-title svg{fill:#d8b4fe}
 
 pre{background:#0b0c0d;padding:1rem;border-radius:8px;overflow:auto;color:#e6eefc}
 code{background:rgba(255,255,255,0.03);padding:.2rem .4rem;border-radius:4px;color:#ffb6e6}
