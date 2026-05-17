@@ -65,11 +65,11 @@ a:hover, a:focus{color:var(--accent2);text-decoration:none}
 .post a:hover,.post a:focus{color:var(--accent2);text-decoration:none}
 
 /* Tables */
-.post-content table, .post table{width:100%;border-collapse:collapse;margin:1.25rem 0;font-size:.95rem;color:#e6eefc;display:table}
-.post-content th, .post th{background:rgba(124,58,237,0.25);color:#fff;font-weight:600;text-align:left;padding:.6rem .9rem;border:1px solid rgba(255,255,255,0.22)}
-.post-content td, .post td{padding:.55rem .9rem;border:1px solid rgba(255,255,255,0.18);vertical-align:top}
-.post-content tr:nth-child(even), .post tr:nth-child(even){background:rgba(255,255,255,0.04)}
-.post-content tr:hover, .post tr:hover{background:rgba(124,58,237,0.10)}
+table{width:100%;border-collapse:collapse;margin:1.25rem 0;font-size:.95rem;color:#e6eefc}
+th{background:rgba(124,58,237,0.25);color:#fff;font-weight:600;text-align:left;padding:.6rem .9rem;border:1px solid rgba(255,255,255,0.3)}
+td{padding:.55rem .9rem;border:1px solid rgba(255,255,255,0.2);vertical-align:top}
+tr:nth-child(even){background:rgba(255,255,255,0.04)}
+tr:hover{background:rgba(124,58,237,0.10)}
 
 /* Callouts (Obsidian-style > [!type] blocks) */
 .callout{border-radius:6px;margin:1.25rem 0;overflow:hidden;border:1px solid rgba(255,255,255,0.08);border-left-width:4px}
