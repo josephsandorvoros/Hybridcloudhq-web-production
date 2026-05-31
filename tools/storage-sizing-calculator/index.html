@@ -3,9 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Exploring Hybrid Cloud Solutions in My Homelab: A Blogging Journey</title>
+    <title>Storage Sizing Calculator</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="/assets/styles.css?v=20260517b">
+    
+      
+        <link rel="stylesheet" href="/assets/tools/storage-sizing-calculator.css">
+      
     
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
   </head>
@@ -30,35 +34,88 @@
 
     <main class="container">
       
-<p class="breadcrumb"><a href="/blog/">← Back to Blog</a></p>
+<article class="tool-page container">
+  <p class="breadcrumb"><a href="/tools/">← Back to Tools</a></p>
 
-<article class="post container">
-  
-
-  <header>
-    <h1>Exploring Hybrid Cloud Solutions in My Homelab: A Blogging Journey</h1>
-    <p class="post-meta">May 22, 2025</p>
+  <header class="tool-header">
+    <h1>Storage Sizing Calculator</h1>
+    
+      <p class="tool-description">Estimate usable and raw storage needs for backups, logs, and general data retention.</p>
+    
   </header>
 
-  <section class="post-content">
-    <h1>Introduction to My Homelab Journey</h1>
-<p>Hello and welcome to my blog. I'm excited to share my journey in creating a homelab environment that serves as a learning platform for my work and interests in programming, system design, and hardware solutions.</p>
-<h1>Why Hybrid Cloud?</h1>
-<p>In today's tech landscape, hybrid cloud solutions are becoming increasingly important for businesses and developers alike. By integrating both on-premises and cloud-based resources, hybrid cloud allows for flexibility, scalability, and enhanced performance. My goal is to explore various ways to implement these cloud solutions within my homelab, providing me with practical experience and valuable insights.</p>
-<h1>Showcasing Hardware and Software Projects</h1>
-<p>As I embark on this journey, I will be documenting each step of my projects, showcasing the hardware configurations and software integrations I experiment with. This will include everything from setting up servers to deploying applications in my hybrid cloud setup. Whether you are a fellow enthusiast or someone looking to expand their knowledge, I hope my experiences will provide useful information and inspire innovation.</p>
-<p>I look forward to sharing updates on my progress, challenges, and successes. Stay tuned for more posts as I delve into the world of hybrid cloud solutions and how they can elevate our technological engagements!</p>
-
+  <section class="tool-content">
+    <p>This calculator gives a practical first-pass estimate for storage planning. It is useful for homelab services, log pipelines, backup targets, and hybrid cloud landing zones where you need to plan both usable capacity and raw capacity.</p>
+<p>The model is intentionally simple so you can reason about it quickly:</p>
+<ul>
+  <li>Daily data ingested</li>
+  <li>Retention in days</li>
+  <li>Replication factor for resilience</li>
+  <li>Effective compression and dedup ratio</li>
+  <li>Growth and buffer percentage</li>
+</ul>
+<form class="tool-panel tool-form" data-tool="storage-sizing" novalidate>
+  <fieldset>
+    <legend>Inputs</legend>
+<p><div class="tool-grid">
+<div class="tool-field">
+<label for="dailyGb">Daily data added (GB/day)</label>
+<input id="dailyGb" name="dailyGb" type="number" min="0" step="0.1" value="120" required>
+</div></p>
+<p><div class="tool-field">
+<label for="retentionDays">Retention (days)</label>
+<input id="retentionDays" name="retentionDays" type="number" min="1" step="1" value="30" required>
+</div></p>
+<p><div class="tool-field">
+<label for="replicaFactor">Replication factor</label>
+<input id="replicaFactor" name="replicaFactor" type="number" min="1" step="0.1" value="2" required>
+</div></p>
+<p><div class="tool-field">
+<label for="compressionRatio">Compression and dedup ratio</label>
+<input id="compressionRatio" name="compressionRatio" type="number" min="1" step="0.1" value="1.5" required>
+</div></p>
+<p><div class="tool-field">
+<label for="growthPct">Growth and safety buffer (%)</label>
+<input id="growthPct" name="growthPct" type="number" min="0" step="1" value="25" required>
+</div>
+</div></p>
+  </fieldset>
+  <div class="tool-actions">
+    <button type="submit" class="btn primary">Calculate</button>
+    <button type="button" id="resetTool" class="btn ghost">Reset</button>
+  </div>
+  <p id="toolError" class="tool-error" role="alert" hidden></p>
+</form>
+<section class="tool-results" aria-live="polite" aria-atomic="true">
+  <h2>Results</h2>
+  <div class="tool-results-grid">
+    <article class="result-card">
+      <h3>Total usable data</h3>
+      <p id="usableResult" class="result-value">0 TB</p>
+      <p class="result-note">Before replication overhead</p>
+    </article>
+<p><article class="result-card">
+<h3>Total raw capacity</h3>
+<p id="rawResult" class="result-value">0 TB</p>
+<p class="result-note">After replication and compression assumptions</p>
+</article></p>
+<p><article class="result-card">
+<h3>Suggested purchased capacity</h3>
+<p id="purchaseResult" class="result-value">0 TB</p>
+<p class="result-note">Includes growth and safety buffer</p>
+</article></p>
+  </div>
+</section>
+<section class="tool-notes">
+  <h2>How to interpret this</h2>
+  <p>Use this output as a planning baseline, then refine with workload specifics such as hot vs cold tiers, RAID or erasure coding overhead, and real measured compression ratios from your platform.</p>
+  <p>If this estimate is for production workloads, keep an additional operational buffer for snapshots, temporary spikes, and rebuild windows.</p>
+</section>
+<noscript>
+  <p>This calculator uses JavaScript for live math. Without JavaScript, use the input guidance above and calculate manually with your preferred spreadsheet.</p>
+</noscript>
   </section>
-
-  <footer class="post-footer">
-    <h4>Author - Joseph Sándor Voros</h4>
-    <p class="post-tags">
-      
-    </p>
-  </footer>
 </article>
-
     </main>
 
     <footer class="site-footer">
@@ -103,6 +160,10 @@
       </div>
     </footer>
 
+    
+      
+        <script src="/assets/tools/storage-sizing-calculator.js" defer></script>
+      
     
   </body>
 </html>
