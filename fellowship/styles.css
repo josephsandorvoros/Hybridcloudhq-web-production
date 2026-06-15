@@ -404,7 +404,7 @@ button {
 }
 
 .waypoint-label {
-    fill: rgba(255, 204, 0, 0.8);
+    fill: #ffcc00;
     font-size: 0.92rem;
     text-anchor: middle;
 }
