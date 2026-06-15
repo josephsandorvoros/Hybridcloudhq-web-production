@@ -1,0 +1,113 @@
+{
+  "totalDistanceMeters": 2494483.2,
+  "waypoints": [
+    {
+      "id": "Hobbiton",
+      "name": "Hobbiton",
+      "distance": 0,
+      "x": 317.5,
+      "y": 118.1,
+      "icon": "1",
+      "blurb": "Hobbiton is a Hobbit village in the central regions of the Shire, within the borders of the Westfarthing. It is the home of Bilbo and Frodo Baggins, and the starting point of the Fellowship's journey to destroy the One Ring in the fires of Mount Doom."
+    },
+    {
+      "id": "bree",
+      "name": "Bree",
+      "distance": 135,
+      "x": 369.4,
+      "y": 119.8,
+      "icon": "2",
+      "blurb": "Bree is a village of Men and hobbits, located east of the Shire and south of Fornost in Eriador. It is the only settlement in Eriador"
+    },
+    {
+      "id": "rivendell",
+      "name": "Rivendell",
+      "distance": 485,
+      "x": 488.4,
+      "y": 112,
+      "icon": "3",
+      "blurb": "Rivendell, or Imladris, is an Elven outpost established by Elrond in the Misty Mountains on the eastern edge of Eriador. It is a place of refuge and healing, and serves as the home of Elrond and his people. It is also the location where the Fellowship of the Ring is formed and where the Council of Elrond takes place."
+    },
+    {
+      "id": "khazad-dum",
+      "name": "Bridge of Khazad-dum",
+      "distance": 785,
+      "x": 477.2,
+      "y": 166.1,
+      "icon": "4",
+      "blurb": "Khazad-dûm, commonly known as Moria, is the underground kingdom of the Dwarves of Durin's Folk, and the most famed of all Dwarven realms. The Bridge of Khazad-dûm is a narrow stone bridge that spans a chasm within the mines of Moria. It is the site of a pivotal battle in the Fellowship's journey, where Gandalf confronts the Balrog and ultimately sacrifices himself to allow the rest of the Fellowship to escape."
+    },
+    {
+      "id": "lothlorien",
+      "name": "Lothlorien",
+      "distance": 801,
+      "x": 513,
+      "y": 182.2,
+      "icon": "5",
+      "blurb": "Lothlórien is the fairest and most enchanted Elven realm remaining in Middle-earth during the Third Age. Located east of the Misty Mountains along the Great River Anduin, it is ruled by the Lady Galadriel and Lord Celeborn. The Fellowship finds refuge in Lothlórien after their harrowing escape from Moria, and it is here that they receive gifts and counsel from the Elves before continuing their journey towards Mordor."
+    },
+    {
+      "id": "edoras",
+      "name": "Caras Galadhon",
+      "distance": 835,
+      "x": 526.1,
+      "y": 183.5,
+      "icon": "6",
+      "blurb": "Caras Galadhon is the city and fortress of the Galadhrim of Lothlórien, built by Celeborn and his wife Galadriel. It is located in the heart of Lothlórien, and serves as the residence of the Lady Galadriel and Lord Celeborn. The city is built among the trees, with platforms and walkways connecting the various structures. It is a place of great beauty and tranquility, and serves as a sanctuary for the Fellowship during their time in Lothlórien."
+    },
+    {
+      "id": "Argonath",
+      "name": "Argonath",
+      "distance": 1165,
+      "x": 569.2,
+      "y": 256.9,
+      "icon": "7",
+      "blurb": "The Argonath, also known as the Pillars of the Kings, or the Gate of Kings is a landmark on the northern edge of Gondor. It consists of two enormous statues carved in the likenesses of Isildur and Anárion, the sons of Elendil, who were the first High Kings of Gondor. The statues stand on either side of the River Anduin, marking the northern boundary of Gondor and serving as a warning to those who would enter the land without permission."
+    },
+    {
+      "id": "the-black-gate",
+      "name": "The Black Gate",
+      "distance": 1325,
+      "x": 629.8,
+      "y": 265.2,
+      "icon": "8",
+      "blurb": "The Black Gate, built by Sauron, is the main entrance into the land of Mordor. It is heavily fortified and guarded, serving as a formidable barrier to any who would attempt to enter or leave Mordor without Sauron's permission."
+    },
+    {
+      "id": "osgiliath",
+      "name": "Osgiliath",
+      "distance": 1455,
+      "x": 611.9,
+      "y": 302.6,
+      "icon": "9",
+      "blurb": "Osgiliath is the old capital city of Gondor. The city straddles the Anduin River at a point approximately half way between the cities of Minas Anor to the south-west and Minas Ithil to the north-east, and north of the nearby Emyn Arnen."
+    },
+    {
+      "id": "minas-morgul",
+      "name": "Minas Morgul",
+      "distance": 1485,
+      "x": 626.6,
+      "y": 302.7,
+      "icon": "10",
+      "blurb": "Minas Morgul was the twin city of Minas Tirith before its fall to the forces of Sauron in the Third Age. It was located in the Ephel Dúath mountains, on the western border of Mordor, and was originally known as Minas Ithil, or the Tower of the Moon."
+    },
+    {
+      "id": "escape-from-the-orcs",
+      "name": "Escape from the Orcs",
+      "distance": 1505,
+      "x": 644.9,
+      "y": 276,
+      "icon": "11",
+      "blurb": "Frodo and Sam make a daring escape from the Orcs, continuing their journey towards Mount Doom. This is a pivotal moment in the story, as it marks the point where the two hobbits are on their own, without the support of the rest of the Fellowship, and must rely on their own courage and resourcefulness to continue their quest to destroy the One Ring."
+    },
+    {
+      "id": "mount-doom",
+      "name": "Mount Doom",
+      "distance": 1550,
+      "x": 657.9,
+      "y": 284.9,
+      "icon": "12",
+      "blurb": "The end of the quest, where the full distance of the Fellowship route is complete. Mount Doom, also known as Orodruin, is a volcanic mountain located in the land of Mordor. It is the place where the One Ring was forged by Sauron, and it is the only place where the Ring can be destroyed. The mountain is a symbol of evil and darkness, and serves as the final destination for Frodo and Sam on their quest to destroy the One Ring and save Middle-earth from Sauron's tyranny."
+    }
+  ]
+}
