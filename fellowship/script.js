@@ -1,5 +1,5 @@
 const CONFIG = {
-    totalDistanceMeters: 4023000,
+    totalDistanceMeters: 2494483.2,
     strideRange: { min: 0.5, max: 1.2, default: 0.76 },
     refreshIntervalMs: 60000,
     mapCandidates: [
@@ -15,12 +15,18 @@ const CONFIG = {
 };
 
 const FALLBACK_WAYPOINTS = [
-    { id: "rivendell", name: "Rivendell", distance: 0, x: 68, y: 274.1, icon: "R", blurb: "The Elven refuge where the Fellowship gathers and the quest begins." },
-    { id: "khazad-dum", name: "Bridge of Khazad-dum", distance: 760000, x: 292, y: 186, icon: "K", blurb: "A perilous crossing beneath the mountains, represented here as the first major trial." },
-    { id: "lothlorien", name: "Lothlorien", distance: 1180000, x: 434, y: 218, icon: "L", blurb: "A place of rest and renewal where the company regroups beneath the golden trees." },
-    { id: "edoras", name: "Edoras", distance: 2225000, x: 605.9, y: 204.1, icon: "E", blurb: "The hill city of Rohan, marking the long middle stretch of the journey." },
-    { id: "minas-tirith", name: "Minas Tirith", distance: 3115000, x: 779.8, y: 176.5, icon: "M", blurb: "The White City stands as the last great bastion before the land of shadow." },
-    { id: "mount-doom", name: "Mount Doom", distance: 4023000, x: 930, y: 214.1, icon: "D", blurb: "The end of the quest, where the full distance of the Fellowship route is complete." }
+    { id: "Hobbiton", name: "Hobbiton", distance: 0, x: 317.5, y: 118.1, icon: "1", blurb: "Hobbiton is a Hobbit village in the central regions of the Shire, within the borders of the Westfarthing. It is the home of Bilbo and Frodo Baggins, and the starting point of the Fellowship's journey to destroy the One Ring in the fires of Mount Doom." },
+    { id: "bree", name: "Bree", distance: 135 * 1609.344, x: 369.4, y: 119.8, icon: "2", blurb: "Bree is a village of Men and hobbits, located east of the Shire and south of Fornost in Eriador. It is the only settlement in Eriador" },
+    { id: "rivendell", name: "Rivendell", distance: 485 * 1609.344, x: 488.4, y: 112, icon: "3", blurb: "Rivendell, or Imladris, is an Elven outpost established by Elrond in the Misty Mountains on the eastern edge of Eriador. It is a place of refuge and healing, and serves as the home of Elrond and his people. It is also the location where the Fellowship of the Ring is formed and where the Council of Elrond takes place." },
+    { id: "khazad-dum", name: "Bridge of Khazad-dum", distance: 785 * 1609.344, x: 477.2, y: 166.1, icon: "4", blurb: "Khazad-dum, commonly known as Moria, is the underground kingdom of the Dwarves of Durin's Folk, and the most famed of all Dwarven realms. The Bridge of Khazad-dum is a narrow stone bridge that spans a chasm within the mines of Moria. It is the site of a pivotal battle in the Fellowship's journey, where Gandalf confronts the Balrog and ultimately sacrifices himself to allow the rest of the Fellowship to escape." },
+    { id: "lothlorien", name: "Lothlorien", distance: 801 * 1609.344, x: 513, y: 182.2, icon: "5", blurb: "Lothlorien is the fairest and most enchanted Elven realm remaining in Middle-earth during the Third Age. Located east of the Misty Mountains along the Great River Anduin, it is ruled by the Lady Galadriel and Lord Celeborn. The Fellowship finds refuge in Lothlorien after their harrowing escape from Moria, and it is here that they receive gifts and counsel from the Elves before continuing their journey towards Mordor." },
+    { id: "edoras", name: "Caras Galadhon", distance: 835 * 1609.344, x: 526.1, y: 183.5, icon: "6", blurb: "Caras Galadhon is the city and fortress of the Galadhrim of Lothlorien, built by Celeborn and his wife Galadriel. It is located in the heart of Lothlorien, and serves as the residence of the Lady Galadriel and Lord Celeborn. The city is built among the trees, with platforms and walkways connecting the various structures. It is a place of great beauty and tranquility, and serves as a sanctuary for the Fellowship during their time in Lothlorien." },
+    { id: "Argonath", name: "Argonath", distance: 1165 * 1609.344, x: 569.2, y: 256.9, icon: "7", blurb: "The Argonath, also known as the Pillars of the Kings, or the Gate of Kings is a landmark on the northern edge of Gondor. It consists of two enormous statues carved in the likenesses of Isildur and Anarion, the sons of Elendil, who were the first High Kings of Gondor. The statues stand on either side of the River Anduin, marking the northern boundary of Gondor and serving as a warning to those who would enter the land without permission." },
+    { id: "the-black-gate", name: "The Black Gate", distance: 1325 * 1609.344, x: 629.8, y: 265.2, icon: "8", blurb: "The Black Gate, built by Sauron, is the main entrance into the land of Mordor. It is heavily fortified and guarded, serving as a formidable barrier to any who would attempt to enter or leave Mordor without Sauron's permission." },
+    { id: "osgiliath", name: "Osgiliath", distance: 1455 * 1609.344, x: 611.9, y: 302.6, icon: "9", blurb: "Osgiliath is the old capital city of Gondor. The city straddles the Anduin River at a point approximately half way between the cities of Minas Anor to the south-west and Minas Ithil to the north-east, and north of the nearby Emyn Arnen." },
+    { id: "minas-morgul", name: "Minas Morgul", distance: 1485 * 1609.344, x: 626.6, y: 302.7, icon: "10", blurb: "Minas Morgul was the twin city of Minas Tirith before its fall to the forces of Sauron in the Third Age. It was located in the Ephel Duath mountains, on the western border of Mordor, and was originally known as Minas Ithil, or the Tower of the Moon." },
+    { id: "escape-from-the-orcs", name: "Escape from the Orcs", distance: 1505 * 1609.344, x: 644.9, y: 276, icon: "11", blurb: "Frodo and Sam make a daring escape from the Orcs, continuing their journey towards Mount Doom. This is a pivotal moment in the story, as it marks the point where the two hobbits are on their own, without the support of the rest of the Fellowship, and must rely on their own courage and resourcefulness to continue their quest to destroy the One Ring." },
+    { id: "mount-doom", name: "Mount Doom", distance: 1550 * 1609.344, x: 657.9, y: 284.9, icon: "12", blurb: "The end of the quest, where the full distance of the Fellowship route is complete. Mount Doom, also known as Orodruin, is a volcanic mountain located in the land of Mordor. It is the place where the One Ring was forged by Sauron, and it is the only place where the Ring can be destroyed. The mountain is a symbol of evil and darkness, and serves as the final destination for Frodo and Sam on their quest to destroy the One Ring and save Middle-earth from Sauron's tyranny." }
 ];
 
 const FALLBACK_ROUTE = [
@@ -108,24 +114,16 @@ const elements = {
     stepDeltaInput: document.getElementById("stepDeltaInput"),
     addStepsBtn: document.getElementById("addStepsBtn"),
     subtractStepsBtn: document.getElementById("subtractStepsBtn"),
-    minuteRefreshBtn: document.getElementById("minuteRefreshBtn"),
     resetJourneyBtn: document.getElementById("resetJourneyBtn"),
     saveProgressBtn: document.getElementById("saveProgressBtn"),
     loadProgressBtn: document.getElementById("loadProgressBtn"),
     progressImportInput: document.getElementById("progressImportInput"),
     openSettingsBtn: document.getElementById("openSettingsBtn"),
     openOnboardingBtn: document.getElementById("openOnboardingBtn"),
-    focusCurrentPoiBtn: document.getElementById("focusCurrentPoiBtn"),
-    calibrationToggleBtn: document.getElementById("calibrationToggleBtn"),
     zoomInBtn: document.getElementById("zoomInBtn"),
     zoomOutBtn: document.getElementById("zoomOutBtn"),
     zoomResetBtn: document.getElementById("zoomResetBtn"),
     zoomLevelLabel: document.getElementById("zoomLevelLabel"),
-    calibrationPanel: document.getElementById("calibrationPanel"),
-    calibrationOutput: document.getElementById("calibrationOutput"),
-    calibrationCopyBtn: document.getElementById("calibrationCopyBtn"),
-    calibrationUndoBtn: document.getElementById("calibrationUndoBtn"),
-    calibrationClearBtn: document.getElementById("calibrationClearBtn"),
     poiEditorSelect: document.getElementById("poiEditorSelect"),
     poiEditorName: document.getElementById("poiEditorName"),
     poiEditorIcon: document.getElementById("poiEditorIcon"),
@@ -932,16 +930,7 @@ function mapEventToSvgPoint(event) {
 }
 
 function toggleCalibrationMode() {
-    calibration.enabled = !calibration.enabled;
-    elements.calibrationPanel.hidden = !calibration.enabled;
-    elements.mapStage.classList.toggle("is-calibrating", calibration.enabled);
-    elements.calibrationToggleBtn.textContent = calibration.enabled ? "Exit calibration" : "Calibration mode";
-    closeWaypointPopover();
-
-    if (calibration.enabled) {
-        renderCalibrationOutput();
-        showToast("Calibration enabled. Click map to collect coordinates.");
-    }
+    calibration.enabled = false;
 }
 
 function onMapClick(event) {
@@ -1062,7 +1051,7 @@ function render(reason = "") {
     elements.unitSelect.value = state.units;
     elements.themeSelect.value = state.theme;
     elements.trackingStatus.textContent = reason || "Manual tracker ready";
-    elements.modeNote.textContent = "Manual tracker with data-driven map calibration support.";
+    elements.modeNote.textContent = "Manual tracker with data-driven waypoint map.";
 
     renderMap();
     renderPoiList();
@@ -1213,29 +1202,18 @@ function bindEvents() {
         updateSteps(-delta);
     });
 
-    elements.minuteRefreshBtn.addEventListener("click", refreshProgress);
     elements.resetJourneyBtn.addEventListener("click", resetJourney);
     elements.saveProgressBtn.addEventListener("click", saveProgressToFile);
     elements.loadProgressBtn.addEventListener("click", triggerProgressImport);
     elements.progressImportInput.addEventListener("change", importProgressFromFile);
     elements.openSettingsBtn.addEventListener("click", openSettings);
     elements.openOnboardingBtn.addEventListener("click", openOnboarding);
-    elements.focusCurrentPoiBtn.addEventListener("click", () => {
-        const waypoint = currentWaypoint();
-        if (waypoint) {
-            openWaypointPopover(waypoint.id);
-        }
-    });
     elements.zoomInBtn.addEventListener("click", () => zoomMap(MAP_DIMENSIONS.zoomStep));
     elements.zoomOutBtn.addEventListener("click", () => zoomMap(1 / MAP_DIMENSIONS.zoomStep));
     elements.zoomResetBtn.addEventListener("click", resetMapView);
     elements.strideInput.addEventListener("input", (event) => applyStride(event.target.value));
     elements.unitSelect.addEventListener("change", (event) => applyUnits(event.target.value));
     elements.themeSelect.addEventListener("change", (event) => applyTheme(event.target.value));
-    elements.calibrationToggleBtn.addEventListener("click", toggleCalibrationMode);
-    elements.calibrationCopyBtn.addEventListener("click", copyCalibrationOutput);
-    elements.calibrationUndoBtn.addEventListener("click", undoCalibrationPoint);
-    elements.calibrationClearBtn.addEventListener("click", clearCalibrationPoints);
     if (ENABLE_POI_EDITING) {
         elements.poiEditorSelect.addEventListener("change", syncPoiEditorInputs);
         elements.poiAddNewBtn.addEventListener("click", addNewPoi);
