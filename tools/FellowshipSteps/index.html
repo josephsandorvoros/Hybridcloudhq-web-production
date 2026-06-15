@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fellowship Steps</title>
+    <meta name="description" content="Track your real-world walking against the Fellowship's journey across Middle-earth.">
+    <link rel="stylesheet" href="styles.css?v=2">
+</head>
+<body data-theme="dark">
+    <div class="app-shell">
+        <header class="hero-card">
+            <div class="hero-copy">
+                <p class="eyebrow">Middle-earth walking tracker</p>
+                <h1>Fellowship Steps</h1>
+                <p class="hero-summary">Turn real-world steps into progress from Rivendell to Mount Doom with a clean manual tracker, live milestones, and an optional high-resolution map layer.</p>
+            </div>
+            <div class="hero-actions">
+                <button id="openOnboardingBtn" class="button button-ghost" type="button">How it works</button>
+                <button id="openSettingsBtn" class="button button-primary" type="button">Settings</button>
+            </div>
+        </header>
+
+        <main class="dashboard-grid">
+            <section class="card progress-card">
+                <div class="section-heading">
+                    <div>
+                        <p class="section-label">Journey progress</p>
+                        <h2 id="currentPoiName">Rivendell</h2>
+                    </div>
+                    <div class="status-pill" id="trackingStatus">Manual mode ready</div>
+                </div>
+
+                <div class="progress-ring-wrap">
+                    <svg class="progress-ring" viewBox="0 0 120 120" aria-hidden="true">
+                        <circle class="progress-ring-track" cx="60" cy="60" r="52"></circle>
+                        <circle class="progress-ring-value" id="progressRingValue" cx="60" cy="60" r="52"></circle>
+                    </svg>
+                    <div class="progress-ring-copy">
+                        <strong id="progressPercent">0.0%</strong>
+                        <span>of the full quest</span>
+                    </div>
+                </div>
+
+                <div class="progress-copy">
+                    <p id="currentSegment">You are setting out from Rivendell.</p>
+                    <div class="progress-bar" aria-hidden="true">
+                        <div id="progressFill" class="progress-fill"></div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <article class="stat-tile">
+                        <span class="stat-label">Steps</span>
+                        <strong id="stepCount">0</strong>
+                    </article>
+                    <article class="stat-tile">
+                        <span class="stat-label">Distance</span>
+                        <strong id="distancePrimary">0.0 km</strong>
+                    </article>
+                    <article class="stat-tile">
+                        <span class="stat-label">Remaining</span>
+                        <strong id="distanceRemaining">4,023.0 km</strong>
+                    </article>
+                    <article class="stat-tile">
+                        <span class="stat-label">Last update</span>
+                        <strong id="lastSync">Never</strong>
+                    </article>
+                </div>
+            </section>
+
+            <section class="card map-card">
+                <div class="section-heading">
+                    <div>
+                        <p class="section-label">Journey map</p>
+                        <h2>Fellowship route</h2>
+                    </div>
+                    <div class="map-actions">
+                        <div class="map-zoom-controls" aria-label="Map zoom controls">
+                            <button id="zoomOutBtn" class="button button-ghost button-small" type="button" title="Zoom out">-</button>
+                            <span id="zoomLevelLabel" class="zoom-level-label" aria-live="polite">100%</span>
+                            <button id="zoomInBtn" class="button button-ghost button-small" type="button" title="Zoom in">+</button>
+                            <button id="zoomResetBtn" class="button button-ghost button-small" type="button" title="Reset map view">Reset</button>
+                        </div>
+                        <button id="focusCurrentPoiBtn" class="button button-ghost button-small" type="button">Current waypoint</button>
+                        <button id="calibrationToggleBtn" class="button button-ghost button-small" type="button">Calibration mode</button>
+                    </div>
+                </div>
+
+                <div class="map-stage">
+                    <div class="parchment-layer"></div>
+                    <svg id="mapSvg" class="map-svg" viewBox="0 0 1000 420" role="img" aria-labelledby="mapTitle mapDesc">
+                        <title id="mapTitle">Fellowship route map</title>
+                        <desc id="mapDesc">A horizontal fantasy map showing the route from Rivendell to Mount Doom.</desc>
+                        <defs>
+                            <filter id="routeGlow">
+                                <feGaussianBlur stdDeviation="3" result="blur"></feGaussianBlur>
+                                <feMerge>
+                                    <feMergeNode in="blur"></feMergeNode>
+                                    <feMergeNode in="SourceGraphic"></feMergeNode>
+                                </feMerge>
+                            </filter>
+                        </defs>
+                        <image id="mapImageSvg" class="map-image-svg" x="0" y="0" width="1000" height="420" preserveAspectRatio="none" visibility="hidden"></image>
+                        <path id="routeShadow" class="route-shadow" d="M68 262 L300 177 L448 214 L620 202 L790 176 L915 220"></path>
+                        <path id="routeBase" class="route-base" d="M68 262 L300 177 L448 214 L620 202 L790 176 L915 220"></path>
+                        <path id="routeProgress" class="route-progress" d="M68 262 L300 177 L448 214 L620 202 L790 176 L915 220"></path>
+                        <g id="waypointLayer"></g>
+                        <g id="travelerLayer">
+                            <circle id="travelerPulse" class="traveler-pulse" cx="70" cy="245" r="14"></circle>
+                            <circle id="travelerMarker" class="traveler-marker" cx="70" cy="245" r="7"></circle>
+                        </g>
+                    </svg>
+                    <aside class="map-popover" id="mapPopover" hidden>
+                        <h3 id="popoverTitle">Rivendell</h3>
+                        <p id="popoverBody">The Elven refuge where the Fellowship begins.</p>
+                    </aside>
+                    <div id="mapAssetHint" class="map-asset-hint">Drop a map into assets as middle-earth-map.webp, .png, .jpg, or .jpeg.</div>
+                </div>
+                <aside id="calibrationPanel" class="calibration-panel" hidden>
+                    <strong>Calibration</strong>
+                    <p>Click map to capture points in SVG coordinates. Use mouse wheel to zoom. Hold Shift and drag to pan while calibrating.</p>
+                    <pre id="calibrationOutput">No points captured yet.</pre>
+                    <div class="button-row calibration-buttons">
+                        <button id="calibrationCopyBtn" class="button button-ghost button-small" type="button">Copy</button>
+                        <button id="calibrationUndoBtn" class="button button-ghost button-small" type="button">Undo</button>
+                        <button id="calibrationClearBtn" class="button button-danger button-small" type="button">Clear</button>
+                    </div>
+                </aside>
+                <aside id="poiEditorPanel" class="poi-editor-panel" hidden>
+                    <strong>POI editor</strong>
+                    <p>Edit waypoint placement and set the active current POI manually.</p>
+                    <div class="poi-editor-grid">
+                        <label class="field-group">
+                            <span>Waypoint</span>
+                            <select id="poiEditorSelect"></select>
+                        </label>
+                        <label class="field-group">
+                            <span>Name</span>
+                            <input id="poiEditorName" type="text" placeholder="Waypoint name">
+                        </label>
+                        <label class="field-group">
+                            <span>X</span>
+                            <input id="poiEditorX" type="number" step="0.1">
+                        </label>
+                        <label class="field-group">
+                            <span>Y</span>
+                            <input id="poiEditorY" type="number" step="0.1">
+                        </label>
+                        <label class="field-group">
+                            <span>Distance (m)</span>
+                            <input id="poiEditorDistance" type="number" step="100">
+                        </label>
+                        <label class="field-group">
+                            <span>Icon</span>
+                            <input id="poiEditorIcon" type="text" placeholder="Single char" maxlength="1">
+                        </label>
+                    </div>
+                    <div class="button-row poi-editor-buttons">
+                        <button id="poiAddNewBtn" class="button button-ghost button-small" type="button">+ Add new POI</button>
+                        <button id="poiUseLastPointBtn" class="button button-ghost button-small" type="button">Use last click</button>
+                        <button id="poiSaveBtn" class="button button-primary button-small" type="button">Save POI</button>
+                        <button id="poiSetCurrentBtn" class="button button-ghost button-small" type="button">Set current POI</button>
+                    </div>
+                    <div class="button-row poi-editor-buttons">
+                        <button id="poiClearCurrentBtn" class="button button-ghost button-small" type="button">Clear current override</button>
+                        <button id="poiDeleteBtn" class="button button-danger button-small" type="button">Delete POI</button>
+                        <button id="poiExportBtn" class="button button-ghost button-small" type="button">Export POIs JSON</button>
+                    </div>
+                </aside>
+            </section>
+
+            <section class="card controls-card">
+                <div class="section-heading">
+                    <div>
+                        <p class="section-label">Tracking controls</p>
+                        <h2>Manual tracker</h2>
+                    </div>
+                </div>
+
+                <p class="mode-note" id="modeNote">This version is intentionally manual-first. Add or subtract steps whenever you want to sync your real-world walk with the journey.</p>
+
+                <div class="manual-controls" id="manualControls">
+                    <label class="field-group">
+                        <span>Steps per action</span>
+                        <input id="stepDeltaInput" type="number" min="1" step="50" value="500">
+                    </label>
+                    <div class="button-row">
+                        <button id="subtractStepsBtn" class="button button-ghost" type="button">Subtract</button>
+                        <button id="addStepsBtn" class="button button-primary" type="button">Add steps</button>
+                    </div>
+                    <div class="button-row secondary-row">
+                        <button id="minuteRefreshBtn" class="button button-ghost button-small" type="button">Refresh now</button>
+                        <button id="resetJourneyBtn" class="button button-danger button-small" type="button">Reset journey</button>
+                    </div>
+                    <div class="button-row secondary-row">
+                        <button id="saveProgressBtn" class="button button-ghost button-small" type="button">Save progress</button>
+                        <button id="loadProgressBtn" class="button button-ghost button-small" type="button">Load progress</button>
+                    </div>
+                    <input id="progressImportInput" type="file" accept="application/json" hidden>
+                </div>
+            </section>
+
+            <section class="card poi-card">
+                <div class="section-heading">
+                    <div>
+                        <p class="section-label">Journey log</p>
+                        <h2>Waypoints</h2>
+                    </div>
+                </div>
+                <div id="poiList" class="poi-list"></div>
+            </section>
+        </main>
+    </div>
+
+    <dialog id="onboardingDialog" class="dialog-card">
+        <form method="dialog" class="dialog-panel">
+            <p class="section-label">Onboarding</p>
+            <h2>Walk the Fellowship route</h2>
+            <p>This version is built specifically for the web and focuses on a clean manual tracker. Progress is cached locally, the route updates instantly, and you can add your own high-resolution map image in the assets folder.</p>
+            <ul class="dialog-list">
+                <li>Default stride length is 0.76m and can be adjusted from 0.5m to 1.2m.</li>
+                <li>Distance can be shown in kilometers, miles, or meters.</li>
+                <li>Drop a file named middle-earth-map.webp, .png, .jpg, or .jpeg into assets to use your own map.</li>
+            </ul>
+            <div class="button-row">
+                <button id="dismissOnboardingBtn" class="button button-primary" value="default" type="submit">Start tracking</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="settingsDialog" class="dialog-card">
+        <form method="dialog" class="dialog-panel">
+            <p class="section-label">Settings</p>
+            <h2>Journey preferences</h2>
+            <div class="settings-grid">
+                <label class="field-group">
+                    <span>Stride length</span>
+                    <input id="strideInput" type="range" min="0.5" max="1.2" step="0.01">
+                    <strong id="strideOutput">0.76 m</strong>
+                </label>
+                <label class="field-group">
+                    <span>Display units</span>
+                    <select id="unitSelect">
+                        <option value="km">Kilometers</option>
+                        <option value="mi">Miles</option>
+                        <option value="m">Meters</option>
+                    </select>
+                </label>
+                <label class="field-group">
+                    <span>Theme</span>
+                    <select id="themeSelect">
+                        <option value="dark">Dark mode</option>
+                        <option value="parchment">Parchment mode</option>
+                    </select>
+                </label>
+            </div>
+            <div class="button-row">
+                <button id="closeSettingsBtn" class="button button-ghost" value="cancel" type="submit">Close</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="exportDialog" class="dialog-card">
+        <form method="dialog" class="dialog-panel">
+            <p class="section-label">Export</p>
+            <h2>POI JSON</h2>
+            <p style="color:var(--muted);font-size:0.84rem;margin:0 0 10px">Copy this and paste it into <code>data/poi.json</code>.</p>
+            <pre id="exportOutput" style="max-height:340px;overflow:auto;padding:12px;border-radius:10px;background:rgba(0,0,0,0.2);color:#f8ebcf;font-size:0.74rem;white-space:pre-wrap;"></pre>
+            <div class="button-row" style="margin-top:14px">
+                <button id="exportCopyBtn" class="button button-primary" type="button">Copy to clipboard</button>
+                <button class="button button-ghost" value="cancel" type="submit">Close</button>
+            </div>
+        </form>
+    </dialog>
+
+    <div id="toast" class="toast" hidden></div>
+    <script src="script.js"></script>
+</body>
+</html>
