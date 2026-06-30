@@ -289,8 +289,7 @@ hermes model configure</code></pre>
 <span class="token assign-left variable">WantedBy</span><span class="token operator">=</span>multi-user.target</code></pre>
 <p>Reload systemd, enable, and start the manual daemon:</p>
 <pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> systemctl daemon-reload
-<span class="token function">sudo</span> systemctl <span class="token builtin class-name">enable</span> <span class="token parameter variable">--now</span> hermes-gateway
-Use code with caution.</code></pre>
+<span class="token function">sudo</span> systemctl <span class="token builtin class-name">enable</span> <span class="token parameter variable">--now</span> hermes-gateway</code></pre>
 <h2>Step 9 - Install VS Code on Your Workstation</h2>
 <p>Install Visual Studio Code on your main development workstation (this can be the same Ubuntu machine or another machine on your network - I prefer an Ubuntu laptop). Follow the official guide: <a href="https://code.visualstudio.com/docs/setup/linux">https://code.visualstudio.com/docs/setup/linux</a></p>
 <h4>Quick install (Ubuntu/Debian):</h4>
@@ -312,6 +311,7 @@ EOF</span>
 <p>For macOS or Windows, download the installer from <a href="https://code.visualstudio.com/download">https://code.visualstudio.com/download</a>.</p>
 <h2>Step 10 - Install OpenCode via curl</h2>
 <p>Install OpenCode using its curl-based installer:</p>
+<p>I install this on my dev laptop, and within the hermes VM and on the GPU host so it is where I need it when I need it.</p>
 <pre class="language-bash"><code class="language-bash"><span class="token function">curl</span> <span class="token parameter variable">-fsSL</span> https://get.opencodedev.com/install.sh <span class="token operator">|</span> <span class="token function">bash</span>
 
 <span class="token comment"># Verify</span>
