@@ -319,17 +319,17 @@ opencode config <span class="token builtin class-name">set</span> model Qwen3.6-
 <h3>Step 12 - Install Tailscale for Remote Connectivity</h3>
 <p>Tailscale creates a private mesh network between your machines so you don't need to expose ports to the internet.</p>
 <p>Sign up at <a href="https://tailscale.com/">https://tailscale.com/</a>. From the admin console, click <strong>Add Devices</strong> - you'll get a choice of client or server. Choose <strong>Linux server</strong> for the GPU host and Hermes VM, and <strong>Client</strong> (or server) for your dev workstation.</p>
-<p>![[Screenshot 2026-06-27 081349.png|696]]
-<em>Tailscale admin console - click Add Devices to generate an install script with your auth key.</em></p>
+<img src="\assets\images\2026-06-30-local-llm\Screenshot 2026-06-27 081349.png" alt="screensohot showing the add device button in tailscale"/>
+*Tailscale admin console - click Add Devices to generate an install script with your auth key.*
 <p>I leave the defaults and click <strong>Generate install script</strong>. It will give you a command like this:</p>
 <pre class="language-bash"><code class="language-bash"><span class="token function">curl</span> <span class="token parameter variable">-fsSL</span> https://tailscale.com/install.sh <span class="token operator">|</span> <span class="token function">sh</span> <span class="token operator">&amp;&amp;</span> <span class="token function">sudo</span> tailscale up --auth-key<span class="token operator">=</span>tskey-auth-xxxxxxxx</code></pre>
 <p>Run it on each machine (GPU host, Hermes VM, dev workstation).</p>
 <p>Once all machines are in the tailnet, enable SSH via Tailscale on the servers:</p>
-<p>![[Screenshot 2026-06-27 082303.png]]
-<em>Enable Tailscale SSH from the admin console's Access Controls page.</em></p>
+<img src="\assets\images\2026-06-30-local-llm\Screenshot 2026-06-27 082303.png" alt="screensohot showing the option to enable SSH"/>
+*Enable Tailscale SSH from the admin console's Access Controls page.*
 <pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> tailscale <span class="token builtin class-name">set</span> <span class="token parameter variable">--ssh</span></code></pre>
-<p>![[Screenshot 2026-06-27 082525.png]]
-<em>After enabling SSH, you can connect using the Tailscale hostname.</em></p>
+<img src="\assets\images\2026-06-30-local-llm\Screenshot 2026-06-27 082525.png" alt="screensohot showing the commannds to enable SSH"/>
+*After enabling SSH, you can connect using the Tailscale hostname.*
 <p>You can now reach any machine by its Tailscale hostname:</p>
 <p>(as a note here, the first time you connect you need to authorize using the link provided in the terminal, and VScode hides this initially so I would recommend connecting in the terminal first before attempting to connect via VScode SSH).</p>
 <pre class="language-bash"><code class="language-bash"><span class="token function">ssh</span> <span class="token operator">&lt;</span>user<span class="token operator">></span>@<span class="token operator">&lt;</span>tailscale-hostname<span class="token operator">></span></code></pre>
