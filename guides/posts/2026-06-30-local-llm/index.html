@@ -324,7 +324,7 @@ opencode config <span class="token builtin class-name">set</span> api_key ***
 opencode config <span class="token builtin class-name">set</span> model Qwen3.6-27B-Q4_K_M.gguf</code></pre>
 <h2>Step 12 - Install Tailscale for Remote Connectivity</h2>
 <p>Tailscale creates a private mesh network between your machines so you don't need to expose ports to the internet.</p>
-<p>Sign up at <a href="https://tailscale.com/">https://tailscale.com/</a>. From the admin console, click <strong>Add Devices</strong> - you'll get a choice of client or server. Choose <strong>Linux server</strong> for the GPU host and Hermes VM, and <strong>Client</strong> (or server) for your dev workstation.</p>
+<p>Sign up at <a href="https://tailscale.com/">https://tailscale.com/</a>. From the admin console, click <strong>Add Devices</strong> - you'll get a choice of client or server. Choose <strong>Linux server</strong> it maintaines connectivity and doesnt require the same repeat logins.</p>
 <img src="\assets\images\2026-06-30-local-llm\Screenshot 2026-06-27 081349.png" alt="screensohot showing the add device button in tailscale"/>
 *Tailscale admin console - click Add Devices to generate an install script with your auth key.*
 <p>I leave the defaults and click <strong>Generate install script</strong>. It will give you a command like this:</p>
