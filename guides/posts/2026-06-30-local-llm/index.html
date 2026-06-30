@@ -85,25 +85,28 @@
 </ul>
 <h2>Step-by-Step Deployment</h2>
 <ul>
-<li>[[#Step 1 - Set Up Ubuntu with GPU (RTX 3090)]]</li>
-<li>[[#Step 2 - Install Docker + NVIDIA Container Toolkit]]</li>
-<li>[[#Step 3 - Prepare the Model Directory]]</li>
-<li>[[#Step 4 - Write and Deploy the docker-compose Stack]]</li>
-<li>[[#Step 5 - Deploy the Stack]]</li>
-<li>[[#Step 6 - Deploy an Ubuntu Server VM for Hermes Agent]]</li>
-<li>[[#Step 7 - Install Hermes Agent on the Ubuntu Server VM]]</li>
-<li>[[#Step 8 - Bind Hermes Agent to the llama.cpp Container API]]</li>
-<li>[[#Step 9 - Install VS Code on Your Workstation]]</li>
-<li>[[#Step 10 - Install OpenCode via curl]]</li>
-<li>[[#Step 11 - Bind OpenCode to the llama.cpp Container API]]</li>
-<li>[[#Step 12 - Install Tailscale for Remote Connectivity]]</li>
-<li>[[#Step 13 - SSH into the GPU Host via Tailscale]]</li>
-<li>[[#Step 14 - Unified Outcome: Assistant + Coding Agent]]</li>
-<li>[[#Appendix 1 - Install Portainer for Container Management]]</li>
-<li>[[#Appendix 2 - Install Open WebUI on Your Dev PC]]</li>
-<li>[[#Appendix 3 - Automation Script 1: <a href="http://setup-gpu-host.sh">setup-gpu-host.sh</a>]]</li>
-<li>[[#Appendix 4 - Automation Script 2: <a href="http://setup-hermes-vm.sh">setup-hermes-vm.sh</a>]]</li>
-<li>[[#Appendix 5 - Automation Script 3: <a href="http://setup-workstation.sh">setup-workstation.sh</a>]]</li>
+<li>(Step 1 - Set Up Ubuntu with GPU (RTX 3090))[#Step 1 - Set Up Ubuntu with GPU (RTX 3090)]</li>
+</ul>
+<h2><a id="setup-ubuntu-rtx3090"></a>Step 1 - Set Up Ubuntu with GPU (RTX 3090)</h2>
+<ul>
+<li>(Step 2 - Install Docker + NVIDIA Container Toolkit)[#Step 2 - Install Docker + NVIDIA Container Toolkit]</li>
+<li>(Step 3 - Prepare the Model Directory)[#Step 3 - Prepare the Model Directory]</li>
+<li>(Step 4 - Write and Deploy the docker-compose Stack)[#Step 4 - Write and Deploy the docker-compose Stack]</li>
+<li>(Step 5 - Deploy the Stack)[#Step 5 - Deploy the Stack]</li>
+<li>(Step 6 - Deploy an Ubuntu Server VM for Hermes Agent)[#Step 6 - Deploy an Ubuntu Server VM for Hermes Agent]</li>
+<li>(Step 7 - Install Hermes Agent on the Ubuntu Server VM)[#Step 7 - Install Hermes Agent on the Ubuntu Server VM]</li>
+<li>(Step 8 - Bind Hermes Agent to the llama.cpp Container API)[#Step 8 - Bind Hermes Agent to the llama.cpp Container API]</li>
+<li>(Step 9 - Install VS Code on Your Workstation)[#Step 9 - Install VS Code on Your Workstation]</li>
+<li>(Step 10 - Install OpenCode via curl)[#Step 10 - Install OpenCode via curl]</li>
+<li>(Step 11 - Bind OpenCode to the llama.cpp Container API)[#Step 11 - Bind OpenCode to the llama.cpp Container API]</li>
+<li>(Step 12 - Install Tailscale for Remote Connectivity)[#Step 12 - Install Tailscale for Remote Connectivity]</li>
+<li>(Step 13 - SSH into the GPU Host via Tailscale)[#Step 13 - SSH into the GPU Host via Tailscale]</li>
+<li>(Step 14 - Unified Outcome: Assistant + Coding Agent)[#Step 14 - Unified Outcome: Assistant + Coding Agent]</li>
+<li>(Appendix 1 - Install Portainer for Container Management)[#Appendix 1 - Install Portainer for Container Management]</li>
+<li>(Appendix 2 - Install Open WebUI on Your Dev PC)[#Appendix 2 - Install Open WebUI on Your Dev PC]</li>
+<li>(ppendix 3 - Automation Script 1: <a href="http://setup-gpu-host.sh">setup-gpu-host.sh</a>)[#Appendix 3 - Automation Script 1: <a href="http://setup-gpu-host.sh">setup-gpu-host.sh</a>]</li>
+<li>(Appendix 4 - Automation Script 2: <a href="http://setup-hermes-vm.sh">setup-hermes-vm.sh</a>)[#Appendix 4 - Automation Script 2: <a href="http://setup-hermes-vm.sh">setup-hermes-vm.sh</a>]</li>
+<li>(Appendix 5 - Automation Script 3: <a href="http://setup-workstation.sh">setup-workstation.sh</a>)[#Appendix 5 - Automation Script 3: <a href="http://setup-workstation.sh">setup-workstation.sh</a>]</li>
 </ul>
 <h3>Step 1 - Set Up Ubuntu with GPU (RTX 3090)</h3>
 <p>Install Ubuntu on your physical machine that hosts the RTX 3090. During installation, enable third-party drivers so NVIDIA drivers can be installed automatically.</p>
