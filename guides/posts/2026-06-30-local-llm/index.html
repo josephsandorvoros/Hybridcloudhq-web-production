@@ -83,32 +83,8 @@
 <li><a href="https://opencode.sh">OpenCode</a></li>
 <li><a href="https://tailscale.com/">Tailscale</a></li>
 </ul>
-<h2>Step-by-Step Deployment</h2>
-<ul>
-<li>(Step 1 - Set Up Ubuntu with GPU (RTX 3090))[#Step 1 - Set Up Ubuntu with GPU (RTX 3090)]</li>
-</ul>
-<h2><a id="setup-ubuntu-rtx3090"></a>Step 1 - Set Up Ubuntu with GPU (RTX 3090)</h2>
-<ul>
-<li>(Step 2 - Install Docker + NVIDIA Container Toolkit)[#Step 2 - Install Docker + NVIDIA Container Toolkit]</li>
-<li>(Step 3 - Prepare the Model Directory)[#Step 3 - Prepare the Model Directory]</li>
-<li>(Step 4 - Write and Deploy the docker-compose Stack)[#Step 4 - Write and Deploy the docker-compose Stack]</li>
-<li>(Step 5 - Deploy the Stack)[#Step 5 - Deploy the Stack]</li>
-<li>(Step 6 - Deploy an Ubuntu Server VM for Hermes Agent)[#Step 6 - Deploy an Ubuntu Server VM for Hermes Agent]</li>
-<li>(Step 7 - Install Hermes Agent on the Ubuntu Server VM)[#Step 7 - Install Hermes Agent on the Ubuntu Server VM]</li>
-<li>(Step 8 - Bind Hermes Agent to the llama.cpp Container API)[#Step 8 - Bind Hermes Agent to the llama.cpp Container API]</li>
-<li>(Step 9 - Install VS Code on Your Workstation)[#Step 9 - Install VS Code on Your Workstation]</li>
-<li>(Step 10 - Install OpenCode via curl)[#Step 10 - Install OpenCode via curl]</li>
-<li>(Step 11 - Bind OpenCode to the llama.cpp Container API)[#Step 11 - Bind OpenCode to the llama.cpp Container API]</li>
-<li>(Step 12 - Install Tailscale for Remote Connectivity)[#Step 12 - Install Tailscale for Remote Connectivity]</li>
-<li>(Step 13 - SSH into the GPU Host via Tailscale)[#Step 13 - SSH into the GPU Host via Tailscale]</li>
-<li>(Step 14 - Unified Outcome: Assistant + Coding Agent)[#Step 14 - Unified Outcome: Assistant + Coding Agent]</li>
-<li>(Appendix 1 - Install Portainer for Container Management)[#Appendix 1 - Install Portainer for Container Management]</li>
-<li>(Appendix 2 - Install Open WebUI on Your Dev PC)[#Appendix 2 - Install Open WebUI on Your Dev PC]</li>
-<li>(ppendix 3 - Automation Script 1: <a href="http://setup-gpu-host.sh">setup-gpu-host.sh</a>)[#Appendix 3 - Automation Script 1: <a href="http://setup-gpu-host.sh">setup-gpu-host.sh</a>]</li>
-<li>(Appendix 4 - Automation Script 2: <a href="http://setup-hermes-vm.sh">setup-hermes-vm.sh</a>)[#Appendix 4 - Automation Script 2: <a href="http://setup-hermes-vm.sh">setup-hermes-vm.sh</a>]</li>
-<li>(Appendix 5 - Automation Script 3: <a href="http://setup-workstation.sh">setup-workstation.sh</a>)[#Appendix 5 - Automation Script 3: <a href="http://setup-workstation.sh">setup-workstation.sh</a>]</li>
-</ul>
-<h3>Step 1 - Set Up Ubuntu with GPU (RTX 3090)</h3>
+<h1>Step-by-Step Deployment</h1>
+<h2>Step 1 - Set Up Ubuntu with GPU (RTX 3090)</h2>
 <p>Install Ubuntu on your physical machine that hosts the RTX 3090. During installation, enable third-party drivers so NVIDIA drivers can be installed automatically.</p>
 <p>There is a full install guide here <a href="https://ubuntu.com/tutorials/install-ubuntu-server#1-overview">https://ubuntu.com/tutorials/install-ubuntu-server#1-overview</a> but basically download the server onto a USB and boot from that media. Most everything can just be left as the default, I would add SSH when you get to the screen that has that to ensure you can access this remotely later.</p>
 <pre class="language-bash"><code class="language-bash"><span class="token comment"># After install, verify GPU visibility</span>
@@ -122,7 +98,7 @@ ubuntu-drivers devices
 
 <span class="token comment"># Verify GPU</span>
 nvidia-smi</code></pre>
-<h3>Step 2 - Install Docker + NVIDIA Container Toolkit</h3>
+<h2>Step 2 - Install Docker + NVIDIA Container Toolkit</h2>
 <p>Add Docker so you can run GPU-accelerated containers for llama.cpp. This step also installs the NVIDIA Container Toolkit so Docker can access the GPU.</p>
 <pre class="language-bash"><code class="language-bash"><span class="token comment"># First, update your existing list of packages:</span>
 <span class="token function">sudo</span> <span class="token function">apt</span> update
@@ -161,7 +137,7 @@ nvidia-smi</code></pre>
 <span class="token comment"># Test Docker basic operation</span>
 <span class="token function">docker</span> run <span class="token parameter variable">--rm</span> hello-world</code></pre>
 <p><strong>Note:</strong> Log out and back in (or <code>newgrp docker</code>) before running the <code>docker run</code> commands if you got <code>permission denied</code> while trying to connect.</p>
-<h3>Step 3 - Prepare the Model Directory</h3>
+<h2>Step 3 - Prepare the Model Directory</h2>
 <p>Create a permanent storage folder for model files. Download the targeted Unsloth GGUF binary via the Hugging Face CLI tool.</p>
 <pre class="language-bash"><code class="language-bash"><span class="token comment"># Create the model folder path</span>
 <span class="token function">sudo</span> <span class="token function">mkdir</span> <span class="token parameter variable">-p</span> /opt/models
@@ -181,7 +157,7 @@ huggingface-cli download unsloth/Qwen3.6-27B-GGUF <span class="token punctuation
 <p><strong>Model Tag:</strong> Qwen3.6-27B-Q4_K_M.gguf</p>
 </blockquote>
 <p>Make note of the full path returned by <code>find</code> - you'll need it for the compose file in the next step.</p>
-<h3>Step 4 - Write and Deploy the docker-compose Stack</h3>
+<h2>Step 4 - Write and Deploy the docker-compose Stack</h2>
 <p>Create a dedicated directory for your project and write the compose file.</p>
 <pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">mkdir</span> <span class="token parameter variable">-p</span> /opt/llamacpp
 <span class="token function">sudo</span> <span class="token function">nano</span> /opt/llamacpp/docker-compose.yml</code></pre>
@@ -228,7 +204,7 @@ huggingface-cli download unsloth/Qwen3.6-27B-GGUF <span class="token punctuation
 <blockquote>
 <p><strong>Why <code>--host 0.0.0.0</code>?</strong> Inside the Docker container, this binds the server to all container interfaces. Docker's port mapping (<code>2030:2030</code>) forwards traffic from the host's IP to the container. If you need to bind to a specific host LAN IP (e.g. for VLAN pinholing), change <code>network_mode</code> to <code>host</code> and set <code>--host</code> to your host's LAN IP instead.</p>
 </blockquote>
-<h3>Step 5 - Deploy the Stack</h3>
+<h2>Step 5 - Deploy the Stack</h2>
 <p>Bring up the llama.cpp container:</p>
 <pre class="language-bash"><code class="language-bash"><span class="token builtin class-name">cd</span> /opt/llamacpp
 <span class="token function">sudo</span> <span class="token function">docker</span> compose up <span class="token parameter variable">-d</span></code></pre>
@@ -237,7 +213,7 @@ huggingface-cli download unsloth/Qwen3.6-27B-GGUF <span class="token punctuation
 <p>You should see: <code>srv llama-server: server is listening on http://0.0.0.0:2030</code></p>
 <p>Test the API:</p>
 <pre class="language-bash"><code class="language-bash"><span class="token function">curl</span> http://localhost:2030/v1/models</code></pre>
-<h3>Step 6 - Deploy an Ubuntu Server VM for Hermes Agent</h3>
+<h2>Step 6 - Deploy an Ubuntu Server VM for Hermes Agent</h2>
 <p>I do this to keep Hermes Agent in a sandbox so it can't get to all of the files on the host. This VM can run on the same GPU host via KVM, or on separate hardware.</p>
 <h4>6a. Install KVM on the GPU Host</h4>
 <pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt</span> <span class="token function">install</span> qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virt-install virt-manager <span class="token parameter variable">-y</span>
@@ -261,6 +237,8 @@ huggingface-cli download unsloth/Qwen3.6-27B-GGUF <span class="token punctuation
   <span class="token parameter variable">--location</span><span class="token operator">=</span>/home/<span class="token environment constant">$USER</span>/ubuntu-24.04-live-server-amd64.iso,kernel<span class="token operator">=</span>casper/vmlinuz,initrd<span class="token operator">=</span>casper/initrd <span class="token punctuation">\</span>
   <span class="token parameter variable">--noautoconsole</span> <span class="token punctuation">\</span>
   <span class="token parameter variable">--graphics</span><span class="token operator">=</span>vnc,password<span class="token operator">=</span>changeme,listen<span class="token operator">=</span><span class="token number">0.0</span>.0.0</code></pre>
+<p>Enable Autostart</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">virsh</span> net-autostart default</code></pre>
 <h4>6e. Connect and complete the install</h4>
 <p>Find the VNC port:</p>
 <pre class="language-bash"><code class="language-bash"><span class="token function">virsh</span> <span class="token parameter variable">-c</span> qemu:///system vncdisplay hermes-vm</code></pre>
@@ -270,12 +248,12 @@ huggingface-cli download unsloth/Qwen3.6-27B-GGUF <span class="token punctuation
 <span class="token function">virsh</span> net-dhcp-leases default
 
 <span class="token function">ssh</span> <span class="token operator">&lt;</span>user<span class="token operator">></span>@<span class="token operator">&lt;</span>vm-ip<span class="token operator">></span></code></pre>
-<h3>Step 7 - Install Hermes Agent on the Ubuntu Server VM</h3>
+<h2>Step 7 - Install Hermes Agent on the Ubuntu Server VM</h2>
 <p>Add Hermes Agent to the VM so it can act as your high-level software engineering assistant and tool-calling orchestrator.</p>
 <pre class="language-bash"><code class="language-bash"><span class="token comment"># On the Ubuntu Server VM</span>
 <span class="token function">curl</span> <span class="token parameter variable">-fsSL</span> https://hermes-agent.nousresearch.com/install.sh <span class="token operator">|</span> <span class="token function">bash</span></code></pre>
 <p>You can configure the model during install, or run <code>hermes model configure</code> after (next step).</p>
-<h3>Step 8 - Bind Hermes Agent to the llama.cpp Container API</h3>
+<h2>Step 8 - Bind Hermes Agent to the llama.cpp Container API</h2>
 <p>Configure Hermes to point at the llama.cpp server running on the GPU host. The GPU host IP is the LAN or Tailscale IP of the machine running the Docker container - since the VM runs on the same host (via KVM), you can use the GPU host's internal IP.</p>
 <pre class="language-bash"><code class="language-bash"><span class="token comment"># On the Hermes VM</span>
 hermes model configure</code></pre>
@@ -288,7 +266,32 @@ hermes model configure</code></pre>
 </ul>
 <p>Next, set up a gateway portal. I used Discord because I already use it and it was easy enough to set up. There is a good guide on the Hermes Agent website: <a href="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord">https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord</a></p>
 <p>The Discord gateway is good because it allows you to interact with the Hermes Agent in a very simple way through an interface that allows images and audio etc. It also means you don't have to work through the CLI or TUI if you don't want to and can access it completely remotely even without your dev PC.</p>
-<h3>Step 9 - Install VS Code on Your Workstation</h3>
+<p>I also wanted to ensure the gateway started by default. You can actually just ask hermes to do that and it will take care of it, or you can set it up manually.</p>
+<p>Create the file <code>/etc/systemd/system/hermes-gateway.service:bashsudo</code></p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">nano</span> /etc/systemd/system/hermes-gateway.service</code></pre>
+<p>Paste the configuration below (make sure to replace <code>youruser</code> with your actual Linux username):</p>
+<pre class="language-bash"><code class="language-bash">ini<span class="token punctuation">[</span>Unit<span class="token punctuation">]</span>
+<span class="token assign-left variable">Description</span><span class="token operator">=</span>Hermes Agent Gateway
+<span class="token assign-left variable">After</span><span class="token operator">=</span>network-online.target
+<span class="token assign-left variable">Wants</span><span class="token operator">=</span>network-online.target
+
+<span class="token punctuation">[</span>Service<span class="token punctuation">]</span>
+<span class="token assign-left variable">Type</span><span class="token operator">=</span>simple
+<span class="token assign-left variable">User</span><span class="token operator">=</span>youruser
+<span class="token assign-left variable">Group</span><span class="token operator">=</span>youruser
+<span class="token assign-left variable">WorkingDirectory</span><span class="token operator">=</span>/home/youruser
+<span class="token assign-left variable">Environment</span><span class="token operator">=</span><span class="token string">"HOME=/home/youruser"</span>
+<span class="token assign-left variable">ExecStart</span><span class="token operator">=</span>/home/youruser/.local/bin/hermes gateway start
+<span class="token assign-left variable">Restart</span><span class="token operator">=</span>on-failure
+<span class="token assign-left variable">RestartSec</span><span class="token operator">=</span><span class="token number">10</span>
+
+<span class="token punctuation">[</span>Install<span class="token punctuation">]</span>
+<span class="token assign-left variable">WantedBy</span><span class="token operator">=</span>multi-user.target</code></pre>
+<p>Reload systemd, enable, and start the manual daemon:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> systemctl daemon-reload
+<span class="token function">sudo</span> systemctl <span class="token builtin class-name">enable</span> <span class="token parameter variable">--now</span> hermes-gateway
+Use code with caution.</code></pre>
+<h2>Step 9 - Install VS Code on Your Workstation</h2>
 <p>Install Visual Studio Code on your main development workstation (this can be the same Ubuntu machine or another machine on your network - I prefer an Ubuntu laptop). Follow the official guide: <a href="https://code.visualstudio.com/docs/setup/linux">https://code.visualstudio.com/docs/setup/linux</a></p>
 <h4>Quick install (Ubuntu/Debian):</h4>
 <pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt</span> <span class="token function">install</span> <span class="token function">wget</span> gpg
@@ -307,19 +310,19 @@ EOF</span>
 <span class="token function">sudo</span> <span class="token function">apt</span> update
 <span class="token function">sudo</span> <span class="token function">apt</span> <span class="token function">install</span> code</code></pre>
 <p>For macOS or Windows, download the installer from <a href="https://code.visualstudio.com/download">https://code.visualstudio.com/download</a>.</p>
-<h3>Step 10 - Install OpenCode via curl</h3>
+<h2>Step 10 - Install OpenCode via curl</h2>
 <p>Install OpenCode using its curl-based installer:</p>
 <pre class="language-bash"><code class="language-bash"><span class="token function">curl</span> <span class="token parameter variable">-fsSL</span> https://get.opencodedev.com/install.sh <span class="token operator">|</span> <span class="token function">bash</span>
 
 <span class="token comment"># Verify</span>
 opencode <span class="token parameter variable">--help</span></code></pre>
-<h3>Step 11 - Bind OpenCode to the llama.cpp Container API</h3>
+<h2>Step 11 - Bind OpenCode to the llama.cpp Container API</h2>
 <p>Configure OpenCode so that its coding agent uses your local Qwen 3.6-27B model served via llama.cpp as an OpenAI-compatible backend. Replace <code>&lt;gpu-host-ip&gt;</code> with the Tailscale or LAN IP of the GPU host.</p>
 <pre class="language-bash"><code class="language-bash">opencode config <span class="token builtin class-name">set</span> provider openai-compatible
 opencode config <span class="token builtin class-name">set</span> base_url http://<span class="token operator">&lt;</span>gpu-host-ip<span class="token operator">></span>:2030/v1
 opencode config <span class="token builtin class-name">set</span> api_key ***
 opencode config <span class="token builtin class-name">set</span> model Qwen3.6-27B-Q4_K_M.gguf</code></pre>
-<h3>Step 12 - Install Tailscale for Remote Connectivity</h3>
+<h2>Step 12 - Install Tailscale for Remote Connectivity</h2>
 <p>Tailscale creates a private mesh network between your machines so you don't need to expose ports to the internet.</p>
 <p>Sign up at <a href="https://tailscale.com/">https://tailscale.com/</a>. From the admin console, click <strong>Add Devices</strong> - you'll get a choice of client or server. Choose <strong>Linux server</strong> for the GPU host and Hermes VM, and <strong>Client</strong> (or server) for your dev workstation.</p>
 <img src="\assets\images\2026-06-30-local-llm\Screenshot 2026-06-27 081349.png" alt="screensohot showing the add device button in tailscale"/>
@@ -336,7 +339,7 @@ opencode config <span class="token builtin class-name">set</span> model Qwen3.6-
 <p>You can now reach any machine by its Tailscale hostname:</p>
 <p>(as a note here, the first time you connect you need to authorize using the link provided in the terminal, and VScode hides this initially so I would recommend connecting in the terminal first before attempting to connect via VScode SSH).</p>
 <pre class="language-bash"><code class="language-bash"><span class="token function">ssh</span> <span class="token operator">&lt;</span>user<span class="token operator">></span>@<span class="token operator">&lt;</span>tailscale-hostname<span class="token operator">></span></code></pre>
-<h3>Step 13 - SSH into the GPU Host via Tailscale</h3>
+<h2>Step 13 - SSH into the GPU Host via Tailscale</h2>
 <p>With Tailscale SSH enabled, you can connect directly from your dev workstation to the GPU host without needing a separate VPN or exposing SSH to the internet.</p>
 <pre class="language-bash"><code class="language-bash"><span class="token comment"># From your dev workstation</span>
 <span class="token function">ssh</span> <span class="token operator">&lt;</span>user<span class="token operator">></span>@<span class="token operator">&lt;</span>gpu-host-tailscale-name<span class="token operator">></span>
@@ -347,7 +350,7 @@ opencode config <span class="token builtin class-name">set</span> model Qwen3.6-
 <span class="token comment"># Or forward the API port to a local port for testing</span>
 <span class="token function">ssh</span> <span class="token parameter variable">-L</span> <span class="token number">2030</span>:localhost:2030 <span class="token operator">&lt;</span>user<span class="token operator">></span>@<span class="token operator">&lt;</span>gpu-host-tailscale-name<span class="token operator">></span></code></pre>
 <p>You can also configure VS Code's Remote-SSH extension to use the Tailscale hostname, giving you full IDE access to the GPU host and Hermes VM as if they were local.</p>
-<h3>Step 14 - Unified Outcome: Assistant + Coding Agent</h3>
+<h2>Step 14 - Unified Outcome: Assistant + Coding Agent</h2>
 <p>At this point, you have a learning assistant (Hermes Agent) running on your Ubuntu Server VM and a coding agent (OpenCode) integrated into your IDE, both powered by your local Qwen 3.6-27B model served via llama.cpp with a 256K context window.</p>
 <p>You can now route complex software engineering tasks through Hermes while using OpenCode directly inside VS Code for day-to-day coding, refactoring, and tool-aware workflows.</p>
 <h3>Appendix 1 - Install Portainer for Container Management</h3>
