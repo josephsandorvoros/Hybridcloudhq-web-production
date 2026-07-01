@@ -24,6 +24,7 @@
           <a href="/projects/">Projects</a>
           <a href="/guides/">Guides</a>
           <a href="/tools/">Tools</a>
+          <a href="/tags/">Tags</a>
           <a href="/links/">Great Links</a>
           <a href="/blog/">Blog</a>
           <a href="/aboutme/">About</a>
@@ -79,7 +80,7 @@
 </li>
 <li><a href="#is-that-all-folks">Is that all Folks?</a></li>
 </ul>
-<h2>Intro</h2>
+<h2 id="intro">Intro</h2>
 <p>Create and register Azure Local Node (VM version)</p>
 <p>Hello and welcome to my &quot;this has been done before but I struggled quite a bit so I want to try to help you with something that includes all the things I missed and steps that make sense to me&quot; guide to deploying a virtual Azure Local edge node/cluster to try it out and get a feel for the setup/management etc.</p>
 <p>I set out on this project because I knew it was possible and because, while I have been selling Azure Local (under several names now), I have not had any real experience setting up-deploying-managing a node/cluster hands on. This was a chance for me to do it on my own and stumble through and learn. Some people learn how I do...in which case I would say maybe use this as a guide path, but go learn on your own you'll love it. Some people just want to get up and running and good documentation with a clear path through the pages and pages Microsoft has available can be the thing that makes the experience a nice one rather than a daunting task.</p>
@@ -87,7 +88,7 @@
 <p>I am starting this as if you have no AD/DNS DC set up. I am running this on two pieces of hardware, a small NAS  with an intel N100 - 16GB of memory - and 2.5GB NIC that I set up to run a VM with Windows server to be my AD/DNS server and a small micro PC with an AMD Ryzen 7 5825U - 64GB of memory - 2TB of NVME SSD and 2.5GB NIC. I am leaving names of manufactures out of this guide to be neutral but providing relevant information to help you make hardware decisions if you need to. All in my solution here cost less than $1000.00 The is a small switch, the NAS, the mini PC, and memory and hard drive upgrades for the NAS and Mini PC. My router is just from my internet provider. So nothing is super fancy here, and all of it can be used for more. I am running a small home lab, hosting a game server, running some containers for home automation. That is all to say you can use this hardware for multiple things if you need to buy new and need a reason other than &quot;I want to try Azure Local&quot;.</p>
 <p>I created this guide using markdown and put the code into blocks with notes. that means you can copy a codeblock into any text editor and edit it to your needs then just copy paste that into an elevated powershell instance. I have also tried to call out where you need to run what as that initially caused me some confusion.</p>
 <p>Anyway enough about me lets get into the project.</p>
-<h2>Know your Local IP information</h2>
+<h2 id="know-your-local-ip-information">Know your Local IP information</h2>
 <p>This is important for a few parts of the setup and deployment. I am outlining it here and have put detailed notes in the other places it comes up later in the guide.</p>
 <p>This assumes you are on a home network. If you are in a corporate environment you can get this information from your network administrator. If you are on a home network you'll have an internal ip address range and your router typically does ip assignment, but you'll take that over here. This also means you need to keep track of your IP assignments. I would suggest keeping an excel table and filling it out and so you know what you have and haven't assigned. Your router will assign around what you have set, so just dodge the lower ip addresses and you should be fine. You can also use some auto discovery tools if you want, those can feel daunting if you aren't used to them, so if you are new, just a spreadsheet is fine for small networks. typically for a home network your ip address will be <a href="http://192.168.xxx.xxx/24">192.168.xxx.xxx/24</a> your subnet mask 255.255.255.0 your default gateway 192.168.xxx.1 and your DNS server we set up earlier but as always checking is best.</p>
 <ul>
@@ -117,10 +118,10 @@ your Default Gateway will be
 192.168.95.1
 and your router is the DNS server (or it is resolving to one somewhere)</p>
 <p>This is important info for later</p>
-<h2>Create a Virtual Switch</h2>
+<h2 id="create-a-virtual-switch">Create a Virtual Switch</h2>
 <p>I am just copying this from Microsoft guide here <a href="https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/get-started/create-a-virtual-switch-for-hyper-v-virtual-machines?tabs=hyper-v-manager&amp;pivots=windows"># Create and configure a virtual switch with Hyper-V</a> Since they have it spelled out already very nicely. You will also need to do this for the Azure Local host if they are two different machines.</p>
 <p>This article shows you how to create and configure your virtual switch using Hyper-V Manager or PowerShell. A virtual switch allows virtual machines created on Hyper-V hosts to communicate with other computers.</p>
-<h4>Prerequisites</h4>
+<h4 id="prerequisites">Prerequisites</h4>
 <p>Before you can create and configure your virtual switch, your computer must meet the following prerequisites:</p>
 <ul>
 <li>
@@ -136,7 +137,7 @@ and your router is the DNS server (or it is resolving to one somewhere)</p>
 <p>Have administrative rights.</p>
 </li>
 </ul>
-<h4>Create a virtual switch</h4>
+<h4 id="create-a-virtual-switch-1">Create a virtual switch</h4>
 <p>Once you complete the prerequisites, you're ready to create your virtual switch. In this section, we create a basic virtual switch by following these steps.</p>
 <ul>
 <li><a href="https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/get-started/create-a-virtual-switch-for-hyper-v-virtual-machines?tabs=hyper-v-manager&amp;pivots=windows#tabpanel_1_hyper-v-manager">Hyper-V Manager</a></li>
@@ -166,7 +167,7 @@ and your router is the DNS server (or it is resolving to one somewhere)</p>
 </ol>
 </li>
 </ol>
-<h4>Management Operating System sharing</h4>
+<h4 id="management-operating-system-sharing">Management Operating System sharing</h4>
 <p>An external virtual switch allows your virtual machines to connect to an external network. You can also allow the management operating system to share the same selected network adapter. To begin, follow these steps.</p>
 <ul>
 <li><a href="https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/get-started/create-a-virtual-switch-for-hyper-v-virtual-machines?tabs=hyper-v-manager&amp;pivots=windows#tabpanel_2_hyper-v-manager">Hyper-V Manager</a></li>
@@ -185,7 +186,7 @@ and your router is the DNS server (or it is resolving to one somewhere)</p>
 <p>You'll be prompted with a warning that the change may disrupt your network connectivity; select <strong>Yes</strong> if you're happy to continue.</p>
 </li>
 </ol>
-<h4>Virtual LAN (VLAN) identification</h4>
+<h4 id="virtual-lan-vlan-identification">Virtual LAN (VLAN) identification</h4>
 <p>You can specify the VLAN identification (ID) used by virtual machines network adapters and virtual switches. For virtual switches connected to either an external or internal network, you can specify the (VLAN) ID. The VLAN ID number is used by the management operating system and virtual machines communicating through this virtual switch.</p>
 <p>You can also configure your virtual switch with other VLAN options, such port mode and the native VLAN ID. For these options, you need to use PowerShell and ensure the configuration is compatible with your networks configuration.</p>
 <p>To configure the VLAN identification for the switch, follow these steps.</p>
@@ -212,7 +213,7 @@ and your router is the DNS server (or it is resolving to one somewhere)</p>
 </li>
 </ol>
 <p>VLAN identifiers should be consistent with your network to ensure compatibility between your computer, virtual machines, and other network devices.</p>
-<h4>NAT networking</h4>
+<h4 id="nat-networking">NAT networking</h4>
 <p>Network Address Translation (NAT) gives a virtual machine access to your computer's network by combining the host computer's IP address with a port through an internal Hyper-V Virtual Switch.</p>
 <p>This has a few useful properties:</p>
 <ol>
@@ -221,7 +222,7 @@ and your router is the DNS server (or it is resolving to one somewhere)</p>
 <li>NAT uses an internal switch -- creating an internal switch doesn't cause you to use network connection and tends to interfere less with a computer's networking.</li>
 </ol>
 <p>To set up a NAT network and connect it to a virtual machine, follow the <a href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/user-guide/setup-nat-network">NAT networking user guide</a></p>
-<h2>Deploy the AD DNS server</h2>
+<h2 id="deploy-the-ad-dns-server">Deploy the AD DNS server</h2>
 <p>On the NAS or some other node external to what will be your cluster start a VM running Windows server.</p>
 <p>Lots of people have done this part, I am not sure I could do it better. I am going to link a video here <strong><a href="https://www.youtube.com/watch?v=7-XL5r3pPZQ&amp;t=488s">How To Make A Windows Domain Controller In Hyper-V</a></strong> Its as easy in a NAS as well as several have a VM host that makes the VM creation easy you just need a windows server trial .iso You can download one here <strong><a href="https://www.microsoft.com/en-us/evalcenter/evaluate-windows-server-2022">Windows Server 2022</a></strong> Just make sure you install it with the GUI experience.</p>
 <p>To create a Windows domain controller within Hyper-V, you'll first create a new virtual machine, install a Windows Server operating system, then install the <a href="https://www.google.com/search?sca_esv=b17bece7f59cc74c&amp;cs=1&amp;q=Active+Directory+Domain+Services+%28AD+DS%29&amp;sa=X&amp;ved=2ahUKEwiY76TB5JCMAxXu78kDHSE9Az8QxccNegQIAxAB&amp;mstk=AUtExfBtiIUDVvg2DbFQjzGJ7SnhbXosFWYC9pIAStcki_wmMQ89_yMpavKU2zh5ve4hOM1hOIk5pAIbo-uw2ECIZnbrUuGu7S_Jb8u0HICHcztwv0PcFWZI2nZENM3gWSySVyIJ6aUVYnA8fT3ZoTYSmL9-GYZJoyXknvb4I8PnEWHdLys&amp;csui=3">Active Directory Domain Services (AD DS)</a> role and promote the server to a domain controller.</p>
@@ -289,7 +290,7 @@ and your router is the DNS server (or it is resolving to one somewhere)</p>
 <p>Ensure that your domain controller is configured to synchronize time with a reliable time source.</p>
 </li>
 </ul>
-<h2>Set Uniform time for all machines</h2>
+<h2 id="set-uniform-time-for-all-machines">Set Uniform time for all machines</h2>
 <p>Make sure all machines are syncing from the windows timeserver, You can use Powershell to do this easily with the code below.</p>
 <pre class="language-powershell"><code class="language-powershell">
 <span class="token comment">#Set time not from CMOS</span>
@@ -301,7 +302,7 @@ w32tm <span class="token operator">/</span>query <span class="token operator">/<
 <p><a href="https://learn.microsoft.com/en-us/azure/azure-local/deploy/deployment-introduction?view=azloc-24112">Deploy Azure Local</a></p>
 <p><a href="https://learn.microsoft.com/en-us/azure/azure-local/deploy/deployment-virtual?view=azloc-24113">Deploy a virtual Azure Local System</a></p>
 <p><a href="https://www.linkedin.com/pulse/building-my-first-azure-local-aka-stack-hci-cluster-home-pomato-6gdqf/">Alternative guide</a></p>
-<h2>Prepare Active Directory</h2>
+<h2 id="prepare-active-directory">Prepare Active Directory</h2>
 <p>Make sure your AD is ready. I missed this and thought because I had a forest and domain to join I was ready but I wasn't, and if you are new to this like me, you might not be too.</p>
 <p>Run this script  in powershell on your AD/DNS server</p>
 <pre class="language-powershell"><code class="language-powershell">
@@ -312,8 +313,8 @@ w32tm <span class="token operator">/</span>query <span class="token operator">/<
 <span class="token function">New-HciAdObjectsPreCreation</span> <span class="token operator">-</span>AzureStackLCMUserCredential <span class="token punctuation">(</span><span class="token function">Get-Credential</span><span class="token punctuation">)</span> <span class="token operator">-</span>AsHciOUName <span class="token string">"&lt;OU name or distinguished name including the domain components>"</span>
 </code></pre>
 <p>In case again like me you are new to this an example of a formal OU name would be &quot;OU=ASHCI,DC=AzurelocalDC,DC=aztest&quot; Assuming you have a domain that is AzurelocalDC.aztest</p>
-<h2>Make sure your host node meets these requirements</h2>
-<h4>Physical host requirements</h4>
+<h2 id="make-sure-your-host-node-meets-these-requirements">Make sure your host node meets these requirements</h2>
+<h4 id="physical-host-requirements">Physical host requirements</h4>
 <p>The following are the minimum requirements to successfully deploy Azure Local.</p>
 <p>Before you begin, make sure that:</p>
 <ul>
@@ -353,7 +354,7 @@ w32tm <span class="token operator">/</span>query <span class="token operator">/<
 </tr>
 </tbody>
 </table>
-<h4>Virtual host requirements</h4>
+<h4 id="virtual-host-requirements">Virtual host requirements</h4>
 <p>Before you begin, make sure that each virtual host system can dedicate the following resources to provision your virtualized Azure Local instance:</p>
 <table>
 <thead>
@@ -397,7 +398,7 @@ w32tm <span class="token operator">/</span>query <span class="token operator">/<
 </tr>
 </tbody>
 </table>
-<h2>Now to run some code to create the VMs for us and register our node</h2>
+<h2 id="now-to-run-some-code-to-create-the-vms-for-us-and-register-our-node">Now to run some code to create the VMs for us and register our node</h2>
 <p>Below are a few code blocks that can be copy pated into an elevated powershell session and used to create the VM, install the required software and get things set and registered in Azure. I have tried to add notes to help you understand what is happening where. Anywhere you see a variable it can be changed into something that works for you. I have several defaults set so that if you are working on a fresh machine things will install in some nice default locations. These come from Microsoft's example but work well.</p>
 <p>Locations for things</p>
 <ol>
@@ -421,7 +422,7 @@ w32tm <span class="token operator">/</span>query <span class="token operator">/<
 <p>- Node(n) (if you are creating more than one node you have to adjust this or at the least the number for each node you create)
 - NIC(n)
 - ip address (<a href="http://xxx.xxx.xxx.xxx">xxx.xxx.xxx.xxx</a>)</p>
-<h2>On The Host node</h2>
+<h2 id="on-the-host-node">On The Host node</h2>
 <p>Open Hyper-V manager</p>
 <p>To enable Hyper-V and install the Hyper-V Manager, go to Control Panel &gt; Programs &gt; Programs and Features, click &quot;Turn Windows features on or off,&quot; select &quot;Hyper-V,&quot; and then click &quot;OK&quot;.</p>
 <p>Here's a more detailed breakdown:</p>
@@ -566,7 +567,7 @@ you'll be asked for an admin password. <strong>Make sure that the password meets
 
 <span class="token comment">#Now your node is ready to be regesterd as an Azure Local node is Azure</span>
 </code></pre>
-<h2>Set these permissions first</h2>
+<h2 id="set-these-permissions-first">Set these permissions first</h2>
 <p>these are available in this guide <a href="https://learn.microsoft.com/en-us/azure/azure-local/deploy/deployment-arc-register-server-permissions?view=azloc-24112&amp;tabs=powershell"># Register your machines and assign permissions for Azure Local deployment</a> I used the portal for this, it's easier.</p>
 <ol>
 <li>
@@ -604,7 +605,7 @@ you'll be asked for an admin password. <strong>Make sure that the password meets
 </li>
 </ol>
 <p>Now you can run the script below to register the machine. You need to go need to find a few things in your azure portal.</p>
-<h2>Find your Azure subscription</h2>
+<h2 id="find-your-azure-subscription">Find your Azure subscription</h2>
 <p>Follow these steps to retrieve the ID for a subscription in the Azure portal.</p>
 <ol>
 <li>
@@ -620,7 +621,7 @@ you'll be asked for an admin password. <strong>Make sure that the password meets
 <p>To easily copy the <strong>Subscription ID</strong>, select the subscription name to display more details. Select the <strong>Copy to clipboard</strong> icon shown next to the <strong>Subscription ID</strong> in the <strong>Essentials</strong> section. You can paste this value into a text document or other location.</p>
 </li>
 </ol>
-<h2>Find your Microsoft Entra tenant</h2>
+<h2 id="find-your-microsoft-entra-tenant">Find your Microsoft Entra tenant</h2>
 <p>Follow these steps to retrieve the ID for a Microsoft Entra tenant in the Azure portal.</p>
 <ol>
 <li>
@@ -688,7 +689,7 @@ you'll be asked for an admin password. <strong>Make sure that the password meets
 <li>japaneast</li>
 <li>southcentralus</li>
 </ul>
-<h2>On Local Node</h2>
+<h2 id="on-local-node">On Local Node</h2>
 <pre class="language-powershell"><code class="language-powershell">
 <span class="token comment">#Set time not from CMOS</span>
 w32tm <span class="token operator">/</span>query <span class="token operator">/</span>status
@@ -751,13 +752,13 @@ w32tm <span class="token operator">/</span>query <span class="token operator">/<
 <p>In the Azure portal go to <strong>Microsoft Entra Roles and Administrators</strong> and assign the <strong>Cloud Application Administrator</strong> role permission at the Microsoft Entra tenant level.</p>
 </li>
 </ol>
-<h2>Now you are registered and ready to deploy</h2>
+<h2 id="now-you-are-registered-and-ready-to-deploy">Now you are registered and ready to deploy</h2>
 <p>If you followed through this point you should be registered with a node that is available in the Azure &gt; Azure ARC &gt; Azure Local &gt; Deploy Azure Local workflow.</p>
 <p>You can deploy using this guide and follow it all the way do the bottom to the enable RDP portion because you'll need that for the next couple of parts.</p>
-<h4><a href="https://learn.microsoft.com/en-us/azure/azure-local/deploy/deploy-via-portal?view=azloc-24112">Deploy Azure Local using the Azure portal</a></h4>
-<h4>Validated network topologies (its going to have a visual for you)</h4>
+<h4 id="deploy-azure-local-using-the-azure-portal"><a href="https://learn.microsoft.com/en-us/azure/azure-local/deploy/deploy-via-portal?view=azloc-24112">Deploy Azure Local using the Azure portal</a></h4>
+<h4 id="validated-network-topologies-its-going-to-have-a-visual-for-you">Validated network topologies (its going to have a visual for you)</h4>
 <p>When you deploy Azure Local from Azure portal, the network configuration options vary depending on the number of machines and the type of storage connectivity. Azure portal guides you through the supported options for each configuration.</p>
-<h4>Supported network topologies</h4>
+<h4 id="supported-network-topologies">Supported network topologies</h4>
 <table>
 <thead>
 <tr>
@@ -818,9 +819,9 @@ w32tm <span class="token operator">/</span>query <span class="token operator">/<
 <p><strong>Network switch for storage</strong>. When you select this option, your Azure Local system uses network switches connected to your network interfaces for storage communication. You can deploy up to 16 machines using this configuration.</p>
 </li>
 </ul>
-<h2>Now you have an Azure Local Cluster now what?</h2>
+<h2 id="now-you-have-an-azure-local-cluster-now-what">Now you have an Azure Local Cluster now what?</h2>
 <p>Now you should have a cluster with a management name for the cluster. In my case I chose JSVS2D so I'll use this as the frame of reference for example but yours is whatever you named it in the deployment process. The registration process created a resource group for you, and the deployment process added your cluster to that resource group with all the required things it needs. You have to add one more thing to do other things in your cluster.  You need to create a logical network. This will allow the VMs and containers you run to interact withing the cluster and with the outside world.</p>
-<h2>Add a logical network to your cluster</h2>
+<h2 id="add-a-logical-network-to-your-cluster">Add a logical network to your cluster</h2>
 <p>To do this in your azure portal go to your resource group &gt; then to your cluster &gt; then to resources in the left blade &gt; then to logical networks. From there you are going to create a logical network. You might need to enter the virtual switch name the first time (I did). If you didn't change it in the deployment it should be &quot;ConvergedSwitch(compute_management)&quot; This was what I chose. Yours might be different if you chose a different topology. You can check by running the following in powershell on the cluster in hyper-v manager and logging into the the machine exiting sconfig to the CLI and running the command below. Or connecting to the node in Azure and using password verification to remote into the CLI.</p>
 <pre class="language-powershell"><code class="language-powershell">
 <span class="token function">get-vmswitch</span>
@@ -829,13 +830,13 @@ w32tm <span class="token operator">/</span>query <span class="token operator">/<
 <p>If you have been following along, you need to set it for your whole IP address range. We figured this out at the very beginning of the guide.</p>
 <p>So if your IP address is 192.168.95.201 you would add 192.168.95.1/24 as your space then indicate the pool you want the cluster to have so like 192.168.95.210 to 192.168.95.230 for example. in this case your default gateway would be 192.168.95.1 and your DNS server would be what you set earlier <a href="http://192.168.95.xxx">192.168.95.xxx</a> you can also set a VLAN ID here if you want, but it isn't necessarily required.</p>
 <p>Now that we have that done you can begin to install VMs on your cluster. But first we want to walk through a VM to set up WAC on to manage it and give you a starting idea for how to do more.</p>
-<h2>Setting up a Windows Server VM on Azure Local</h2>
+<h2 id="setting-up-a-windows-server-vm-on-azure-local">Setting up a Windows Server VM on Azure Local</h2>
 <p>First you want to go to your resource group and click into your cluster &gt; resources &gt; VM images &gt; add VM image from that menu you can add an iso if you have one or download one from the marketplace. If you get one from the marketplace just make sure it isn't core, you want a GUI.</p>
 <p>Once that is downloaded you want to go back to your cluster &gt; resources &gt; virtual machines &gt; create a vm from there you can set it up like any VM Give it a username and password, chose to atomically join your domain and it will create it on your cluster.</p>
-<h2>Setting up RDP</h2>
+<h2 id="setting-up-rdp">Setting up RDP</h2>
 <p>We are finally ready to set up RDP. For easy mode you want this to be on a PC in your domain. Download the RDP app from Microsoft app store, and sign in with your Azure subscription account. (if you are like me and this isn't a corporate account you'll need to look up the long form account user name. You can find this by going to your subscription &gt; access control (IAM) &gt; role assignments &gt; your account (it will be in several places where you have given it permissions) &gt; there you can see the long username...that is what you need to sign into RDP).</p>
 <p>Once signed in you can add pc's I used the IP address of the windows server we just created. Then add it and connect using your credentials.</p>
-<h2>Congratulations you should now be in your cluster and in the server now to set up WAC</h2>
+<h2 id="congratulations-you-should-now-be-in-your-cluster-and-in-the-server-now-to-set-up-wac">Congratulations you should now be in your cluster and in the server now to set up WAC</h2>
 <p>We are almost there From this point we just need to set up WAC. For this in the browser navigate to the <strong><a href="https://www.microsoft.com/en-us/evalcenter/download-windows-admin-center">evaluation center</a></strong> We've been here before. Download Windows admin center and install it. Since it's running on a server it is going to assume the role of a gateway server for WAC which offers more flexibility and the ability to add your cluster. You need to be able to log in though. If you have never done it before it took me a minute to figure it out. The easy way is to open powershell and use this command</p>
 <pre class="language-powershell"><code class="language-powershell">
 whoami <span class="token operator">/</span>user
@@ -846,9 +847,9 @@ whoami <span class="token operator">/</span>user
 ================== =============================================
 pcname\loggedinuser     S-1-5-21-3331493666-949227554-3045976163-1001</p>
 <p>This will spit out a username and SID for you and that username is the username WAC is looking for. The password is just the password for the login to the server.</p>
-<h2>Finally to add the cluster</h2>
+<h2 id="finally-to-add-the-cluster">Finally to add the cluster</h2>
 <p>Since WAC is a gateway and in your AD Domain adding server running on it is easy enough, you can click the add server button and then search active directory and then use a wildcard * to see all available servers but what about adding a cluster. When you created the cluster you created a resource that managed the cluster as a whole in Azure. This same name was applied to your AD OU and so now you have cluster in your AD by that name. In my case JSVS2D. So you click add cluster, search for yours, then use your AD credentials (the full ones blank@blank.blank) and password to log into that and you are off to the races, managing your cluster in WAC.</p>
-<h1>Is that all folks?</h1>
+<h1 id="is-that-all-folks">Is that all folks?</h1>
 <p>That is where I'll end this guide. From this point on you know how to add VM images, start VMs, Manage in WAC, and you are ready to deploy containers and VMs and workloads to your cluster. From here the world is your oyster.</p>
 <p>Now that you see how easy it is once everything is set up you can do it on the full blown version as well by acquiring validated hardware from a Microsoft approved OEM vendor <a href="https://azurelocalsolutions.azure.microsoft.com/">Azure Local Catalogue and sizer</a>.</p>
 <p>I hope this guide helps, and wish you a good journey in your Azure Local adventures.</p>
@@ -857,9 +858,7 @@ pcname\loggedinuser     S-1-5-21-3331493666-949227554-3045976163-1001</p>
 
   <footer class="post-footer">
     <h4>Author - Joseph Sándor Voros</h4>
-    <p class="post-tags">
-      
-    </p>
+    
   </footer>
 </article>
 

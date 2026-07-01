@@ -1,6 +1,6 @@
-<h1>Fellowship Steps</h1>
+<h1 id="fellowship-steps">Fellowship Steps</h1>
 <p>Fellowship Steps is a browser-based walking tracker that maps your real-world step totals onto the Fellowship's journey from Rivendell to Mount Doom.</p>
-<h2>Files</h2>
+<h2 id="files">Files</h2>
 <ul>
 <li><code>index.html</code> contains the app shell and UI structure.</li>
 <li><code>styles.css</code> contains the visual system, layout, and map styling.</li>
@@ -9,11 +9,11 @@
 <li><code>data/path.json</code> stores dense route coordinates used by the overlay path.</li>
 <li><code>assets/</code> is where custom map images and future static resources belong.</li>
 </ul>
-<h2>Run locally</h2>
+<h2 id="run-locally">Run locally</h2>
 <p>From this folder:</p>
 <pre class="language-bash"><code class="language-bash">python3 <span class="token parameter variable">-m</span> http.server <span class="token number">4173</span></code></pre>
 <p>Then open <code>http://127.0.0.1:4173/</code> in a browser.</p>
-<h2>Map asset support</h2>
+<h2 id="map-asset-support">Map asset support</h2>
 <p>If you have a high-resolution Middle-earth map, put it in <code>assets/</code> using one of these names:</p>
 <ul>
 <li><code>middle-earth-map.webp</code></li>
@@ -22,9 +22,9 @@
 <li><code>middle-earth-map.jpeg</code></li>
 </ul>
 <p>The app will detect it automatically and render it beneath the Fellowship route overlay.</p>
-<h2>State storage</h2>
+<h2 id="state-storage">State storage</h2>
 <p>Progress is stored locally in the browser under <code>fellowship-steps-web</code>.</p>
-<h2>Current behavior</h2>
+<h2 id="current-behavior">Current behavior</h2>
 <ul>
 <li>Manual step tracking only</li>
 <li>Adjustable stride length</li>
@@ -34,7 +34,7 @@
 <li>Optional custom map background from <code>assets/</code></li>
 <li>Calibration mode to capture SVG coordinates by clicking the map and copy JSON snippets</li>
 </ul>
-<h2>Calibration workflow</h2>
+<h2 id="calibration-workflow">Calibration workflow</h2>
 <ol>
 <li>Click <code>Calibration mode</code> in the map header.</li>
 <li>Click points on the map to collect coordinates in SVG space.</li>

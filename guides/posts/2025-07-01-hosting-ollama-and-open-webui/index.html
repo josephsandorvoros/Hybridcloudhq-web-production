@@ -24,6 +24,7 @@
           <a href="/projects/">Projects</a>
           <a href="/guides/">Guides</a>
           <a href="/tools/">Tools</a>
+          <a href="/tags/">Tags</a>
           <a href="/links/">Great Links</a>
           <a href="/blog/">Blog</a>
           <a href="/aboutme/">About</a>
@@ -44,7 +45,7 @@
   </header>
 
   <section class="post-content">
-    <h2>Why Host Your Own AI?</h2>
+    <h2 id="why-host-your-own-ai">Why Host Your Own AI?</h2>
 <p>If you’re anything like me, you’re reading this because you’re curious about how to host your own local AI. When I first told friends I was working on this, the most common response was: “Why?” And honestly? There are a few reasons.</p>
 <p>First, I wanted to prove to myself that I could. That’s often reason enough to start any project. But beyond that, I noticed AI becoming a bigger part of my work life. My company is embracing it more and more, and I'm frequently talking to customers about AI use cases. So it made sense to dig deeper and understand it firsthand.</p>
 <p>The obvious options were:</p>
@@ -54,7 +55,7 @@
 </ul>
 <p>Then I stumbled upon a third option—one I kept seeing mentioned in the homelab community: host it myself. I had enough gear to make it happen. And while my setup was limited, those constraints were part of the appeal. Constraints push you to learn. So, it became a challenge. A puzzle. And a really fun one at that.</p>
 <p>Now I’m sharing the results here, hoping this write-up helps someone else explore, learn, or get inspired to do the same.</p>
-<h2>What Do You Actually Need?</h2>
+<h2 id="what-do-you-actually-need">What Do You Actually Need?</h2>
 <p>With the goal clear—run a local AI model effectively on modest hardware—it’s time to look at the setup. My environment includes:</p>
 <ul>
 <li>A Proxmox cluster with high availability (HA)</li>
@@ -63,13 +64,13 @@
 <p>Eventually I may move this to a dedicated host with a P40 GPU, but I started with what I had. The question was: what could I run on this setup?</p>
 <p>Like many, I watched a few excellent videos (especially <a href="https://www.youtube.com/watch?v=Wjrdr0NU4Sk&amp;t=1196s">Network Chuck &quot;host all your AI locally&quot;</a>) but his instructions didn’t map cleanly to my hardware or virtualized cluster. So I had to do a bit of digging.</p>
 <p>Thankfully, I found a helpful write-up on hardware requirements by Zack Saadioui: <a href="https://www.arsturn.com/blog/hardware-requirements-for-running-ollama">Hardware Requirements for Running Ollama</a>. That gave me the confidence to move forward, build a VM, and jump into the install process.</p>
-<h2>What Got in the Way?</h2>
+<h2 id="what-got-in-the-way">What Got in the Way?</h2>
 <p>Let’s be real—any good homelab project comes with a few speed bumps.</p>
 <p>I wanted the most efficient setup possible, so I spun up an Ubuntu Server VM, installed Docker, and planned to run both Ollama and Open WebUI as containers.</p>
 <p>This raised some familiar Docker pain points (hello, container networking!), but Portainer made it easier to manage and monitor everything—plus it was already running in my lab.</p>
 <p>Bonus challenge: I wanted remote access.</p>
 <p>For that, I had two solid options. I already used Tailscale (VPN/tailnet) and had Cloudflare in my environment for DNS, tunneling, and HTTPS termination. After weighing the pros and cons, I decided to roll with Cloudflare and a custom subdomain for remote access.</p>
-<h4>Tools Used</h4>
+<h4 id="tools-used">Tools Used</h4>
 <p>Here are the key ingredients in this build:
 <a href="https://ubuntu.com/download/server">Ubuntu Server</a>
 <a href="https://www.docker.com/">Docker</a>
@@ -79,14 +80,14 @@
 <a href="https://tailscale.com/">Tailscale</a>
 <a href="https://www.cloudflare.com/">Cloudflare</a>
 <a href="https://www.proxmox.com/en/">Proxmox</a></p>
-<h1>Let’s Get Building</h1>
+<h1 id="lets-get-building">Let’s Get Building</h1>
 <p>Time to dive in. I’ll walk you through each step of the setup—explaining both the “how” and the “why.” Whether you’re brand new to this or a seasoned self-hoster, I’ve tried to make this guide beginner-friendly and skippable where needed.</p>
 <p>Note: I’m not covering how to install Proxmox here. Their docs and the community videos below do a great job:</p>
 <ul>
 <li><a href="https://www.youtube.com/watch?v=hSOFshCkSys">Creating a Basic 3 Node Proxmox Cluster!</a></li>
 <li><a href="https://www.youtube.com/watch?v=08b9DDJ_yf4">ProxMox High Availability Cluster!</a>.</li>
 </ul>
-<h4>Roadmap</h4>
+<h4 id="roadmap">Roadmap</h4>
 <p>Here’s what we’ll cover:</p>
 <ol>
 <li><a href="#creating-a-vm">Creating a VM</a></li>
@@ -97,7 +98,7 @@
 <li><a href="#optional:-secure-access-anywhere-with-cloudflare">Optional: Secure Access Anywhere with Cloudflare</a></li>
 <li><a href="#so...-now-what?">So Now What?</a></li>
 </ol>
-<h2>Creating a VM</h2>
+<h2 id="creating-a-vm">Creating a VM</h2>
 <p>I’m using my Proxmox cluster for this setup. For my particular build, I allocated:</p>
 <ul>
 <li><strong>12 cores</strong></li>
@@ -107,7 +108,7 @@
 <p>That should give me enough room to run a few containers, store chat history, and maybe even do some light Retrieval-Augmented Generation (RAG) later on.</p>
 <p>If you're using a different virtualization platform—VirtualBox, VMware, Hyper-V—the steps will feel very familiar. Most hypervisors have roughly the same workflow and settings, so feel free to adapt this guide to fit your tooling.</p>
 <p>Let’s walk through the key setup steps in Proxmox (with plenty of screenshots to guide you along the way):</p>
-<h4>Step-by-Step Configuration</h4>
+<h4 id="step-by-step-configuration">Step-by-Step Configuration</h4>
 <p><strong>🔹 Give the VM a name</strong><br>
 Start by naming your new virtual machine.
 <img src="\assets\images\ollama-open-webui-post\Pasted image 20250701103713.png" alt=""/></p>
@@ -130,15 +131,15 @@ Give it enough to breathe. Docker and Ollama aren’t lightweights, so plan acco
 Bridge your VM to your LAN so it can reach the outside world (and your other services).</p>
 <img src="\assets\images\ollama-open-webui-post\Pasted image 20250701104213.png" alt=""/>
 <p>Once all that’s done, finish creating the VM and boot it up—you’re ready to install the OS.</p>
-<h2>Installing Ubuntu Server</h2>
+<h2 id="installing-ubuntu-server">Installing Ubuntu Server</h2>
 <p>Ubuntu already has a solid step-by-step guide for server installations here: <a href="https://ubuntu.com/tutorials/install-ubuntu-server#15-what-next">Install Ubuntu Server</a>,so I won’t reinvent the wheel. But I’ll highlight a few specific recommendations that helped me, especially when prepping for remote access.</p>
-<h4>SSH Access Is Your Best Friend</h4>
+<h4 id="ssh-access-is-your-best-friend">SSH Access Is Your Best Friend</h4>
 <p>During installation (around Step 13), Ubuntu will ask whether you want to install OpenSSH:</p>
 <p>Install SSH during setup</p>
 <p><strong>I highly recommend enabling SSH.</strong> It makes life infinitely easier—copying commands, navigating the CLI, managing from your main machine, etc. Not all hypervisor console windows (including Proxmox) support copy-paste or function keys well, so this step is totally worth it.</p>
 <p>Later in the setup, you’ll be prompted to install additional software packages. You can skip most of those for now unless you have a specific use case in mind</p>
 <img src="\assets\images\ollama-open-webui-post\Pasted image 20250701104706.png" alt=""/>
-<h4>Find Your VM’s IP Address</h4>
+<h4 id="find-your-vms-ip-address">Find Your VM’s IP Address</h4>
 <p>Once the setup completes, you’ll need the server’s IP address to connect over SSH. You might’ve seen it flash by during the install:</p>
 <p>IP shown at setup</p>
 <img src="\assets\images\ollama-open-webui-post\Pasted image 20250701104526.png" alt=""/>
@@ -146,7 +147,7 @@ Bridge your VM to your LAN so it can reach the outside world (and your other ser
 <pre class="language-yaml"><code class="language-yaml">ip addr</code></pre>
 <p>Look for the address that matches your network subnet (likely under <code>eth0</code> or <code>enpXsY</code>, depending on your setup):</p>
 <img src="\assets\images\ollama-open-webui-post\Pasted image 20250701105210.png" alt=""/>
-<h4>Connect via SSH</h4>
+<h4 id="connect-via-ssh">Connect via SSH</h4>
 <p>Now that you've got the IP, it’s time to connect remotely. I’m on Windows, so I use <a href="https://www.putty.org/">PuTTY</a>—but any SSH client will work. Just plug in your server’s IP and click <strong>Open</strong>:</p>
 <img src="\assets\images\ollama-open-webui-post\Pasted image 20250627082850.png" alt=""/>
 <p>Login using the credentials you set during Ubuntu installation:</p>
@@ -154,7 +155,7 @@ Bridge your VM to your LAN so it can reach the outside world (and your other ser
 <img src="\assets\images\ollama-open-webui-post\Pasted image 20250627083037.png" alt=""/>
 <p>Successful login</p>
 <p>Boom—you now have remote terminal access to your Ubuntu server.</p>
-<h2>Installing Docker</h2>
+<h2 id="installing-docker">Installing Docker</h2>
 <p>Next up: Docker. We’re about to containerize our setup, and that starts with installing Docker on Ubuntu. I’m borrowing steps from <a href="https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-22-04#introduction">this excellent Digital Ocean guide</a>, with slight tweaks for our context.</p>
 <p>Step 1: Update Your System</p>
 <p>First, let’s make sure Ubuntu is up to date. Run the following, one at a time:</p>
@@ -206,10 +207,10 @@ TriggeredBy: ● docker.socket
              └─7854 /usr/bin/dockerd <span class="token parameter variable">-H</span> fd:// <span class="token parameter variable">--containerd</span><span class="token operator">=</span>/run/containerd/containerd.sock</code></pre>
 <p>Press <code>q</code> to exit the status screen.</p>
 <p>Nice job—you now have Docker installed and ready to go. Up next: adding a user-friendly UI to manage your containers. Let’s install Portainer.</p>
-<h2>Installing Portainer</h2>
+<h2 id="installing-portainer">Installing Portainer</h2>
 <p>Now that Docker’s up and running, let’s layer in a UI to manage containers more easily. Enter: Portainer.</p>
 <p>If you haven’t already installed it, their official guide is excellent: <a href="https://docs.portainer.io/start/install/server/docker/linux">Install Portainer BE with Docker on Linux</a>. I’ll walk you through the essentials here—with a few side notes and screenshots to keep things moving.</p>
-<h4>Deployment</h4>
+<h4 id="deployment">Deployment</h4>
 <p>Start by creating a Docker volume for Portainer’s persistent data:</p>
 <pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">docker</span> volume create portainer_data</code></pre>
 <p>Then pull and run the Portainer container itself:</p>
@@ -220,22 +221,22 @@ TriggeredBy: ● docker.socket
 <p>Want to confirm it deployed? Run <code>sudo docker ps</code>:</p>
 <img src="\assets\images\ollama-open-webui-post\Pasted image 20250701105938.png" alt=""/>
 <p>You should see <code>portainer</code> listed and running:</p>
-<h4>First Login</h4>
+<h4 id="first-login">First Login</h4>
 <p>Time to test it in the browser. Navigate to:</p>
 <pre class="language-bash"><code class="language-bash">https://localhost:9443</code></pre>
 <p>Swap in your IP address or hostname. The initial setup screen will greet you with a prompt to create the admin user:</p>
 <p>You will be presented with the initial setup page for Portainer Server.</p>
-<h4>Creating the first user</h4>
+<h4 id="creating-the-first-user">Creating the first user</h4>
 <p>Choose a strong password (minimum 12 characters). Username defaults to <code>admin</code>, but you can change it.</p>
 <p><img src="https://docs.portainer.io/~gitbook/image?url=https%3A%2F%2Fcontent.gitbook.com%2Fcontent%2F3roAECKwSfowCXNw8RZR%2Fblobs%2FXRgyXC3iKqcSIsdE6x5g%2F2.15-install-server-setup-user.png&amp;width=768&amp;dpr=4&amp;quality=100&amp;sign=b194845d&amp;sv=2" alt=""></p>
-<h4>Enable Usage Stats (Optional)</h4>
+<h4 id="enable-usage-stats-optional">Enable Usage Stats (Optional)</h4>
 <p>You’ll be asked whether to enable anonymous usage reporting via <a href="https://matomo.org/">Matomo</a> It’s up to you, and you can always toggle it later under Settings → General:</p>
 <p><img src="https://docs.portainer.io/~gitbook/image?url=https%3A%2F%2Fcontent.gitbook.com%2Fcontent%2F3roAECKwSfowCXNw8RZR%2Fblobs%2FBQJjUHA4C3DQayB40DQr%2F2.15-install-server-setup-matomo.png&amp;width=768&amp;dpr=4&amp;quality=100&amp;sign=29e83c56&amp;sv=2" alt=""></p>
-<h4>Apply a License Key</h4>
+<h4 id="apply-a-license-key">Apply a License Key</h4>
 <p>Next, you’ll be prompted for a license key. If you’ve signed up for the free Business Edition (includes up to 3 nodes), you’ll already have one. If not, click the “Don’t have a license?” link and follow the flow.</p>
 <p>Once you’ve got it, paste it in and click <strong>Submit</strong>:</p>
 <p><img src="https://docs.portainer.io/~gitbook/image?url=https%3A%2F%2Fcontent.gitbook.com%2Fcontent%2F3roAECKwSfowCXNw8RZR%2Fblobs%2Fulek0Spd0ddXkkXaWJRD%2F2.20-initial-setup-license.png&amp;width=768&amp;dpr=4&amp;quality=100&amp;sign=f7be5bf8&amp;sv=2" alt=""></p>
-<h4>Connecting Your Environment</h4>
+<h4 id="connecting-your-environment">Connecting Your Environment</h4>
 <p>After the admin account is created, Portainer’s <strong>Environment Wizard</strong> will walk you through connecting to your Docker instance:</p>
 <p><img src="https://docs.portainer.io/~gitbook/image?url=https%3A%2F%2Fcontent.gitbook.com%2Fcontent%2F3roAECKwSfowCXNw8RZR%2Fblobs%2FqDCRfpKdw1n5eWnhqGBA%2F2.15-install-server-setup-wizard.png&amp;width=768&amp;dpr=4&amp;quality=100&amp;sign=5ef4ff6e&amp;sv=2" alt=""></p>
 <p>For most setups, it’ll auto-detect and connect locally. If you’re managing multiple environments, just click <strong>Add Environments</strong> later on.</p>
@@ -257,11 +258,11 @@ TriggeredBy: ● docker.socket
 </ul>
 <img src="\assets\images\ollama-open-webui-post\Pasted image 20250627115638.png" alt=""/>
 <p>And that’s it—you’ve now got a beautiful UI to explore, manage, and monitor your containers.</p>
-<h2>Install Ollama + Open WebUI</h2>
+<h2 id="install-ollama-open-webui">Install Ollama + Open WebUI</h2>
 <p>Finally, we’ve reached the fun part: standing up our local AI stack with Ollama and Open WebUI.</p>
 <p>Now, there are a few ways to do this. You could install Ollama directly on your Ubuntu server—but that means handling updates and maintenance from the command line. Since we’ve already set up Portainer, why not make life easier by running everything in containers?</p>
 <p>There’s one small challenge: Docker isolates networking by default, which can make these services harder to wire together. But there’s a simple fix—<strong>use a Docker Compose stack</strong>, and Portainer makes this incredibly easy.</p>
-<h4>Building the Stack in Portainer</h4>
+<h4 id="building-the-stack-in-portainer">Building the Stack in Portainer</h4>
 <p>When you log into Portainer, your dashboard should look something like this:</p>
 <img src="\assets\images\ollama-open-webui-post\Pasted image 20250701110641.png" alt=""/>
 <p>Click into your local environment:</p>
@@ -270,7 +271,7 @@ TriggeredBy: ● docker.socket
 <img src="\assets\images\ollama-open-webui-post\Pasted image 20250701110751.png" alt=""/>
 <p>Give your stack a name and paste this configuration into the editor</p>
 <img src="\assets\images\ollama-open-webui-post\Pasted image 20250701081935.png" alt=""/>
-<h4>Docker Compose Config</h4>
+<h4 id="docker-compose-config">Docker Compose Config</h4>
 <p>Here’s a complete <code>docker-compose.yaml</code> for running both Ollama and Open WebUI together:</p>
 <pre class="language-yaml"><code class="language-yaml"><span class="token key atrule">services</span><span class="token punctuation">:</span>
   <span class="token key atrule">ollama</span><span class="token punctuation">:</span>
@@ -314,13 +315,13 @@ TriggeredBy: ● docker.socket
 <img src="\assets\images\ollama-open-webui-post\Pasted image 20250701083007.png" alt=""/>
 <p>Give it a minute—Docker needs to download the images. When finished, you’ll see a screen like this:</p>
 <img src="\assets\images\ollama-open-webui-post\Pasted image 20250701111306.png" alt=""/>
-<h4>First Login to Open WebUI</h4>
+<h4 id="first-login-to-open-webui">First Login to Open WebUI</h4>
 <p>Navigate to your server’s IP on port <code>3000</code>. You should land on the Open WebUI welcome screen:</p>
 <img src="\assets\images\ollama-open-webui-post\Pasted image 20250701111358.png" alt=""/>
 <p>Click <strong>Get Started</strong> to create your admin account:</p>
 <img src="\assets\images\ollama-open-webui-post\Pasted image 20250701111443.png" alt=""/>
 Once that’s done… ta-da! You now have a functioning local AI interface—albeit one that doesn’t know anything yet:
-<h4>Pulling Your First Model</h4>
+<h4 id="pulling-your-first-model">Pulling Your First Model</h4>
 <p>Click the hamburger menu (☰), then your username:</p>
 <img src="\assets\images\ollama-open-webui-post\Pasted image 20250701111552.pngg" alt=""/>
 <p>Now head to the <strong>Admin Panel</strong>,</p>
@@ -338,14 +339,14 @@ Once that’s done… ta-da! You now have a functioning local AI interface—alb
 <img src="\assets\images\ollama-open-webui-post\Pasted image 20250701112235.png" alt=""/>
 <p>and paste it into the pull field</p>
 <img src="\assets\images\ollama-open-webui-post\Pasted image 20250701112305.png" alt=""/>
-<h4>Chat with Your AI</h4>
+<h4 id="chat-with-your-ai">Chat with Your AI</h4>
 <p>Once the model finishes downloading, click <strong>New Chat</strong>. You’ll see the selected model listed, and now…</p>
 <img src="\assets\images\ollama-open-webui-post\Pasted image 20250701121808.png" alt=""/>
 <p>ask away:</p>
 <img src="\assets\images\ollama-open-webui-post\Pasted image 20250701122235.png" alt=""/>
 <p>You’re officially hosting your own LLM. 😎</p>
 <p>There’s a <em>lot</em> more this setup can do—but I’ll save that for another post. For now, we’re ready to dive into some optional magic in the next step: external access with Cloudflare.</p>
-<h2>Optional: Secure Access Anywhere with Cloudflare</h2>
+<h2 id="optional-secure-access-anywhere-with-cloudflare">Optional: Secure Access Anywhere with Cloudflare</h2>
 <p>If you’re happy keeping everything local, you can absolutely stop here. You've now got a fully functional AI interface running entirely on your own hardware—no cloud dependencies, no subscriptions, no phoning home.</p>
 <p>But if you're like me, you want to use your AI assistant from <em>anywhere</em>. That means exposing it to the internet—<strong>securely</strong>—and doing it in a way that feels both safe and slick.</p>
 <p>Enter <strong>Cloudflare</strong>.</p>
@@ -360,7 +361,7 @@ Once that’s done… ta-da! You now have a functioning local AI interface—alb
 <p>I won’t reinvent the wheel here—<strong>Network Chuck</strong> has a fantastic video that walks through this exact setup:
 <a href="https://www.youtube.com/watch?v=ey4u7OUAF3c">EXPOSE your home network to the INTERNET!! (it's safe)</a>.
 It’s how I learned to do it, and honestly, it’s super approachable even if you’ve never touched DNS or tunneling before.</p>
-<h2>So...Now What?</h2>
+<h2 id="sonow-what">So...Now What?</h2>
 <p>That brings us to the end of this tutorial—but hopefully just the beginning of your local AI adventure.</p>
 <p>You’ve built something powerful, personal, and privacy-respecting. And if you’ve got a GPU lying around, you’re just scratching the surface of what’s possible.</p>
 <p>Want to try:</p>
@@ -376,9 +377,7 @@ It’s how I learned to do it, and honestly, it’s super approachable even if y
 
   <footer class="post-footer">
     <h4>Author - Joseph Sándor Voros</h4>
-    <p class="post-tags">
-      
-    </p>
+    
   </footer>
 </article>
 

@@ -24,6 +24,7 @@
           <a href="/projects/">Projects</a>
           <a href="/guides/">Guides</a>
           <a href="/tools/">Tools</a>
+          <a href="/tags/">Tags</a>
           <a href="/links/">Great Links</a>
           <a href="/blog/">Blog</a>
           <a href="/aboutme/">About</a>
@@ -44,32 +45,32 @@
   </header>
 
   <section class="post-content">
-    <h1>&quot;Come in, come in, and know me better Man.&quot;</h1>
+    <h1 id="come-in-come-in-and-know-me-better-man">&quot;Come in, come in, and know me better Man.&quot;</h1>
 <p>It's been a bit since I have posted. Life is always going and there is so much to learn. I have been learning more about AI and infrastructure surrounding it for work. I have been using it a bit more both there and at home. I have even played with coding some apps and my own agent harness and interface.</p>
 <p>There are ups and downs. It is certainly an interesting (and often frustrating) process. There are some things it can be very helpful with though. One of them is planning and documentation. This walkthrough is a testament to that. I had to guide it and steer it, and double check it and I believe I got it to what I needed.</p>
 <p>I am a gamer, and I have several I have always wanted to host in a more persistent way. With my homelab setup, I finally have a chance to do that. In this case 7 games I play semi regularly and a couple of demo hosts I am able to take advantage of that I destroy and rebuild n a regular basis. This wasn't all done at once for me, but I have enough documented steps now from various places to make it work. And I thought this would be a good chance to share a walkthrough here.</p>
-<h2>Prerequisites</h2>
+<h2 id="prerequisites">Prerequisites</h2>
 <ul>
 <li>You need an OCI VPS (it can be small its just going to run a couple of things)</li>
 <li>You Need NGINX acting as a reverse Proxy for your on prem stuff</li>
 <li>You need some place to run your self hosted infrastructure (this can be in the cloud as well, but I am set up at home)</li>
 <li>You need a domain, and you need a DNS Provider. I use Cloudflare for these.</li>
 </ul>
-<h2>Steps</h2>
+<h2 id="steps">Steps</h2>
 <ol>
 <li>The first step is to follow <a href="https://www.youtube.com/watch?v=ISEP6SIrEVE">Thomas Wildes guide here</a> It's very thorough, and easy to follow. It was the first step for me in creating a way to securely serve internal apps to the outside world.</li>
 <li>You may want to set up some vLANs on network segregation to keep your Game server(s) separated from the rest of your network. I am also using a Proxmox cluster and virtualization for even further separation.</li>
 <li>You will want <a href="https://cubecoders.com/AMP">AMP server</a> for this walkthrough. Yes I use this and paid for it. You will also see I have 4 instances of the amp server running. One runs in Hybrid mode and acts as the ADS(AMP Deployment Server) and as a game host, and the other three act as target hosts. This lets me control all of my game instances and hosts from a single AMP instance that can be passed through my tunnel.</li>
 <li>I also use <a href="https://code.visualstudio.com/">VSCode</a> to do most of my editing. Particularly for my OCI VPS as it give me a nice visual picture of the file structure. But feel free to just SSH using a key and VIM or NANO if you are more comfortable there.</li>
 </ol>
-<h2>What is this?</h2>
+<h2 id="what-is-this">What is this?</h2>
 <p>Below is the outline and steps the LLM and I cam up with to ensure the games I wanted to run would work. You would of course modify this for whatever games you want to run, but the general idea is a good solid guide with all the right steps in place to show a clear picture of how to do this. When set up correctly you have security, multiple layers of segregation and isolation. A single management panel and TLS security for access to that. And a game or game cluster to share with your friends and family.</p>
-<h2>📋 HybridCloudHQ — Game Server Master Reference</h2>
+<h2 id="-hybridcloudhq-game-server-master-reference">📋 HybridCloudHQ — Game Server Master Reference</h2>
 <div class="markdown-alert markdown-alert-abstract"><p class="markdown-alert-title">Cluster Summary</p><p><strong>4-node Proxmox VE hyper-converged cluster</strong> · Ceph · AMP + Docker game hosting · Pangolin/OCI tunnel · NGINX + TLS
 Ceph raw: <strong>3.88 TiB</strong> · Usable (rep-3): <strong>~1.13 TiB</strong> · Utilization target: <strong>≤ 50% per node</strong></p>
 </div>
 <hr>
-<h2>1 — Cluster Hardware</h2>
+<h2 id="1-cluster-hardware">1 — Cluster Hardware</h2>
 <table>
 <thead>
 <tr>
@@ -117,7 +118,7 @@ Ceph raw: <strong>3.88 TiB</strong> · Usable (rep-3): <strong>~1.13 TiB</strong
 </tbody>
 </table>
 <hr>
-<h2>2 — Node Role Map</h2>
+<h2 id="2-node-role-map">2 — Node Role Map</h2>
 <table>
 <thead>
 <tr>
@@ -150,7 +151,7 @@ Ceph raw: <strong>3.88 TiB</strong> · Usable (rep-3): <strong>~1.13 TiB</strong
 </tbody>
 </table>
 <hr>
-<h2>3 — Master VM Table</h2>
+<h2 id="3-master-vm-table">3 — Master VM Table</h2>
 <table>
 <thead>
 <tr>
@@ -311,12 +312,12 @@ Ceph raw: <strong>3.88 TiB</strong> · Usable (rep-3): <strong>~1.13 TiB</strong
 </table>
 </div>
 <hr>
-<h2>4 — Master Port Reference</h2>
+<h2 id="4-master-port-reference">4 — Master Port Reference</h2>
 <div class="markdown-alert markdown-alert-info"><p class="markdown-alert-title">AMP SFTP — LAN/VPN Only, Never Internet Exposed</p><p>AMP assigns a unique SFTP port per game instance for admin file management (mods, configs, world saves). <strong>Players never use SFTP — do not add these ports to OCI, iptables, Traefik, or Pangolin.</strong> Access SFTP via your local LAN or VPN when remote. Each instance on amp-medium gets its own port so they don't collide on the same VM.</p>
 </div>
 <div class="markdown-alert markdown-alert-warning"><p class="markdown-alert-title"><svg class="octicon octicon-alert mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>This Table Is the Single Source of Truth</p><p>OCI Security List, iptables, <code>traefik_config.yml</code>, <code>docker-compose.yml</code>, Pangolin UI, and AMP instance config must all match the <strong>Internet</strong> ports in this table exactly.</p>
 </div>
-<h3>4.1 — Game Ports (Internet Exposed via Pangolin)</h3>
+<h3 id="41-game-ports-internet-exposed-via-pangolin">4.1 — Game Ports (Internet Exposed via Pangolin)</h3>
 <table>
 <thead>
 <tr>
@@ -435,7 +436,7 @@ Ceph raw: <strong>3.88 TiB</strong> · Usable (rep-3): <strong>~1.13 TiB</strong
 </tr>
 </tbody>
 </table>
-<h3>4.2 — Admin Ports (LAN/VPN Only — never through Pangolin)</h3>
+<h3 id="42-admin-ports-lanvpn-only-never-through-pangolin">4.2 — Admin Ports (LAN/VPN Only — never through Pangolin)</h3>
 <table>
 <thead>
 <tr>
@@ -565,8 +566,8 @@ Ceph raw: <strong>3.88 TiB</strong> · Usable (rep-3): <strong>~1.13 TiB</strong
 <div class="markdown-alert markdown-alert-info"><p class="markdown-alert-title">Pangolin — One Backend Per External Port + Protocol</p><p>Traefik binds one OS socket per entryPoint. A second Pangolin target on the same port+protocol crashes Traefik on next restart. All game ports in this cluster are unique per protocol — do not reuse them.</p>
 </div>
 <hr>
-<h2>5 — OCI VPS Setup</h2>
-<h3>5.1 Security List Ingress Rules</h3>
+<h2 id="5-oci-vps-setup">5 — OCI VPS Setup</h2>
+<h3 id="51-security-list-ingress-rules">5.1 Security List Ingress Rules</h3>
 <p>Navigate: <strong>Networking → VCN → Security Lists → Default Security List</strong>
 Source CIDR: <code>0.0.0.0/0</code> for all game ports. <strong>Do not add SFTP or RCON ports.</strong></p>
 <ul>
@@ -587,7 +588,7 @@ Source CIDR: <code>0.0.0.0/0</code> for all game ports. <strong>Do not add SFTP 
 <li>[ ] TCP 443 — Pangolin HTTPS</li>
 <li>[ ] TCP 80 — Pangolin HTTP redirect</li>
 </ul>
-<h3>5.2 OCI VPS iptables</h3>
+<h3 id="52-oci-vps-iptables">5.2 OCI VPS iptables</h3>
 <pre class="language-bash"><code class="language-bash"><span class="token comment"># TCP game ports</span>
 <span class="token function">sudo</span> iptables <span class="token parameter variable">-I</span> INPUT <span class="token number">6</span> <span class="token parameter variable">-p</span> tcp <span class="token parameter variable">-m</span> multiport <span class="token punctuation">\</span>
   <span class="token parameter variable">--dports</span> <span class="token number">80,443</span>,7777,15637,25565 <span class="token parameter variable">-j</span> ACCEPT
@@ -602,10 +603,10 @@ Source CIDR: <code>0.0.0.0/0</code> for all game ports. <strong>Do not add SFTP 
 <span class="token comment"># Verify</span>
 <span class="token function">sudo</span> iptables <span class="token parameter variable">-L</span> INPUT <span class="token parameter variable">-n</span> <span class="token parameter variable">-v</span> --line-numbers</code></pre>
 <hr>
-<h2>6 — Pangolin Setup</h2>
+<h2 id="6-pangolin-setup">6 — Pangolin Setup</h2>
 <div class="markdown-alert markdown-alert-tip"><p class="markdown-alert-title"><svg class="octicon octicon-light-bulb mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 0 1-1.484.211c-.04-.282-.163-.547-.37-.847a8.456 8.456 0 0 0-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.751.751 0 0 1-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75ZM5.75 12h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM6 15.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z"></path></svg>NGINX + TLS Is Already In Place</p><p>HTTP resources (AMP ADS, Portainer, Forgejo, Stirling PDF) are handled by your existing NGINX reverse proxy. Only Raw TCP/UDP game server ports need Pangolin entryPoints. SFTP and RCON are never added here.</p>
 </div>
-<h3>6.1 <code>traefik_config.yml</code> — Add Under <code>entryPoints:</code></h3>
+<h3 id="61-traefik_configyml-add-under-entrypoints">6.1 <code>traefik_config.yml</code> — Add Under <code>entryPoints:</code></h3>
 <p><strong>File:</strong> <code>/opt/pangolin/config/traefik/traefik_config.yml</code></p>
 <pre class="language-yaml"><code class="language-yaml"><span class="token key atrule">entryPoints</span><span class="token punctuation">:</span>
   <span class="token comment"># Pangolin system — do not modify existing entries</span>
@@ -658,7 +659,7 @@ Source CIDR: <code>0.0.0.0/0</code> for all game ports. <strong>Do not add SFTP 
 
   <span class="token comment"># SFTP ports — NOT added here (LAN/VPN access only)</span>
   <span class="token comment"># Dune: Awakening — NOT added here (PTC server-list discovery only)</span></code></pre>
-<h3>6.2 <code>docker-compose.yml</code> — Add Under <code>services: gerbil: ports:</code></h3>
+<h3 id="62-docker-composeyml-add-under-services-gerbil-ports">6.2 <code>docker-compose.yml</code> — Add Under <code>services: gerbil: ports:</code></h3>
 <p><strong>File:</strong> <code>/opt/pangolin/docker-compose.yml</code></p>
 <pre class="language-yaml"><code class="language-yaml">    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
 
@@ -689,7 +690,7 @@ Source CIDR: <code>0.0.0.0/0</code> for all game ports. <strong>Do not add SFTP 
       <span class="token comment"># Dune: Awakening NOT mapped here — server-list only</span></code></pre>
 <p>This is what I mean by easy for me to visualize the editing here</p>
 <img src="\assets\images\amp-game-servers-setup-tutorial\AMP Game Servers Tutorial VS Code.png" alt="VS Code view of configuring the yaml files"/>
-<h3>6.3 Apply and Verify</h3>
+<h3 id="63-apply-and-verify">6.3 Apply and Verify</h3>
 <pre class="language-bash"><code class="language-bash"><span class="token builtin class-name">cd</span> /opt/pangolin
 <span class="token function">docker</span> compose up <span class="token parameter variable">-d</span>
 <span class="token function">docker</span> compose restart traefik
@@ -703,7 +704,7 @@ ss <span class="token parameter variable">-ltnp</span> <span class="token operat
 <span class="token comment"># Check Traefik — no crash loops, no "address already in use"</span>
 <span class="token function">docker</span> <span class="token function">ps</span>
 <span class="token function">docker</span> logs traefik <span class="token parameter variable">--tail</span><span class="token operator">=</span><span class="token number">50</span></code></pre>
-<h3>6.4 Pangolin Raw TCP/UDP Resources</h3>
+<h3 id="64-pangolin-raw-tcpudp-resources">6.4 Pangolin Raw TCP/UDP Resources</h3>
 <p>Create one resource per row. <strong>Do not create resources for SFTP or RCON ports.</strong></p>
 <table>
 <thead>
@@ -832,10 +833,10 @@ ss <span class="token parameter variable">-ltnp</span> <span class="token operat
 </tbody>
 </table>
 <hr>
-<h2>7 — AMP Installation &amp; Configuration</h2>
+<h2 id="7-amp-installation-configuration">7 — AMP Installation &amp; Configuration</h2>
 <div class="markdown-alert markdown-alert-info"><p class="markdown-alert-title">AMP Architecture</p><p>AMP is installed <strong>bare metal on the VM OS</strong>. During install, answer YES to Docker isolation. AMP then manages each game server as a Docker container internally — handling Wine, SteamCMD, and dependencies per-container automatically.</p>
 </div>
-<h3>7.1 AMP Install Command (all AMP VMs)</h3>
+<h3 id="71-amp-install-command-all-amp-vms">7.1 AMP Install Command (all AMP VMs)</h3>
 <pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">su</span>
 <span class="token function">bash</span> <span class="token operator">&lt;</span><span class="token punctuation">(</span><span class="token function">wget</span> -qO- getamp.sh<span class="token punctuation">)</span>
 <span class="token comment"># Prompts:</span>
@@ -843,7 +844,7 @@ ss <span class="token parameter variable">-ltnp</span> <span class="token operat
 <span class="token comment">#   Docker isolation    → YES  ← critical</span>
 <span class="token comment">#   HTTPS               → No  (NGINX handles TLS)</span></code></pre>
 <p>Apply licence key in the web UI at <code>http://&lt;vm-ip&gt;:xxxx</code> → restart when prompted.</p>
-<h3>7.2 AMP Instance Registry</h3>
+<h3 id="72-amp-instance-registry">7.2 AMP Instance Registry</h3>
 <table>
 <thead>
 <tr>
@@ -954,8 +955,8 @@ ss <span class="token parameter variable">-ltnp</span> <span class="token operat
 </div>
 <div class="markdown-alert markdown-alert-note"><p class="markdown-alert-title"><svg class="octicon octicon-info mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>amp-node4 Is a Hybrid VM</p><p>VMID 106 runs AMP ADS <strong>and</strong> hosts Minecraft and Dragonwilds via that same ADS instance. No network hop needed — ADS and its instances communicate internally on the same VM.</p>
 </div>
-<h3>7.3 Critical AMP Port Configurations</h3>
-<h4>Return to Moria — Must Remap From Default 7777</h4>
+<h3 id="73-critical-amp-port-configurations">7.3 Critical AMP Port Configurations</h3>
+<h4 id="return-to-moria-must-remap-from-default-7777">Return to Moria — Must Remap From Default 7777</h4>
 <p>AMP → Moria01 → <strong>Configuration → Network</strong>:</p>
 <pre><code>ListenPort    = 7780
 AdvertisePort = 7780
@@ -970,31 +971,31 @@ AdvertisePort=7780
 InitialConnectionRetryTime=60
 AfterDisconnectionRetryTime=600</code></pre>
 <p><strong>If the instance ever resets to defaults:</strong> re-apply the above and restart.</p>
-<h4>RuneScape: Dragonwilds — Must Remap From Default 7777</h4>
+<h4 id="runescape-dragonwilds-must-remap-from-default-7777">RuneScape: Dragonwilds — Must Remap From Default 7777</h4>
 <p>AMP → Dragonwilds01 → <strong>GenericModule → Launch Parameters</strong>, add:</p>
 <pre><code>-port=7779
 </code></pre>
 <p>Restart instance after saving.</p>
 <p><strong>If the instance ever resets to defaults:</strong> re-apply the above and restart.</p>
-<h4>Minecraft Java — JVM Heap &amp; GC Flags</h4>
+<h4 id="minecraft-java-jvm-heap-gc-flags">Minecraft Java — JVM Heap &amp; GC Flags</h4>
 <p>AMP → Minecraft01 → <strong>Java Settings → Memory</strong>: Min 4 GB / Max 10 GB</p>
 <p>JVM Arguments:</p>
 <pre><code>-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M -XX:G1ReservePercent=20 -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4 -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1
 </code></pre>
 <hr>
-<h2>8 — Demo &amp; Conditional VMs (PVE2)</h2>
+<h2 id="8-demo-conditional-vms-pve2">8 — Demo &amp; Conditional VMs (PVE2)</h2>
 <div class="markdown-alert markdown-alert-danger"><p class="markdown-alert-title">PVE2 One-at-a-Time Rule</p><p>VMIDs 107, 300, and 301 all live on PVE2 alongside amp-enshrouded (104).
 amp-enshrouded balloon min = 6 GB · host reserve = 6 GB · free at idle = <strong>~52 GB</strong>
 Any two ephemeral/conditional VMs together consume 48–64 GB — <strong>exceeds node capacity</strong>.
 <strong>Run only ONE of 107, 300, or 301 at any time.</strong></p>
 </div>
-<h3>VMID 300 — openshift-sno (Ephemeral)</h3>
+<h3 id="vmid-300-openshift-sno-ephemeral">VMID 300 — openshift-sno (Ephemeral)</h3>
 <pre class="language-bash"><code class="language-bash">qm start <span class="token number">300</span>    <span class="token comment"># verify 107 and 301 are stopped first</span>
 qm <span class="token function">shutdown</span> <span class="token number">300</span></code></pre>
-<h3>VMID 301 — azure-local-demo (Ephemeral)</h3>
+<h3 id="vmid-301-azure-local-demo-ephemeral">VMID 301 — azure-local-demo (Ephemeral)</h3>
 <pre class="language-bash"><code class="language-bash">qm start <span class="token number">301</span>    <span class="token comment"># verify 107 and 300 are stopped first</span>
 qm <span class="token function">shutdown</span> <span class="token number">301</span></code></pre>
-<h3>VMID 107 — dune-awakening (Conditional)</h3>
+<h3 id="vmid-107-dune-awakening-conditional">VMID 107 — dune-awakening (Conditional)</h3>
 <table>
 <thead>
 <tr>
@@ -1055,7 +1056,7 @@ qm <span class="token function">shutdown</span> <span class="token number">301</
 <span class="token comment"># Stop the instance in AMP first for graceful world save, then:</span>
 qm <span class="token function">shutdown</span> <span class="token number">107</span></code></pre>
 <hr>
-<h2>9 — Operational Gotchas &amp; Tips</h2>
+<h2 id="9-operational-gotchas-tips">9 — Operational Gotchas &amp; Tips</h2>
 <div class="markdown-alert markdown-alert-danger"><p class="markdown-alert-title">Conan Exiles — TCP AND UDP 7777. No Remap. Ever.</p><p>TCP 7777, UDP 7777, UDP 7778, and UDP 27015 must be identical at OCI, iptables, Traefik, Pangolin, and AMP. BattlEye + UE4 hardwire port advertising across both protocols. Remap = broken auth = zero players. Confirmed by prior failed attempt.</p>
 </div>
 <div class="markdown-alert markdown-alert-danger"><p class="markdown-alert-title">PVE2 — Never Run Multiple Ephemeral/Conditional VMs Simultaneously</p><p>107 + 300 = 56 GB · 107 + 301 = 56 GB · 300 + 301 = 64 GB. All exceed available headroom when amp-enshrouded is at its balloon minimum. Check PVE2 free RAM before starting any of 107, 300, 301.</p>
@@ -1082,20 +1083,20 @@ qm <span class="token function">shutdown</span> <span class="token number">107</
 <div class="markdown-alert markdown-alert-tip"><p class="markdown-alert-title"><svg class="octicon octicon-light-bulb mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 0 1-1.484.211c-.04-.282-.163-.547-.37-.847a8.456 8.456 0 0 0-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.751.751 0 0 1-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75ZM5.75 12h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM6 15.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z"></path></svg>Crowdsec on OCI VPS</p><p>High UDP packet rates from game clients can trigger false-positive bans. Whitelist game server IPs and port ranges in Crowdsec rules or add custom scenario exclusions.</p>
 </div>
 <hr>
-<h2>10 — Quick Reference Commands</h2>
-<h3>Verify Game Ports (OCI VPS)</h3>
+<h2 id="10-quick-reference-commands">10 — Quick Reference Commands</h2>
+<h3 id="verify-game-ports-oci-vps">Verify Game Ports (OCI VPS)</h3>
 <pre class="language-bash"><code class="language-bash"><span class="token comment"># UDP game ports</span>
 ss <span class="token parameter variable">-lunp</span> <span class="token operator">|</span> <span class="token function">grep</span> <span class="token parameter variable">-E</span> <span class="token string">'7777|7778|7779|7780|2456|2457|9876|9877|15637|25565|27015'</span>
 
 <span class="token comment"># TCP game ports — 7777 and 15637 are both TCP</span>
 ss <span class="token parameter variable">-ltnp</span> <span class="token operator">|</span> <span class="token function">grep</span> <span class="token parameter variable">-E</span> <span class="token string">'7777|15637|25565|443|80'</span></code></pre>
-<h3>Pangolin</h3>
+<h3 id="pangolin">Pangolin</h3>
 <pre class="language-bash"><code class="language-bash"><span class="token builtin class-name">cd</span> /opt/pangolin
 <span class="token function">docker</span> compose up <span class="token parameter variable">-d</span>
 <span class="token function">docker</span> compose restart traefik
 <span class="token function">docker</span> logs traefik <span class="token parameter variable">--tail</span><span class="token operator">=</span><span class="token number">50</span>    <span class="token comment"># Check for errors</span>
 ss <span class="token parameter variable">-lunp</span> <span class="token operator">|</span> <span class="token function">grep</span> <span class="token operator">&lt;</span>port<span class="token operator">></span>           <span class="token comment"># Verify a specific port</span></code></pre>
-<h3>VM Lifecycle</h3>
+<h3 id="vm-lifecycle">VM Lifecycle</h3>
 <pre class="language-bash"><code class="language-bash">qm start <span class="token operator">&lt;</span>VMID<span class="token operator">></span>
 qm <span class="token function">shutdown</span> <span class="token operator">&lt;</span>VMID<span class="token operator">></span>
 qm status <span class="token operator">&lt;</span>VMID<span class="token operator">></span>
@@ -1103,13 +1104,13 @@ qm migrate <span class="token operator">&lt;</span>VMID<span class="token operat
 qm snapshot <span class="token operator">&lt;</span>VMID<span class="token operator">></span> <span class="token operator">&lt;</span>name<span class="token operator">></span> <span class="token string">"&lt;description>"</span>
 qm listsnapshot <span class="token operator">&lt;</span>VMID<span class="token operator">></span>
 qm rollback <span class="token operator">&lt;</span>VMID<span class="token operator">></span> <span class="token operator">&lt;</span>snapname<span class="token operator">></span></code></pre>
-<h3>AMP</h3>
+<h3 id="amp">AMP</h3>
 <pre class="language-bash"><code class="language-bash">ampinstmgr status
 ampinstmgr startall
 ampinstmgr stopall
 journalctl <span class="token parameter variable">-u</span> ampinstmgr <span class="token parameter variable">-f</span></code></pre>
 <hr>
-<h2>11 — Game Server Status Summary</h2>
+<h2 id="11-game-server-status-summary">11 — Game Server Status Summary</h2>
 <table>
 <thead>
 <tr>
@@ -1212,9 +1213,7 @@ journalctl <span class="token parameter variable">-u</span> ampinstmgr <span cla
 
   <footer class="post-footer">
     <h4>Author - Joseph Sándor Voros</h4>
-    <p class="post-tags">
-      
-    </p>
+    
   </footer>
 </article>
 
