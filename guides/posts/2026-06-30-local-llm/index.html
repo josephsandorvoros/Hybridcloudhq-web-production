@@ -69,7 +69,7 @@
 </tr>
 <tr>
 <td><strong>Context Size</strong></td>
-<td>262,144 Tokens</td>
+<td>131,072 Tokens</td>
 </tr>
 <tr>
 <td><strong>Model</strong></td>
@@ -195,6 +195,9 @@ huggingface-cli download unsloth/Qwen3.6-27B-GGUF <span class="token punctuation
     <span class="token key atrule">ports</span><span class="token punctuation">:</span>
       <span class="token punctuation">-</span> <span class="token string">"2030:2030"</span>
 
+    <span class="token key atrule">healthcheck</span><span class="token punctuation">:</span>
+      <span class="token key atrule">disable</span><span class="token punctuation">:</span> <span class="token boolean important">true</span>
+
     <span class="token key atrule">deploy</span><span class="token punctuation">:</span>
       <span class="token key atrule">resources</span><span class="token punctuation">:</span>
         <span class="token key atrule">reservations</span><span class="token punctuation">:</span>
@@ -212,12 +215,12 @@ huggingface-cli download unsloth/Qwen3.6-27B-GGUF <span class="token punctuation
       --api-key ""
       --jinja
       --parallel 1
-      --reasoning-budget 1024
+      --reasoning-budget 4096
       --reasoning-budget-message "... thinking budget reached, outputting code now."
-      --ctx-size 262144
-      --temp 0.6
-      --top-k 20
-      --top-p 0.8
+      --ctx-size 131072
+      --temp 0.3
+      --top-k 40
+      --top-p 0.95
       --repeat-penalty 1
       --presence-penalty 0
       --cache-type-k q4_0
