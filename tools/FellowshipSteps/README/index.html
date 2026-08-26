@@ -1,10 +1,10 @@
 <h1 id="fellowship-steps">Fellowship Steps</h1>
-<p>Fellowship Steps is a browser-based walking tracker that maps your real-world step totals onto the Fellowship's journey from Rivendell to Mount Doom.</p>
+<p>Fellowship Steps is a browser-based walking tracker that maps your real-world step totals onto the Fellowship's journey from Hobbiton to Mount Doom.</p>
 <h2 id="files">Files</h2>
 <ul>
-<li><code>index.html</code> contains the app shell and UI structure.</li>
-<li><code>styles.css</code> contains the visual system, layout, and map styling.</li>
-<li><code>script.js</code> contains the journey logic, manual step tracking, local storage, optional map asset detection, and calibration tooling.</li>
+<li><code>index.html</code> contains the app shell, UI structure, and the onboarding / settings / export dialogs.</li>
+<li><code>styles.css</code> contains the visual system, layout, and map styling, including responsive breakpoints for desktop, portrait, and mobile.</li>
+<li><code>script.js</code> contains the journey logic, manual step tracking, local storage, streak tracking, milestone celebrations, and optional map asset detection.</li>
 <li><code>data/poi.json</code> stores waypoint metadata and total journey distance.</li>
 <li><code>data/path.json</code> stores dense route coordinates used by the overlay path.</li>
 <li><code>assets/</code> is where custom map images and future static resources belong.</li>
@@ -13,31 +13,30 @@
 <p>From this folder:</p>
 <pre class="language-bash"><code class="language-bash">python3 <span class="token parameter variable">-m</span> http.server <span class="token number">4173</span></code></pre>
 <p>Then open <code>http://127.0.0.1:4173/</code> in a browser.</p>
+<h2 id="features">Features</h2>
+<ul>
+<li><strong>Manual step tracking</strong> — add or subtract steps; a quick-add row (+500 / +1k / +5k / +10k) makes logging fast.</li>
+<li><strong>Adjustable stride length</strong> — set your stride in meters (default 0.76 m) to convert steps to distance.</li>
+<li><strong>Distance display</strong> — kilometers, miles, or meters.</li>
+<li><strong>Journey progress</strong> — a progress ring and bar show how far you are from Mount Doom (1,550 mi / 2,494 km).</li>
+<li><strong>Quest progress log</strong> — a compact list of all 12 waypoints with reached / current / upcoming status, plus a &quot;next up&quot; progress bar between your current and next waypoint.</li>
+<li><strong>Waypoint popovers</strong> — click or focus any map pin (or quest-log entry) to see its lore and target distance. Popovers clamp to the map edges and flip to stay in view.</li>
+<li><strong>Milestone celebrations</strong> — a burst and toast fire when you pass a waypoint, with a special message at Mount Doom.</li>
+<li><strong>Walking streak</strong> — a &quot;Walking streak&quot; card tracks your current streak, best streak, total steps, and active days, with a 14-day bar chart.</li>
+<li><strong>Dark / parchment themes</strong> — toggle from the header; the theme-color meta follows the active theme.</li>
+<li><strong>Onboarding &amp; settings</strong> — a &quot;How it works&quot; dialog introduces the tracker, and a Settings dialog adjusts stride length, display units, and theme.</li>
+<li><strong>Optimized map</strong> — the bundled map loads as a small WebP (with a high-res JPEG fallback) and is framed to sit inside the UI.</li>
+<li><strong>Responsive layout</strong> — the dashboard reflows from a two-column grid on desktop to a single column on portrait and mobile, with the map, tracker, quest log, and streak all stacking cleanly.</li>
+<li><strong>Keyboard &amp; screen-reader support</strong> — map pins and quest-log entries are focusable and activatable with Enter/Space; Escape closes popovers.</li>
+</ul>
 <h2 id="map-asset-support">Map asset support</h2>
 <p>If you have a high-resolution Middle-earth map, put it in <code>assets/</code> using one of these names:</p>
 <ul>
-<li><code>middle-earth-map.webp</code></li>
+<li><code>middle-earth-map.webp</code> (preferred — smallest)</li>
 <li><code>middle-earth-map.png</code></li>
 <li><code>middle-earth-map.jpg</code></li>
 <li><code>middle-earth-map.jpeg</code></li>
 </ul>
-<p>The app will detect it automatically and render it beneath the Fellowship route overlay.</p>
+<p>The app detects the best available format automatically (WebP first) and renders it beneath the Fellowship route overlay.</p>
 <h2 id="state-storage">State storage</h2>
-<p>Progress is stored locally in the browser under <code>fellowship-steps-web</code>.</p>
-<h2 id="current-behavior">Current behavior</h2>
-<ul>
-<li>Manual step tracking only</li>
-<li>Adjustable stride length</li>
-<li>Distance display in kilometers, miles, or meters</li>
-<li>Journey progress ring and bar</li>
-<li>Waypoint popovers and achievement cards</li>
-<li>Optional custom map background from <code>assets/</code></li>
-<li>Calibration mode to capture SVG coordinates by clicking the map and copy JSON snippets</li>
-</ul>
-<h2 id="calibration-workflow">Calibration workflow</h2>
-<ol>
-<li>Click <code>Calibration mode</code> in the map header.</li>
-<li>Click points on the map to collect coordinates in SVG space.</li>
-<li>Use <code>Copy</code> in the calibration panel.</li>
-<li>Paste route arrays into <code>data/path.json</code> and POI objects into <code>data/poi.json</code>.</li>
-</ol>
+<p>Progress, streak history, theme, and settings are stored locally in the browser under <code>fellowship-steps-web</code>.</p>

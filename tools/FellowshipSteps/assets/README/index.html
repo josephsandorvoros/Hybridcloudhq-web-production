@@ -1,6 +1,11 @@
 <h1 id="assets">Assets</h1>
 <p>Put custom static files for Fellowship Steps in this folder.</p>
 <h2 id="map-image">Map image</h2>
+<p>The app ships with an optimized default map:</p>
+<ul>
+<li><code>middle-earth-map.webp</code> — ~1800px wide, ~440 KB. Loaded first.</li>
+<li><code>middle-earth-map.jpeg</code> — full 10000×5455 resolution (~19 MB). Used only if the WebP is missing.</li>
+</ul>
 <p>To use your own map without changing code, add your image with one of these filenames:</p>
 <ul>
 <li><code>middle-earth-map.webp</code></li>
@@ -8,7 +13,7 @@
 <li><code>middle-earth-map.jpg</code></li>
 <li><code>middle-earth-map.jpeg</code></li>
 </ul>
-<p>The app checks these names automatically on load and uses the first one it finds.</p>
+<p>The app checks these names automatically on load and uses the first one it finds (WebP first).</p>
 <h2 id="notes">Notes</h2>
 <ul>
 <li>A wide horizontal image works best.</li>

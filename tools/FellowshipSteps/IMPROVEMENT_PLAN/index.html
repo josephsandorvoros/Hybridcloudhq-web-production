@@ -1,0 +1,211 @@
+<h1 id="fellowship-steps-improvement-plan">Fellowship Steps — Improvement Plan</h1>
+<p>A fresh-eyes review of the app, its interactions, flow, and style. Findings below were
+verified by running the app (<code>python3 -m http.server 4173</code>) and inspecting the live DOM,
+not just reading the code.</p>
+<p><strong>Stack:</strong> single-page vanilla JS (<code>script.js</code>, ~1280 lines), one <code>index.html</code>, one
+<code>styles.css</code>, two JSON data files, one 19 MB map image. No build step, no framework,
+state in <code>localStorage</code>.</p>
+<hr>
+<h2 id="tldr-the-three-things-that-matter-most">TL;DR — the three things that matter most</h2>
+<ol>
+<li><strong>The map is the soul of the app, and it's currently broken.</strong> The route line doesn't
+track progress, the overlay is misaligned with the geography, and the image is
+stretched. Fixing the map is the single highest-leverage change.</li>
+<li><strong>The core loop (add steps → watch the journey advance) is underwhelming.</strong> There's
+no milestone moment, no history, no quick-add, and the &quot;achievements&quot; feature that's
+described in code is never rendered.</li>
+<li><strong>A lot of dead/misleading code and docs</strong> (calibration mode, POI editor, <code>path.json</code>)
+create a gap between what the README promises and what the app actually does.</li>
+</ol>
+<hr>
+<h2 id="p0-fix-whats-broken-do-these-first">P0 — Fix what's broken (do these first)</h2>
+<h3 id="1-the-route-progress-line-doesnt-track-progress">1. The route-progress line doesn't track progress</h3>
+<p><strong>File:</strong> <code>styles.css</code> (<code>.route-progress</code>), <code>script.js</code> (<code>renderMap</code>)</p>
+<p>The progress line uses a hardcoded <code>stroke-dasharray: 1200</code>, but the real route path is
+only <strong>~529 units</strong> long (measured via <code>getTotalLength()</code>). Because the dash (1200) is
+far longer than the path (529), the line is <strong>fully drawn by ~44% progress and never
+changes again</strong> for the rest of the journey. The last 56% of the quest shows no movement
+on the map line.</p>
+<p><strong>Fix:</strong> compute the real path length in JS after the route is built and set both
+<code>stroke-dasharray</code> and the offset base to that value (or use <code>pathLength=&quot;100&quot;</code> on the
+<code>&lt;path&gt;</code> so the dash math is always 0–100). This makes the gold line grow in lockstep
+with the traveler marker.</p>
+<h3 id="2-the-map-image-is-stretched-aspect-mismatch">2. The map image is stretched (aspect mismatch)</h3>
+<p><strong>File:</strong> <code>index.html</code> (<code>#mapImageSvg</code>), <code>script.js</code> (<code>initMapAsset</code>)</p>
+<p>The SVG <code>viewBox</code> is <code>1000 × 420</code> (aspect <strong>2.38</strong>) but the map image is
+<code>10000 × 5455</code> (aspect <strong>1.83</strong>). With <code>preserveAspectRatio=&quot;none&quot;</code> the image is
+stretched to fill, so the map looks squashed/distorted.</p>
+<p><strong>Fix:</strong> either (a) change the <code>viewBox</code> to match the image aspect (e.g. <code>0 0 1000 545.5</code>)
+and re-project the waypoint coordinates, or (b) use <code>preserveAspectRatio=&quot;xMidYMid slice&quot;</code>
+and accept letterboxing. Option (a) is the correct one and pairs with #3.</p>
+<h3 id="3-the-overlay-doesnt-line-up-with-the-geography">3. The overlay doesn't line up with the geography</h3>
+<p><strong>File:</strong> <code>data/poi.json</code>, <code>data/path.json</code>, <code>script.js</code></p>
+<p>The waypoint pins (x 317–658, y 112–303) only cover the left-center of the map and do not
+sit on the real places (e.g. the &quot;Rivendell&quot; pin is not over Rivendell on the map). The
+route is a straight-line polyline snapped between pins, not the actual road.</p>
+<p><strong>Fix:</strong> re-calibrate the 12 waypoint coordinates against the real map, and replace the
+straight-line route with a hand-traced path that follows the road on the map. This is the
+work that makes the fantasy premise actually land. (This is exactly what the &quot;calibration
+mode&quot; in the README was supposed to help with — see #7.)</p>
+<h3 id="4-datapathjson-is-dead-the-dense-route-is-never-used">4. <code>data/path.json</code> is dead — the dense route is never used</h3>
+<p><strong>File:</strong> <code>script.js</code> (<code>init</code>)</p>
+<p><code>init()</code> unconditionally calls <code>buildRouteFromWaypoints()</code> when <code>ENABLE_POI_EDITING</code> is
+false (which it always is), <strong>overwriting</strong> whatever was loaded from <code>path.json</code>. So the
+carefully-authored 26-point route in <code>path.json</code> is silently discarded and the app always
+draws straight lines.</p>
+<p><strong>Fix:</strong> decide the source of truth. If <code>path.json</code> is the real route, stop overwriting it.
+If the straight-line route is intended, delete <code>path.json</code> and the fetch so the code and
+the data agree.</p>
+<h3 id="5-dead-code-and-a-duplicate-function">5. Dead code and a duplicate function</h3>
+<p><strong>File:</strong> <code>script.js</code></p>
+<ul>
+<li><code>renderAchievements()</code> targets <code>#achievementsGrid</code>, which <strong>does not exist</strong> in the
+HTML — it returns early and never runs.</li>
+<li><code>renderCalibrationOutput()</code> / <code>copyCalibrationOutput()</code> / <code>undoCalibrationPoint()</code> /
+<code>clearCalibrationPoints()</code> target <code>#calibrationOutput</code>, which <strong>does not exist</strong>.</li>
+<li><code>toggleCalibrationMode()</code> just sets <code>calibration.enabled = false</code> (a no-op) and no
+button is wired to it.</li>
+<li><code>setCurrentPoiOverride()</code> is <strong>declared twice</strong> (the second definition wins).</li>
+</ul>
+<p><strong>Fix:</strong> delete the dead calibration + achievements code, or build the features it was
+meant to support (see P1 #6 and P2). Remove the duplicate.</p>
+<h3 id="6-the-19-mb-map-image-is-a-performance-problem">6. The 19 MB map image is a performance problem</h3>
+<p><strong>File:</strong> <code>assets/middle-earth-map.jpeg</code> (19,497,651 bytes, 10000×5455)</p>
+<p>A 19 MB JPEG is slow to fetch and decode, and it's displayed in a ~700 px box. The
+&quot;drop a map into assets&quot; hint also lingers for several seconds while the image is probed.</p>
+<p><strong>Fix:</strong> ship a web-optimized version (e.g. a ~1600–2000 px wide WebP, a few hundred KB)
+as the default, keep the HD file optional. Show a proper loading state on the map while
+the image decodes instead of the &quot;drop a map&quot; hint.</p>
+<hr>
+<h2 id="p1-improve-the-core-flow-and-interactions">P1 — Improve the core flow and interactions</h2>
+<h3 id="1-make-add-steps-a-one-tap-satisfying-loop">1. Make &quot;add steps&quot; a one-tap, satisfying loop</h3>
+<p><strong>File:</strong> <code>index.html</code> (controls card), <code>script.js</code></p>
+<p>Right now you must type a number into &quot;Steps per action&quot; then click Add. Add quick-add
+presets as big tappable buttons: <strong>+500 / +1,000 / +5,000 / +10,000</strong>, plus a &quot;log today's
+walk&quot; affordance. Keep the custom input for precision. This is the action the user takes
+every day — it should be the fastest, most rewarding thing on the page.</p>
+<h3 id="2-celebrate-milestones-the-achievement-thats-missing">2. Celebrate milestones (the &quot;achievement&quot; that's missing)</h3>
+<p><strong>File:</strong> <code>script.js</code> (<code>render</code>, <code>updateSteps</code>), <code>index.html</code></p>
+<p>When a step crosses a waypoint distance, there's no moment — the numbers just tick. Add a
+celebration: a toast/banner (&quot;You've reached Rivendell!&quot;), a brief pulse on the map pin,
+and unlock the waypoint in the list. The <code>completionIds()</code> logic already exists; surface it.
+This is the emotional payoff of the whole app and it's currently absent.</p>
+<h3 id="3-add-a-journey-history-log">3. Add a journey history / log</h3>
+<p><strong>File:</strong> <code>script.js</code> (state), <code>index.html</code></p>
+<p>Steps are a single cumulative counter with no history. Add a lightweight log of entries
+(<code>{date, delta, note}</code>) so the user can see daily/weekly totals, a streak, and a small
+sparkline or bar chart of the last 14 days. This turns a counter into a habit tracker and
+gives &quot;Last update&quot; real context.</p>
+<h3 id="4-de-duplicate-the-waypoint-list-and-the-map">4. De-duplicate the waypoint list and the map</h3>
+<p><strong>File:</strong> <code>index.html</code>, <code>script.js</code></p>
+<p>The &quot;Journey log / Waypoints&quot; card and the map both render all 12 waypoints with the same
+blurbs. Pick a role for each: the <strong>map</strong> is for spatial progress (pins + route), the
+<strong>list</strong> is for the narrative (blurbs, distance, locked/unlocked). Make the list a
+vertical &quot;quest log&quot; with clear current/next/upcoming states and a progress tick per
+segment, rather than a second copy of the map.</p>
+<h3 id="5-fix-popover-positioning-and-make-it-robust">5. Fix popover positioning and make it robust</h3>
+<p><strong>File:</strong> <code>script.js</code> (<code>openWaypointPopover</code>)</p>
+<p>The popover is positioned with absolute pixel math that can overflow the map edges and
+misaligns when zoomed/panned. Anchor it to the waypoint's screen position with clamping to
+the map bounds, and close it on Escape / outside click (partially present). Consider a
+single shared detail panel instead of a floating popover.</p>
+<h3 id="6-decide-the-fate-of-calibration-poi-editing">6. Decide the fate of calibration / POI editing</h3>
+<p><strong>File:</strong> <code>script.js</code>, <code>index.html</code>, <code>README.md</code></p>
+<p>The README documents a &quot;Calibration workflow&quot; and a POI editor, but <code>ENABLE_POI_EDITING</code>
+is <code>false</code>, the panel is hidden, and the calibration UI doesn't exist. Either (a) build a
+real, minimal calibration tool (click map → capture SVG coords → write <code>poi.json</code>), or
+(b) remove the feature and its docs. Right now it's a promise the app doesn't keep.</p>
+<h3 id="7-make-the-map-keyboard-and-screen-reader-accessible">7. Make the map keyboard- and screen-reader-accessible</h3>
+<p><strong>File:</strong> <code>index.html</code>, <code>script.js</code></p>
+<p>Waypoints are clickable but not focusable; the map has no keyboard path. Make each
+waypoint focusable (<code>tabindex</code>, <code>role=&quot;button&quot;</code>, Enter/Space to open), add an <code>aria-live</code>
+region for progress announcements, and ensure the zoom/pan controls are reachable.</p>
+<hr>
+<h2 id="p2-style-and-polish">P2 — Style and polish</h2>
+<h3 id="1-reconcile-the-maps-light-parchment-with-the-dark-ui">1. Reconcile the map's light parchment with the dark UI</h3>
+<p><strong>File:</strong> <code>styles.css</code></p>
+<p>The map stage is a bright parchment rectangle floating in a dark, gold-accented UI. It
+reads as a separate widget, not part of the world. Frame it (aged border, subtle inner
+shadow, corner ornaments) so it feels like a map <em>in</em> the app, and let the parchment tone
+shift with the dark/parchment theme.</p>
+<h3 id="2-fix-waypoint-label-legibility-on-the-map">2. Fix waypoint label legibility on the map</h3>
+<p><strong>File:</strong> <code>styles.css</code> (<code>.waypoint-label</code>), <code>script.js</code></p>
+<p>Labels are tiny, gold-on-map, and overlap at default zoom. Add a subtle text halo/backing,
+hide labels below a zoom threshold (show on hover/zoom), and offset colliding labels.</p>
+<h3 id="3-add-a-favicon-theme-color-and-a-real-loading-state">3. Add a favicon, theme-color, and a real loading state</h3>
+<p><strong>File:</strong> <code>index.html</code></p>
+<p>No favicon or <code>&lt;meta name=&quot;theme-color&quot;&gt;</code>. Add a ring/footprint favicon, a theme-color
+meta that follows the active theme, and a skeleton/loading state for the map and data.</p>
+<h3 id="4-promote-the-theme-toggle">4. Promote the theme toggle</h3>
+<p><strong>File:</strong> <code>index.html</code>, <code>script.js</code></p>
+<p>Dark vs. parchment is buried in Settings. A small toggle in the header makes the
+parchment mode (which is thematically perfect) discoverable.</p>
+<h3 id="5-tighten-the-hero">5. Tighten the hero</h3>
+<p><strong>File:</strong> <code>index.html</code></p>
+<p>The hero summary is long and the two buttons (&quot;How it works&quot;, &quot;Settings&quot;) are low-value
+at the top. Consider leading with the live journey state (current location + % + next
+stop) so the first thing you see is <em>your</em> progress, not marketing copy.</p>
+<hr>
+<h2 id="p3-stretch-nice-to-have">P3 — Stretch / nice-to-have</h2>
+<ul>
+<li><strong>PWA / offline:</strong> add a manifest + service worker so it installs and works offline
+(it's a local <code>http.server</code> app today; a PWA makes it a real daily companion).</li>
+<li><strong>Step-count import:</strong> paste or import from a wearable/CSV instead of only manual entry.</li>
+<li><strong>Companion characters:</strong> show which Fellowship members are &quot;with you&quot; per segment
+(Gandalf leaves at the Bridge of Khazad-dûm, etc.) for narrative flavor.</li>
+<li><strong>Shareable progress card:</strong> render a small image of current progress to share.</li>
+<li><strong>Multiple journeys / reset-with-keep-settings:</strong> the reset flow already preserves
+settings; add &quot;start a new quest&quot; that archives the old one.</li>
+<li><strong>Tests:</strong> the distance/progress/waypoint math is pure and worth a small unit-test pass
+(it currently has no tests and the dash/length math in P0 #1 shows why).</li>
+</ul>
+<hr>
+<h2 id="suggested-order-of-attack">Suggested order of attack</h2>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Item</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>P0 #1, #2, #3, #4</td>
+<td>Make the map actually work — the core of the app</td>
+</tr>
+<tr>
+<td>2</td>
+<td>P0 #6</td>
+<td>Ship a small map image so the app loads fast</td>
+</tr>
+<tr>
+<td>3</td>
+<td>P1 #1, #2</td>
+<td>Make the daily loop fast and rewarding</td>
+</tr>
+<tr>
+<td>4</td>
+<td>P0 #5, P1 #6</td>
+<td>Delete dead code / reconcile docs with reality</td>
+</tr>
+<tr>
+<td>5</td>
+<td>P1 #3, #4, #5, #7</td>
+<td>History, de-dup, popover, a11y</td>
+</tr>
+<tr>
+<td>6</td>
+<td>P2</td>
+<td>Visual polish</td>
+</tr>
+<tr>
+<td>7</td>
+<td>P3</td>
+<td>Stretch goals</td>
+</tr>
+</tbody>
+</table>
+<p>Each P0 item is small and independently shippable; the map fixes (#1–#4) can land as one
+cohesive change.</p>

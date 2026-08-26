@@ -3,10 +3,10 @@ const CONFIG = {
     strideRange: { min: 0.5, max: 1.2, default: 0.76 },
     refreshIntervalMs: 60000,
     mapCandidates: [
-        "assets/middle-earth-map.jpeg",
         "assets/middle-earth-map.webp",
         "assets/middle-earth-map.png",
-        "assets/middle-earth-map.jpg"
+        "assets/middle-earth-map.jpg",
+        "assets/middle-earth-map.jpeg"
     ],
     dataPaths: {
         poi: "data/poi.json",
@@ -15,25 +15,25 @@ const CONFIG = {
 };
 
 const FALLBACK_WAYPOINTS = [
-    { id: "Hobbiton", name: "Hobbiton", distance: 0, x: 317.5, y: 118.1, icon: "1", blurb: "Hobbiton is a Hobbit village in the central regions of the Shire, within the borders of the Westfarthing. It is the home of Bilbo and Frodo Baggins, and the starting point of the Fellowship's journey to destroy the One Ring in the fires of Mount Doom." },
-    { id: "bree", name: "Bree", distance: 135, x: 369.4, y: 119.8, icon: "2", blurb: "Bree is a village of Men and hobbits, located east of the Shire and south of Fornost in Eriador. It is the only settlement in Eriador" },
-    { id: "rivendell", name: "Rivendell", distance: 485, x: 488.4, y: 112, icon: "3", blurb: "Rivendell, or Imladris, is an Elven outpost established by Elrond in the Misty Mountains on the eastern edge of Eriador. It is a place of refuge and healing, and serves as the home of Elrond and his people. It is also the location where the Fellowship of the Ring is formed and where the Council of Elrond takes place." },
-    { id: "khazad-dum", name: "Bridge of Khazad-dum", distance: 785, x: 477.2, y: 166.1, icon: "4", blurb: "Khazad-dum, commonly known as Moria, is the underground kingdom of the Dwarves of Durin's Folk, and the most famed of all Dwarven realms. The Bridge of Khazad-dum is a narrow stone bridge that spans a chasm within the mines of Moria. It is the site of a pivotal battle in the Fellowship's journey, where Gandalf confronts the Balrog and ultimately sacrifices himself to allow the rest of the Fellowship to escape." },
-    { id: "lothlorien", name: "Lothlorien", distance: 801, x: 513, y: 182.2, icon: "5", blurb: "Lothlorien is the fairest and most enchanted Elven realm remaining in Middle-earth during the Third Age. Located east of the Misty Mountains along the Great River Anduin, it is ruled by the Lady Galadriel and Lord Celeborn. The Fellowship finds refuge in Lothlorien after their harrowing escape from Moria, and it is here that they receive gifts and counsel from the Elves before continuing their journey towards Mordor." },
-    { id: "edoras", name: "Caras Galadhon", distance: 835, x: 526.1, y: 183.5, icon: "6", blurb: "Caras Galadhon is the city and fortress of the Galadhrim of Lothlorien, built by Celeborn and his wife Galadriel. It is located in the heart of Lothlorien, and serves as the residence of the Lady Galadriel and Lord Celeborn. The city is built among the trees, with platforms and walkways connecting the various structures. It is a place of great beauty and tranquility, and serves as a sanctuary for the Fellowship during their time in Lothlorien." },
-    { id: "Argonath", name: "Argonath", distance: 1165, x: 569.2, y: 256.9, icon: "7", blurb: "The Argonath, also known as the Pillars of the Kings, or the Gate of Kings is a landmark on the northern edge of Gondor. It consists of two enormous statues carved in the likenesses of Isildur and Anarion, the sons of Elendil, who were the first High Kings of Gondor. The statues stand on either side of the River Anduin, marking the northern boundary of Gondor and serving as a warning to those who would enter the land without permission." },
-    { id: "the-black-gate", name: "The Black Gate", distance: 1325, x: 629.8, y: 265.2, icon: "8", blurb: "The Black Gate, built by Sauron, is the main entrance into the land of Mordor. It is heavily fortified and guarded, serving as a formidable barrier to any who would attempt to enter or leave Mordor without Sauron's permission." },
-    { id: "osgiliath", name: "Osgiliath", distance: 1455, x: 611.9, y: 302.6, icon: "9", blurb: "Osgiliath is the old capital city of Gondor. The city straddles the Anduin River at a point approximately half way between the cities of Minas Anor to the south-west and Minas Ithil to the north-east, and north of the nearby Emyn Arnen." },
-    { id: "minas-morgul", name: "Minas Morgul", distance: 1485, x: 626.6, y: 302.7, icon: "10", blurb: "Minas Morgul was the twin city of Minas Tirith before its fall to the forces of Sauron in the Third Age. It was located in the Ephel Duath mountains, on the western border of Mordor, and was originally known as Minas Ithil, or the Tower of the Moon." },
-    { id: "escape-from-the-orcs", name: "Escape from the Orcs", distance: 1505, x: 644.9, y: 276, icon: "11", blurb: "Frodo and Sam make a daring escape from the Orcs, continuing their journey towards Mount Doom. This is a pivotal moment in the story, as it marks the point where the two hobbits are on their own, without the support of the rest of the Fellowship, and must rely on their own courage and resourcefulness to continue their quest to destroy the One Ring." },
-    { id: "mount-doom", name: "Mount Doom", distance: 1550, x: 657.9, y: 284.9, icon: "12", blurb: "The end of the quest, where the full distance of the Fellowship route is complete. Mount Doom, also known as Orodruin, is a volcanic mountain located in the land of Mordor. It is the place where the One Ring was forged by Sauron, and it is the only place where the Ring can be destroyed. The mountain is a symbol of evil and darkness, and serves as the final destination for Frodo and Sam on their quest to destroy the One Ring and save Middle-earth from Sauron's tyranny." }
+    { id: "Hobbiton", name: "Hobbiton", distance: 0, x: 335.0, y: 165.0, icon: "1", blurb: "Hobbiton is a Hobbit village in the central regions of the Shire, within the borders of the Westfarthing. It is the home of Bilbo and Frodo Baggins, and the starting point of the Fellowship's journey to destroy the One Ring in the fires of Mount Doom." },
+    { id: "bree", name: "Bree", distance: 154.2, x: 385.0, y: 170.0, icon: "2", blurb: "Bree is a village of Men and hobbits, located east of the Shire and south of Fornost in Eriador. It is the only settlement in Eriador" },
+    { id: "rivendell", name: "Rivendell", distance: 482.7, x: 490.0, y: 150.0, icon: "3", blurb: "Rivendell, or Imladris, is an Elven outpost established by Elrond in the Misty Mountains on the eastern edge of Eriador. It is a place of refuge and healing, and serves as the home of Elrond and his people. It is also the location where the Fellowship of the Ring is formed and where the Council of Elrond takes place." },
+    { id: "khazad-dum", name: "Bridge of Khazad-dum", distance: 677.0, x: 470.0, y: 210.0, icon: "4", blurb: "Khazad-dum, commonly known as Moria, is the underground kingdom of the Dwarves of Durin's Folk, and the most famed of all Dwarven realms. The Bridge of Khazad-dum is a narrow stone bridge that spans a chasm within the mines of Moria. It is the site of a pivotal battle in the Fellowship's journey, where Gandalf confronts the Balrog and ultimately sacrifices himself to allow the rest of the Fellowship to escape." },
+    { id: "lothlorien", name: "Lothlorien", distance: 863.4, x: 525.0, y: 235.0, icon: "5", blurb: "Lothlorien is the fairest and most enchanted Elven realm remaining in Middle-earth during the Third Age. Located east of the Misty Mountains along the Great River Anduin, it is ruled by the Lady Galadriel and Lord Celeborn. The Fellowship finds refuge in Lothlorien after their harrowing escape from Moria, and it is here that they receive gifts and counsel from the Elves before continuing their journey towards Mordor." },
+    { id: "edoras", name: "Caras Galadhon", distance: 906.8, x: 535.0, y: 245.0, icon: "6", blurb: "Caras Galadhon is the city and fortress of the Galadhrim of Lothlorien, built by Celeborn and his wife Galadriel. It is located in the heart of Lothlorien, and serves as the residence of the Lady Galadriel and Lord Celeborn. The city is built among the trees, with platforms and walkways connecting the various structures. It is a place of great beauty and tranquility, and serves as a sanctuary for the Fellowship during their time in Lothlorien." },
+    { id: "Argonath", name: "Argonath", distance: 1195.6, x: 575.0, y: 330.0, icon: "7", blurb: "The Argonath, also known as the Pillars of the Kings, or the Gate of Kings is a landmark on the northern edge of Gondor. It consists of two enormous statues carved in the likenesses of Isildur and Anarion, the sons of Elendil, who were the first High Kings of Gondor. The statues stand on either side of the River Anduin, marking the northern boundary of Gondor and serving as a warning to those who would enter the land without permission." },
+    { id: "the-black-gate", name: "The Black Gate", distance: 1343.3, x: 615.0, y: 355.0, icon: "8", blurb: "The Black Gate, built by Sauron, is the main entrance into the land of Mordor. It is heavily fortified and guarded, serving as a formidable barrier to any who would attempt to enter or leave Mordor without Sauron's permission." },
+    { id: "osgiliath", name: "Osgiliath", distance: 1411.9, x: 605.0, y: 375.0, icon: "9", blurb: "Osgiliath is the old capital city of Gondor. The city straddles the Anduin River at a point approximately half way between the cities of Minas Anor to the south-west and Minas Ithil to the north-east, and north of the nearby Emyn Arnen." },
+    { id: "minas-morgul", name: "Minas Morgul", distance: 1460.4, x: 620.0, y: 370.0, icon: "10", blurb: "Minas Morgul was the twin city of Minas Tirith before its fall to the forces of Sauron in the Third Age. It was located in the Ephel Duath mountains, on the western border of Mordor, and was originally known as Minas Ithil, or the Tower of the Moon." },
+    { id: "escape-from-the-orcs", name: "Escape from the Orcs", distance: 1515.7, x: 635.0, y: 360.0, icon: "11", blurb: "Frodo and Sam make a daring escape from the Orcs, continuing their journey towards Mount Doom. This is a pivotal moment in the story, as it marks the point where the two hobbits are on their own, without the support of the rest of the Fellowship, and must rely on their own courage and resourcefulness to continue their quest to destroy the One Ring." },
+    { id: "mount-doom", name: "Mount Doom", distance: 1550.0, x: 645.0, y: 365.0, icon: "12", blurb: "The end of the quest, where the full distance of the Fellowship route is complete. Mount Doom, also known as Orodruin, is a volcanic mountain located in the land of Mordor. It is the place where the One Ring was forged by Sauron, and it is the only place where the Ring can be destroyed. The mountain is a symbol of evil and darkness, and serves as the final destination for Frodo and Sam on their quest to destroy the One Ring and save Middle-earth from Sauron's tyranny." }
 ];
 
 const FALLBACK_ROUTE = [
-    [68, 274.1], [96, 264], [126, 254], [158, 242], [192, 229], [228, 214], [262, 198], [292, 186],
-    [326, 194], [362, 203], [398, 212], [434, 218], [470, 216], [508, 212], [548, 208], [586, 205],
-    [605.9, 204.1], [642, 201], [678, 196], [715, 190], [748, 183], [779.8, 176.5], [812, 181],
-    [848, 192], [886, 205], [930, 214.1]
+    [335.0, 165.0], [360.0, 168.0], [385.0, 170.0], [420.0, 160.0], [455.0, 155.0], [490.0, 150.0],
+    [480.0, 175.0], [470.0, 210.0], [495.0, 225.0], [525.0, 235.0], [535.0, 245.0], [550.0, 280.0],
+    [565.0, 305.0], [575.0, 330.0], [590.0, 345.0], [615.0, 355.0], [605.0, 375.0], [620.0, 370.0],
+    [635.0, 360.0], [645.0, 365.0]
 ];
 
 const STORAGE_KEY = "fellowship-steps-web";
@@ -41,7 +41,7 @@ const ENABLE_POI_EDITING = false;
 const POI_DISTANCES_IN_MILES = true;
 const MAP_DIMENSIONS = {
     width: 1000,
-    height: 420,
+    height: 545.5,
     maxZoom: 8,
     zoomStep: 1.18
 };
@@ -49,12 +49,6 @@ const MAP_DIMENSIONS = {
 const journey = {
     waypoints: [...FALLBACK_WAYPOINTS],
     route: [...FALLBACK_ROUTE]
-};
-
-const calibration = {
-    enabled: false,
-    points: [],
-    lastPoint: null
 };
 
 const mapView = {
@@ -65,8 +59,7 @@ const mapView = {
     isDragging: false,
     lastClientX: 0,
     lastClientY: 0,
-    dragMoved: false,
-    suppressClick: false
+    dragMoved: false
 };
 
 const defaultState = {
@@ -79,7 +72,8 @@ const defaultState = {
     onboardingSeen: false,
     activeMapAsset: "",
     poiOverrides: {},
-    currentPoiOverrideId: ""
+    currentPoiOverrideId: "",
+    journeyHistory: {}
 };
 
 const state = loadState();
@@ -108,7 +102,6 @@ const elements = {
     mapPopover: document.getElementById("mapPopover"),
     popoverTitle: document.getElementById("popoverTitle"),
     popoverBody: document.getElementById("popoverBody"),
-    achievementsGrid: document.getElementById("achievementsGrid"),
     poiList: document.getElementById("poiList"),
     modeNote: document.getElementById("modeNote"),
     stepDeltaInput: document.getElementById("stepDeltaInput"),
@@ -131,7 +124,6 @@ const elements = {
     poiEditorY: document.getElementById("poiEditorY"),
     poiEditorDistance: document.getElementById("poiEditorDistance"),
     poiAddNewBtn: document.getElementById("poiAddNewBtn"),
-    poiUseLastPointBtn: document.getElementById("poiUseLastPointBtn"),
     poiSaveBtn: document.getElementById("poiSaveBtn"),
     poiSetCurrentBtn: document.getElementById("poiSetCurrentBtn"),
     poiClearCurrentBtn: document.getElementById("poiClearCurrentBtn"),
@@ -147,7 +139,14 @@ const elements = {
     strideOutput: document.getElementById("strideOutput"),
     unitSelect: document.getElementById("unitSelect"),
     themeSelect: document.getElementById("themeSelect"),
-    toast: document.getElementById("toast")
+    themeToggleBtn: document.getElementById("themeToggleBtn"),
+    themeColorMeta: document.getElementById("themeColorMeta"),
+    toast: document.getElementById("toast"),
+    streakCurrent: document.getElementById("streakCurrent"),
+    streakBest: document.getElementById("streakBest"),
+    totalStepsAll: document.getElementById("totalStepsAll"),
+    activeDays: document.getElementById("activeDays"),
+    streakChart: document.getElementById("streakChart")
 };
 
 function loadState() {
@@ -382,6 +381,88 @@ function setLastSync(reason) {
     render(reason);
 }
 
+function todayKey(date = new Date()) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+}
+
+function recordJourneySteps(delta) {
+    if (!delta || delta <= 0) {
+        return;
+    }
+    if (!state.journeyHistory || typeof state.journeyHistory !== "object") {
+        state.journeyHistory = {};
+    }
+    const key = todayKey();
+    state.journeyHistory[key] = (Number(state.journeyHistory[key]) || 0) + delta;
+}
+
+function computeStreaks() {
+    const history = state.journeyHistory || {};
+    const activeDays = new Set(Object.keys(history).filter((key) => (Number(history[key]) || 0) > 0));
+
+    let current = 0;
+    const cursor = new Date();
+    if (!activeDays.has(todayKey(cursor))) {
+        cursor.setDate(cursor.getDate() - 1);
+    }
+    while (activeDays.has(todayKey(cursor))) {
+        current += 1;
+        cursor.setDate(cursor.getDate() - 1);
+    }
+
+    const sorted = [...activeDays].sort();
+    let best = 0;
+    let run = 0;
+    let prev = null;
+    for (const day of sorted) {
+        if (prev) {
+            const prevDate = new Date(`${prev}T00:00:00`);
+            prevDate.setDate(prevDate.getDate() + 1);
+            run = todayKey(prevDate) === day ? run + 1 : 1;
+        } else {
+            run = 1;
+        }
+        if (run > best) {
+            best = run;
+        }
+        prev = day;
+    }
+
+    return { current, best, activeDays: activeDays.size };
+}
+
+function renderJourneyStats() {
+    if (!elements.streakCurrent) {
+        return;
+    }
+    const { current, best, activeDays } = computeStreaks();
+    const history = state.journeyHistory || {};
+    const totalSteps = Object.values(history).reduce((sum, value) => sum + (Number(value) || 0), 0);
+
+    elements.streakCurrent.textContent = `${current} ${current === 1 ? "day" : "days"}`;
+    elements.streakBest.textContent = `${best} ${best === 1 ? "day" : "days"}`;
+    elements.totalStepsAll.textContent = totalSteps.toLocaleString();
+    elements.activeDays.textContent = String(activeDays);
+
+    const days = [];
+    const cursor = new Date();
+    for (let i = 13; i >= 0; i -= 1) {
+        const day = new Date(cursor);
+        day.setDate(cursor.getDate() - i);
+        const key = todayKey(day);
+        days.push({ key, label: day.toLocaleDateString([], { weekday: "narrow" }), steps: Number(history[key]) || 0 });
+    }
+    const max = Math.max(1, ...days.map((day) => day.steps));
+    elements.streakChart.innerHTML = days.map((day) => {
+        const height = day.steps > 0 ? Math.max(10, Math.round((day.steps / max) * 100)) : 0;
+        const cls = day.steps > 0 ? "streak-bar is-active" : "streak-bar";
+        return `<div class="streak-bar-slot" title="${day.key}: ${day.steps.toLocaleString()} steps"><div class="${cls}" style="height:${height}%"></div><span class="streak-bar-label">${day.label}</span></div>`;
+    }).join("");
+}
+
 function showToast(message) {
     if (!elements.toast) {
         return;
@@ -523,12 +604,40 @@ function resetMapView() {
     applyMapView();
 }
 
+function routeTotalLength() {
+    try {
+        return elements.routeBase.getTotalLength();
+    } catch {
+        return 0;
+    }
+}
+
+function routePointAt(fraction) {
+    const length = routeTotalLength();
+    if (!length) {
+        return { x: 0, y: 0 };
+    }
+
+    const point = elements.routeBase.getPointAtLength(clamp(fraction, 0, 1) * length);
+    return { x: point.x, y: point.y };
+}
+
+function waypointFraction(point) {
+    const total = CONFIG.totalDistanceMeters;
+    if (!total) {
+        return 0;
+    }
+
+    return clamp(Number(point.distance) / total, 0, 1);
+}
+
 function renderWaypointLayer() {
     const active = currentWaypoint();
     const activeId = active ? active.id : "";
     const completed = new Set(completionIds());
 
     elements.waypointLayer.innerHTML = journey.waypoints.map((point) => {
+        const pos = routePointAt(waypointFraction(point));
         const pinClasses = ["waypoint-pin"];
 
         if (completed.has(point.id)) {
@@ -540,7 +649,7 @@ function renderWaypointLayer() {
         }
 
         return `
-            <g class="waypoint" data-waypoint-id="${point.id}" transform="translate(${point.x}, ${point.y})">
+            <g class="waypoint" data-waypoint-id="${point.id}" transform="translate(${pos.x.toFixed(1)}, ${pos.y.toFixed(1)})" tabindex="0" role="button" aria-label="${point.name}, ${formatDistance(point.distance, state.units)}">
                 <rect class="waypoint-diamond" x="-8" y="-30" width="16" height="16" rx="2" transform="rotate(45)"></rect>
                 <circle class="${pinClasses.join(" ")}" r="11"></circle>
                 <text class="waypoint-label" y="34">${point.name}</text>
@@ -551,6 +660,12 @@ function renderWaypointLayer() {
 
     Array.from(elements.waypointLayer.querySelectorAll(".waypoint")).forEach((node) => {
         node.addEventListener("click", () => openWaypointPopover(node.dataset.waypointId));
+        node.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                openWaypointPopover(node.dataset.waypointId);
+            }
+        });
     });
 }
 
@@ -576,8 +691,28 @@ function openWaypointPopover(waypointId) {
         y = nodeBox.top + nodeBox.height / 2 - mapBox.top;
     }
 
-    elements.mapPopover.style.left = `${Math.max(16, x - 90)}px`;
-    elements.mapPopover.style.top = `${Math.max(16, y - 110)}px`;
+    // Measure the popover so it can be clamped fully inside the map stage.
+    const popBox = elements.mapPopover.getBoundingClientRect();
+    const popW = popBox.width;
+    const popH = popBox.height;
+    const margin = 12;
+
+    // Prefer to the right of the pin; flip to the left if it would overflow.
+    let left = x + 16;
+    if (left + popW > mapBox.width - margin) {
+        left = x - 16 - popW;
+    }
+    left = Math.min(Math.max(margin, left), Math.max(margin, mapBox.width - popW - margin));
+
+    // Prefer above the pin; flip below if it would overflow the top edge.
+    let top = y - popH - 16;
+    if (top < margin) {
+        top = y + 16;
+    }
+    top = Math.min(Math.max(margin, top), Math.max(margin, mapBox.height - popH - margin));
+
+    elements.mapPopover.style.left = `${left}px`;
+    elements.mapPopover.style.top = `${top}px`;
 }
 
 function closeWaypointPopover() {
@@ -588,30 +723,16 @@ function currentPositionOnPath() {
     if (ENABLE_POI_EDITING && state.currentPoiOverrideId) {
         const forced = currentWaypoint();
         if (forced) {
-            return { x: forced.x, y: forced.y };
+            return routePointAt(waypointFraction(forced));
         }
     }
 
-    const activeIndex = currentWaypointIndex();
-    const start = journey.waypoints[activeIndex];
-    const end = journey.waypoints[Math.min(activeIndex + 1, journey.waypoints.length - 1)];
-
-    if (!start || !end) {
+    const total = CONFIG.totalDistanceMeters;
+    if (!total) {
         return { x: 0, y: 0 };
     }
 
-    if (start.id === end.id) {
-        return { x: start.x, y: start.y };
-    }
-
-    const segmentDistance = end.distance - start.distance;
-    const withinSegment = totalDistance() - start.distance;
-    const ratio = segmentDistance === 0 ? 0 : withinSegment / segmentDistance;
-
-    return {
-        x: start.x + (end.x - start.x) * ratio,
-        y: start.y + (end.y - start.y) * ratio
-    };
+    return routePointAt(totalDistance() / total);
 }
 
 function renderMap() {
@@ -629,39 +750,6 @@ function renderMap() {
     elements.travelerPulse.setAttribute("cy", position.y.toFixed(2));
 }
 
-function renderAchievements() {
-    if (!elements.achievementsGrid) {
-        return;
-    }
-
-    const completed = new Set(completionIds());
-    const active = currentWaypoint();
-    const activeId = active ? active.id : "";
-
-    elements.achievementsGrid.innerHTML = journey.waypoints.map((point) => {
-        const classes = ["achievement-card"];
-        if (completed.has(point.id)) {
-            classes.push("is-unlocked");
-        }
-        if (activeId === point.id) {
-            classes.push("is-current");
-        }
-
-        return `
-            <article class="${classes.join(" ")}">
-                <div class="achievement-top">
-                    <div>
-                        <h3>${point.name}</h3>
-                        <p>${point.blurb}</p>
-                    </div>
-                    <div class="achievement-icon">${point.icon}</div>
-                </div>
-                <p class="distance-chip">${formatDistance(point.distance, state.units)}</p>
-            </article>
-        `;
-    }).join("");
-}
-
 function renderPoiList() {
     if (!elements.poiList) {
         return;
@@ -670,63 +758,49 @@ function renderPoiList() {
     const completed = new Set(completionIds());
     const active = currentWaypoint();
     const activeId = active ? active.id : "";
+    const distance = totalDistance();
+    const next = nextWaypoint();
 
-    elements.poiList.innerHTML = journey.waypoints.map((point) => {
-        const classes = ["poi-item"];
-        if (activeId === point.id) {
-            classes.push("is-active");
-        }
+    let progressLabel;
+    let progressPct = 100;
+    if (active && next && active.id !== next.id) {
+        const span = Math.max(1, next.distance - active.distance);
+        progressPct = Math.min(100, Math.max(0, ((distance - active.distance) / span) * 100));
+        progressLabel = `Next up: ${next.name} • ${formatDistance(Math.max(0, next.distance - distance), state.units)} to go`;
+    } else {
+        progressLabel = "The Ring is at the fire. Quest complete.";
+    }
 
+    const items = journey.waypoints.map((point) => {
+        const status = activeId === point.id ? "current" : (completed.has(point.id) ? "reached" : "upcoming");
         return `
-            <article class="${classes.join(" ")}" data-poi-id="${point.id}">
-                <div class="poi-top">
-                    <div>
-                        <h3>${point.name}</h3>
-                        <p>${point.blurb}</p>
-                    </div>
-                    <div class="poi-icon">${completed.has(point.id) ? "*" : point.icon}</div>
-                </div>
-                <p class="distance-chip">${formatDistance(point.distance, state.units)}</p>
-            </article>
+            <li class="quest-item is-${status}" data-poi-id="${point.id}" tabindex="0" role="button" aria-label="${point.name}, ${status}, ${formatDistance(point.distance, state.units)}">
+                <span class="quest-status" aria-hidden="true"></span>
+                <span class="quest-name">${point.name}</span>
+                <span class="quest-distance">${formatDistance(point.distance, state.units)}</span>
+            </li>
         `;
     }).join("");
 
-    Array.from(elements.poiList.querySelectorAll(".poi-item")).forEach((node) => {
+    elements.poiList.innerHTML = `
+        <div class="quest-progress">
+            <p class="quest-progress-label">${progressLabel}</p>
+            <div class="quest-progress-track" role="progressbar" aria-label="Progress to next waypoint" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(progressPct)}">
+                <div class="quest-progress-bar" style="width:${progressPct.toFixed(1)}%"></div>
+            </div>
+        </div>
+        <ul class="quest-items">${items}</ul>
+    `;
+
+    Array.from(elements.poiList.querySelectorAll(".quest-item")).forEach((node) => {
         node.addEventListener("click", () => openWaypointPopover(node.dataset.poiId));
+        node.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                openWaypointPopover(node.dataset.poiId);
+            }
+        });
     });
-}
-
-function formatCalibrationOutput() {
-    if (!calibration.points.length) {
-        return "No points captured yet.";
-    }
-
-    const routeLines = calibration.points.map((point) => `  [${point.x}, ${point.y}],`).join("\n");
-    const last = calibration.points[calibration.points.length - 1];
-
-    return [
-        `Last point: x=${last.x}, y=${last.y}`,
-        "",
-        "Route snippet:",
-        "[",
-        routeLines,
-        "]",
-        "",
-        "POI snippet:",
-        "{",
-        '  "id": "new-poi",',
-        '  "name": "New POI",',
-        '  "distance": 0,',
-        `  "x": ${last.x},`,
-        `  "y": ${last.y},`,
-        '  "icon": "N",',
-        '  "blurb": "Describe this waypoint."',
-        "}"
-    ].join("\n");
-}
-
-function renderCalibrationOutput() {
-    elements.calibrationOutput.textContent = formatCalibrationOutput();
 }
 
 function populatePoiEditor() {
@@ -768,16 +842,6 @@ function syncPoiEditorInputs() {
     elements.poiEditorX.value = String(point.x);
     elements.poiEditorY.value = String(point.y);
     elements.poiEditorDistance.value = String(point.distance);
-}
-
-function useLastCalibrationPointForPoi() {
-    if (!calibration.lastPoint) {
-        showToast("No calibration point yet. Click on the map first.");
-        return;
-    }
-
-    elements.poiEditorX.value = String(calibration.lastPoint.x);
-    elements.poiEditorY.value = String(calibration.lastPoint.y);
 }
 
 function saveSelectedPoiEdits() {
@@ -881,17 +945,6 @@ function deleteSelectedPoi() {
     showToast(`${point.name} deleted.`);
 }
 
-function setCurrentPoiOverride() {
-    const point = selectedPoi();
-    if (!point) {
-        return;
-    }
-
-    state.currentPoiOverrideId = point.id;
-    render("Current POI overridden");
-    showToast(`Current POI set to ${point.name}.`);
-}
-
 function buildExportJson() {
     const data = {
         totalDistanceMeters: CONFIG.totalDistanceMeters,
@@ -932,28 +985,6 @@ function mapEventToSvgPoint(event) {
     };
 }
 
-function toggleCalibrationMode() {
-    calibration.enabled = false;
-}
-
-function onMapClick(event) {
-    if (!calibration.enabled) {
-        return;
-    }
-
-    if (mapView.suppressClick) {
-        mapView.suppressClick = false;
-        return;
-    }
-
-    const point = mapEventToSvgPoint(event);
-    calibration.lastPoint = point;
-    calibration.points.push(point);
-    renderCalibrationOutput();
-    event.preventDefault();
-    event.stopPropagation();
-}
-
 function onMapWheel(event) {
     event.preventDefault();
     const anchor = mapEventToSvgPoint(event);
@@ -963,11 +994,6 @@ function onMapWheel(event) {
 
 function onMapPointerDown(event) {
     if (event.button !== 0 && event.button !== 1) {
-        return;
-    }
-
-    const canPan = !calibration.enabled || event.shiftKey || event.button === 1;
-    if (!canPan) {
         return;
     }
 
@@ -1004,32 +1030,8 @@ function onMapPointerUp() {
     }
 
     mapView.isDragging = false;
-    mapView.suppressClick = mapView.dragMoved;
     mapView.dragMoved = false;
     elements.mapStage.classList.remove("is-panning");
-}
-
-function copyCalibrationOutput() {
-    const text = elements.calibrationOutput.textContent || "";
-    navigator.clipboard.writeText(text)
-        .then(() => showToast("Calibration output copied."))
-        .catch(() => showToast("Copy failed. Select text manually."));
-}
-
-function undoCalibrationPoint() {
-    if (!calibration.points.length) {
-        return;
-    }
-
-    calibration.points.pop();
-    calibration.lastPoint = calibration.points[calibration.points.length - 1] || null;
-    renderCalibrationOutput();
-}
-
-function clearCalibrationPoints() {
-    calibration.points = [];
-    calibration.lastPoint = null;
-    renderCalibrationOutput();
 }
 
 function render(reason = "") {
@@ -1040,6 +1042,7 @@ function render(reason = "") {
 
     state.completedIds = completionIds();
     elements.body.dataset.theme = state.theme;
+    syncThemeChrome();
     document.documentElement.style.setProperty("--route-progress", percent.toFixed(2));
     elements.progressFill.style.width = `${percent.toFixed(2)}%`;
     elements.progressPercent.textContent = `${percent.toFixed(1)}%`;
@@ -1058,15 +1061,51 @@ function render(reason = "") {
 
     renderMap();
     renderPoiList();
+    renderJourneyStats();
     if (ENABLE_POI_EDITING) {
         populatePoiEditor();
     }
     persistState();
 }
 
+function celebrateWaypoint(point) {
+    if (!point) {
+        return;
+    }
+
+    const position = currentPositionOnPath();
+    const layer = document.getElementById("travelerLayer");
+    if (!layer) {
+        return;
+    }
+
+    const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    ring.setAttribute("class", "waypoint-burst");
+    ring.setAttribute("cx", position.x.toFixed(2));
+    ring.setAttribute("cy", position.y.toFixed(2));
+    ring.setAttribute("r", "12");
+    layer.appendChild(ring);
+    window.setTimeout(() => ring.remove(), 900);
+
+    const isFinal = point.id === "mount-doom";
+    showToast(isFinal ? "Mount Doom reached — the quest is complete!" : `Waypoint reached: ${point.name}`);
+}
+
 function updateSteps(delta) {
+    const before = new Set(completionIds());
     state.steps = Math.max(0, state.steps + delta);
+    if (delta > 0) {
+        recordJourneySteps(delta);
+    }
+    const after = completionIds();
     setLastSync(delta >= 0 ? "Journey updated" : "Progress adjusted");
+
+    if (delta > 0) {
+        const newlyPassed = journey.waypoints.filter((point) => after.includes(point.id) && !before.has(point.id));
+        if (newlyPassed.length) {
+            celebrateWaypoint(newlyPassed[newlyPassed.length - 1]);
+        }
+    }
 }
 
 function resetJourney() {
@@ -1100,6 +1139,25 @@ function applyUnits(value) {
 function applyTheme(value) {
     state.theme = value === "parchment" ? "parchment" : "dark";
     render("Theme updated");
+}
+
+function syncThemeChrome() {
+    const isParchment = state.theme === "parchment";
+    if (elements.themeColorMeta) {
+        elements.themeColorMeta.setAttribute("content", isParchment ? "#efe0bb" : "#15120e");
+    }
+    if (elements.themeToggleBtn) {
+        elements.themeToggleBtn.setAttribute("aria-pressed", String(isParchment));
+        elements.themeToggleBtn.title = isParchment ? "Switch to dark theme" : "Switch to parchment theme";
+        const icon = elements.themeToggleBtn.querySelector(".theme-toggle-icon");
+        const text = elements.themeToggleBtn.querySelector(".theme-toggle-text");
+        if (icon) {
+            icon.textContent = isParchment ? "☾" : "☀";
+        }
+        if (text) {
+            text.textContent = isParchment ? "Dark" : "Parchment";
+        }
+    }
 }
 
 function refreshProgress() {
@@ -1205,6 +1263,13 @@ function bindEvents() {
         updateSteps(-delta);
     });
 
+    document.querySelectorAll(".quick-add-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+            const delta = Math.max(1, Number(btn.dataset.steps) || 500);
+            updateSteps(delta);
+        });
+    });
+
     elements.resetJourneyBtn.addEventListener("click", resetJourney);
     elements.saveProgressBtn.addEventListener("click", saveProgressToFile);
     elements.loadProgressBtn.addEventListener("click", triggerProgressImport);
@@ -1217,10 +1282,14 @@ function bindEvents() {
     elements.strideInput.addEventListener("input", (event) => applyStride(event.target.value));
     elements.unitSelect.addEventListener("change", (event) => applyUnits(event.target.value));
     elements.themeSelect.addEventListener("change", (event) => applyTheme(event.target.value));
+    if (elements.themeToggleBtn) {
+        elements.themeToggleBtn.addEventListener("click", () => {
+            applyTheme(state.theme === "parchment" ? "dark" : "parchment");
+        });
+    }
     if (ENABLE_POI_EDITING) {
         elements.poiEditorSelect.addEventListener("change", syncPoiEditorInputs);
         elements.poiAddNewBtn.addEventListener("click", addNewPoi);
-        elements.poiUseLastPointBtn.addEventListener("click", useLastCalibrationPointForPoi);
         elements.poiSaveBtn.addEventListener("click", saveSelectedPoiEdits);
         elements.poiSetCurrentBtn.addEventListener("click", setCurrentPoiOverride);
         elements.poiClearCurrentBtn.addEventListener("click", clearCurrentPoiOverride);
@@ -1232,14 +1301,15 @@ function bindEvents() {
     elements.mapSvg.addEventListener("mousedown", onMapPointerDown);
     window.addEventListener("mousemove", onMapPointerMove);
     window.addEventListener("mouseup", onMapPointerUp);
-    elements.mapSvg.addEventListener("click", onMapClick, true);
 
     document.addEventListener("click", (event) => {
-        if (calibration.enabled) {
-            return;
+        if (!event.target.closest(".waypoint") && !event.target.closest(".quest-item") && !event.target.closest(".map-popover")) {
+            closeWaypointPopover();
         }
+    });
 
-        if (!event.target.closest(".waypoint") && !event.target.closest(".poi-item") && !event.target.closest(".map-popover")) {
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
             closeWaypointPopover();
         }
     });
@@ -1262,7 +1332,6 @@ async function init() {
     if (!ENABLE_POI_EDITING) {
         state.poiOverrides = {};
         state.currentPoiOverrideId = "";
-        journey.route = buildRouteFromWaypoints(journey.waypoints);
         if (elements.poiEditorPanel) {
             elements.poiEditorPanel.hidden = true;
         }

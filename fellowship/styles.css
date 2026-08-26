@@ -133,6 +133,18 @@ button {
     gap: 12px;
 }
 
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.theme-toggle-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
 .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -157,6 +169,10 @@ button {
 .controls-card,
 .achievements-card {
     grid-column: span 4;
+}
+
+.journey-stats-card {
+    grid-column: span 12;
 }
 
 .poi-card {
@@ -291,14 +307,61 @@ button {
     font-size: 1.18rem;
 }
 
+.streak-chart {
+    display: grid;
+    grid-template-columns: repeat(14, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 22px;
+    align-items: end;
+}
+
+.streak-bar-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    height: 96px;
+}
+
+.streak-bar-slot .streak-bar {
+    width: 100%;
+    max-width: 22px;
+    border-radius: 4px 4px 0 0;
+    background: var(--line);
+    min-height: 3px;
+}
+
+.streak-bar.is-active {
+    background: linear-gradient(180deg, var(--accent-strong), var(--accent));
+}
+
+.streak-bar-label {
+    font-size: 0.68rem;
+    color: var(--muted);
+}
+
 .map-stage {
     position: relative;
     overflow: hidden;
-    min-height: 420px;
+    min-height: 480px;
     border-radius: calc(var(--radius-lg) - 6px);
     background:
         linear-gradient(135deg, rgba(245, 230, 200, 0.92), rgba(214, 186, 134, 0.94));
     border: 1px solid rgba(87, 54, 25, 0.12);
+    box-shadow:
+        inset 0 0 0 6px rgba(120, 80, 32, 0.14),
+        inset 0 0 40px rgba(87, 54, 25, 0.28),
+        0 10px 24px rgba(0, 0, 0, 0.18);
+}
+
+.map-stage::after {
+    content: "";
+    position: absolute;
+    inset: 8px;
+    border: 1px solid rgba(87, 54, 25, 0.28);
+    border-radius: calc(var(--radius-lg) - 14px);
+    pointer-events: none;
+    z-index: 2;
 }
 
 .parchment-layer {
@@ -320,7 +383,7 @@ button {
     position: relative;
     width: 100%;
     height: 100%;
-    min-height: 420px;
+    min-height: 480px;
     z-index: 1;
 }
 
@@ -370,8 +433,8 @@ button {
 .route-progress {
     stroke: rgba(255, 204, 0, 0.8);
     stroke-width: 4;
-    stroke-dasharray: 1200;
-    stroke-dashoffset: calc(1200 - (1200 * var(--route-progress)) / 100);
+    stroke-dasharray: 100;
+    stroke-dashoffset: calc(100 - var(--route-progress));
     transition: stroke-dashoffset 500ms ease;
 }
 
@@ -380,6 +443,19 @@ button {
 .waypoint-pin,
 .waypoint-diamond {
     cursor: pointer;
+}
+
+.waypoint:focus {
+    outline: none;
+}
+
+.waypoint:focus .waypoint-pin {
+    stroke: #fff;
+    stroke-width: 3;
+}
+
+.waypoint:focus .waypoint-diamond {
+    fill: #fff;
 }
 
 .waypoint-pin {
@@ -407,17 +483,24 @@ button {
     fill: #ffcc00;
     font-size: 0.92rem;
     text-anchor: middle;
+    paint-order: stroke;
+    stroke: rgba(40, 24, 8, 0.85);
+    stroke-width: 3px;
+    stroke-linejoin: round;
+    font-weight: 700;
 }
 
 .traveler-pulse {
     fill: rgba(255, 204, 0, 0.22);
     animation: pulse 1800ms ease-out infinite;
+    pointer-events: none;
 }
 
 .traveler-marker {
     fill: #2a1a08;
     stroke: #ffcc00;
     stroke-width: 4;
+    pointer-events: none;
 }
 
 @keyframes pulse {
@@ -433,6 +516,28 @@ button {
 
     100% {
         transform: scale(1.18);
+        opacity: 0;
+    }
+}
+
+.waypoint-burst {
+    fill: none;
+    stroke: #ffcc00;
+    stroke-width: 3;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: waypoint-burst 900ms ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes waypoint-burst {
+    0% {
+        transform: scale(1);
+        opacity: 0.9;
+    }
+
+    100% {
+        transform: scale(4.5);
         opacity: 0;
     }
 }
@@ -576,6 +681,11 @@ button {
     transform: translateY(-1px);
 }
 
+.button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
 .button-primary {
     background: linear-gradient(135deg, var(--accent-strong), var(--accent));
     border-color: rgba(255, 204, 0, 0.4);
@@ -599,16 +709,136 @@ button {
     padding: 10px 14px;
 }
 
-.achievements-grid,
-.poi-list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-auto-flow: row;
-    gap: 12px;
+.quick-add {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
 }
 
-.achievement-card,
-.poi-item {
+.quick-add-label {
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 4px;
+}
+
+.quick-add .button-small {
+    flex: 1 1 auto;
+    min-height: 38px;
+    padding: 8px 12px;
+    font-variant-numeric: tabular-nums;
+}
+
+.achievements-grid,
+.quest-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.quest-items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.quest-progress {
+    margin: 0;
+}
+
+.quest-progress-label {
+    margin: 0 0 8px;
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+.quest-progress-track {
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+.quest-progress-bar {
+    height: 100%;
+    width: 0;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--accent), #ffd54a);
+    transition: width 300ms ease;
+}
+
+.quest-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 12px;
+    border-radius: var(--radius-sm, 10px);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background 150ms ease, border-color 150ms ease;
+}
+
+.quest-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.quest-item:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.quest-status {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex: none;
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.quest-item.is-reached .quest-status {
+    background: var(--accent);
+    box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.15);
+}
+
+.quest-item.is-current {
+    border-color: rgba(255, 204, 0, 0.4);
+    background: rgba(255, 204, 0, 0.06);
+}
+
+.quest-item.is-current .quest-status {
+    background: var(--accent);
+    box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.28);
+    animation: quest-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes quest-pulse {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.28); }
+    50% { box-shadow: 0 0 0 6px rgba(255, 204, 0, 0.1); }
+}
+
+.quest-name {
+    flex: 1;
+    font-size: 0.92rem;
+    color: var(--text);
+}
+
+.quest-item.is-upcoming .quest-name {
+    color: var(--muted);
+}
+
+.quest-distance {
+    font-size: 0.8rem;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+.achievement-card {
     padding: 16px;
     border-radius: var(--radius-md);
     border: 1px solid var(--line);
@@ -640,16 +870,14 @@ button {
     border-color: rgba(255, 204, 0, 0.4);
 }
 
-.achievement-top,
-.poi-top {
+.achievement-top {
     display: flex;
     justify-content: space-between;
     align-items: start;
     gap: 12px;
 }
 
-.achievement-icon,
-.poi-icon {
+.achievement-icon {
     width: 44px;
     height: 44px;
     display: grid;
@@ -660,29 +888,17 @@ button {
     font-size: 1.2rem;
 }
 
-.achievement-card h3,
-.poi-item h3 {
+.achievement-card h3 {
     margin: 0 0 6px;
     font-size: 1rem;
 }
 
-.achievement-card p,
-.poi-item p {
+.achievement-card p {
     margin: 0;
     color: var(--muted);
     line-height: 1.5;
 }
 
-.distance-chip {
-    padding: 8px 10px;
-    border-radius: 999px;
-    border: 1px solid var(--line);
-    color: var(--accent);
-    white-space: nowrap;
-    font-size: 0.82rem;
-}
-
-.poi-item.is-active,
 .achievement-card.is-current {
     outline: 2px solid rgba(255, 204, 0, 0.28);
 }
@@ -732,7 +948,8 @@ button {
     .map-card,
     .controls-card,
     .achievements-card,
-    .poi-card {
+    .poi-card,
+    .journey-stats-card {
         grid-column: auto;
     }
 
@@ -755,23 +972,30 @@ button {
 
     .hero-actions,
     .map-actions,
-    .map-zoom-controls,
     .button-row,
     .stats-grid,
     .secondary-row {
         grid-template-columns: 1fr;
     }
 
+    .section-heading {
+        flex-wrap: wrap;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+    }
+
     .map-actions {
         display: grid;
+        width: 100%;
     }
 
     .map-zoom-controls {
-        display: grid;
-    }
-
-    .poi-list {
-        grid-template-columns: 1fr;
+        display: flex;
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
     }
 
     .poi-editor-grid,
@@ -786,7 +1010,7 @@ button {
 
     .map-stage,
     .map-svg {
-        min-height: 320px;
+        min-height: 360px;
     }
 
     .map-popover {

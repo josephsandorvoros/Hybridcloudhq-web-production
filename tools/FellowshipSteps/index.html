@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fellowship Steps</title>
     <meta name="description" content="Track your real-world walking against the Fellowship's journey across Middle-earth.">
-    <link rel="stylesheet" href="styles.css?v=3">
+    <meta name="theme-color" id="themeColorMeta" content="#15120e">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='26' fill='none' stroke='%23ffcc00' stroke-width='7'/%3E%3Ccircle cx='32' cy='32' r='12' fill='%23ffcc00'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="styles.css?v=13">
 </head>
 <body data-theme="dark">
     <div class="app-shell">
@@ -13,9 +15,13 @@
             <div class="hero-copy">
                 <p class="eyebrow">Middle-earth walking tracker</p>
                 <h1>Fellowship Steps</h1>
-                <p class="hero-summary">Turn real-world steps into progress from Rivendell to Mount Doom with a clean manual tracker, live milestones, and an optional high-resolution map layer.</p>
+                <p class="hero-summary">Turn real-world steps into the journey from Rivendell to Mount Doom.</p>
             </div>
             <div class="hero-actions">
+                <button id="themeToggleBtn" class="button button-ghost theme-toggle" type="button" aria-pressed="false" title="Switch to parchment theme">
+                    <span class="theme-toggle-icon" aria-hidden="true">☀</span>
+                    <span class="theme-toggle-text">Parchment</span>
+                </button>
                 <button id="openOnboardingBtn" class="button button-ghost" type="button">How it works</button>
                 <button id="openSettingsBtn" class="button button-primary" type="button">Settings</button>
             </div>
@@ -87,7 +93,7 @@
 
                 <div class="map-stage">
                     <div class="parchment-layer"></div>
-                    <svg id="mapSvg" class="map-svg" viewBox="0 0 1000 420" role="img" aria-labelledby="mapTitle mapDesc">
+                    <svg id="mapSvg" class="map-svg" viewBox="0 0 1000 545.5" preserveAspectRatio="xMidYMid slice" role="img" aria-labelledby="mapTitle mapDesc">
                         <title id="mapTitle">Fellowship route map</title>
                         <desc id="mapDesc">A horizontal fantasy map showing the route from Rivendell to Mount Doom.</desc>
                         <defs>
@@ -99,14 +105,14 @@
                                 </feMerge>
                             </filter>
                         </defs>
-                        <image id="mapImageSvg" class="map-image-svg" x="0" y="0" width="1000" height="420" preserveAspectRatio="none" visibility="hidden"></image>
-                        <path id="routeShadow" class="route-shadow" d="M68 262 L300 177 L448 214 L620 202 L790 176 L915 220"></path>
-                        <path id="routeBase" class="route-base" d="M68 262 L300 177 L448 214 L620 202 L790 176 L915 220"></path>
-                        <path id="routeProgress" class="route-progress" d="M68 262 L300 177 L448 214 L620 202 L790 176 L915 220"></path>
+                        <image id="mapImageSvg" class="map-image-svg" x="0" y="0" width="1000" height="545.5" preserveAspectRatio="none" visibility="hidden"></image>
+                        <path id="routeShadow" class="route-shadow" d="M335 165 L360 168 L385 170 L420 160 L455 155 L490 150 L480 175 L470 210 L495 225 L525 235 L535 245 L550 280 L565 305 L575 330 L590 345 L615 355 L605 375 L620 370 L635 360 L645 365"></path>
+                        <path id="routeBase" class="route-base" d="M335 165 L360 168 L385 170 L420 160 L455 155 L490 150 L480 175 L470 210 L495 225 L525 235 L535 245 L550 280 L565 305 L575 330 L590 345 L615 355 L605 375 L620 370 L635 360 L645 365"></path>
+                        <path id="routeProgress" class="route-progress" pathLength="100" d="M335 165 L360 168 L385 170 L420 160 L455 155 L490 150 L480 175 L470 210 L495 225 L525 235 L535 245 L550 280 L565 305 L575 330 L590 345 L615 355 L605 375 L620 370 L635 360 L645 365"></path>
                         <g id="waypointLayer"></g>
                         <g id="travelerLayer">
-                            <circle id="travelerPulse" class="traveler-pulse" cx="70" cy="245" r="14"></circle>
-                            <circle id="travelerMarker" class="traveler-marker" cx="70" cy="245" r="7"></circle>
+                            <circle id="travelerPulse" class="traveler-pulse" cx="335" cy="165" r="14"></circle>
+                            <circle id="travelerMarker" class="traveler-marker" cx="335" cy="165" r="7"></circle>
                         </g>
                     </svg>
                     <aside class="map-popover" id="mapPopover" hidden>
@@ -146,7 +152,6 @@
                     </div>
                     <div class="button-row poi-editor-buttons">
                         <button id="poiAddNewBtn" class="button button-ghost button-small" type="button">+ Add new POI</button>
-                        <button id="poiUseLastPointBtn" class="button button-ghost button-small" type="button">Use last click</button>
                         <button id="poiSaveBtn" class="button button-primary button-small" type="button">Save POI</button>
                         <button id="poiSetCurrentBtn" class="button button-ghost button-small" type="button">Set current POI</button>
                     </div>
@@ -177,6 +182,13 @@
                         <button id="subtractStepsBtn" class="button button-ghost" type="button">Subtract</button>
                         <button id="addStepsBtn" class="button button-primary" type="button">Add steps</button>
                     </div>
+                    <div class="quick-add" role="group" aria-label="Quick add steps">
+                        <span class="quick-add-label">Quick add</span>
+                        <button class="button button-ghost button-small quick-add-btn" type="button" data-steps="500">+500</button>
+                        <button class="button button-ghost button-small quick-add-btn" type="button" data-steps="1000">+1k</button>
+                        <button class="button button-ghost button-small quick-add-btn" type="button" data-steps="5000">+5k</button>
+                        <button class="button button-ghost button-small quick-add-btn" type="button" data-steps="10000">+10k</button>
+                    </div>
                     <div class="button-row">
                         <button id="saveProgressBtn" class="button button-ghost button" type="button">Save progress</button>
                     </div>
@@ -194,10 +206,38 @@
                 <div class="section-heading">
                     <div>
                         <p class="section-label">Journey log</p>
-                        <h2>Waypoints</h2>
+                        <h2>Quest progress</h2>
                     </div>
                 </div>
-                <div id="poiList" class="poi-list"></div>
+                <div id="poiList" class="quest-list"></div>
+            </section>
+
+            <section class="card journey-stats-card">
+                <div class="section-heading">
+                    <div>
+                        <p class="section-label">Journey stats</p>
+                        <h2>Walking streak</h2>
+                    </div>
+                </div>
+                <div class="stats-grid">
+                    <article class="stat-tile">
+                        <span class="stat-label">Current streak</span>
+                        <strong id="streakCurrent">0 days</strong>
+                    </article>
+                    <article class="stat-tile">
+                        <span class="stat-label">Best streak</span>
+                        <strong id="streakBest">0 days</strong>
+                    </article>
+                    <article class="stat-tile">
+                        <span class="stat-label">Total steps</span>
+                        <strong id="totalStepsAll">0</strong>
+                    </article>
+                    <article class="stat-tile">
+                        <span class="stat-label">Active days</span>
+                        <strong id="activeDays">0</strong>
+                    </article>
+                </div>
+                <div class="streak-chart" id="streakChart" aria-label="Steps over the last 14 days"></div>
             </section>
         </main>
     </div>
@@ -264,6 +304,6 @@
     </dialog>
 
     <div id="toast" class="toast" hidden></div>
-    <script src="script.js?v=3"></script>
+    <script src="script.js?v=13"></script>
 </body>
 </html>
