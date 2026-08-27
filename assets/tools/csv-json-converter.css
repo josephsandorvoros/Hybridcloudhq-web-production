@@ -1,0 +1,156 @@
+/* CSV ↔ JSON Converter — self-contained styles.
+   Scoped under .cj-* so it never leaks into other tools. */
+
+.cj-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1.25rem 0 0.5rem;
+}
+
+.cj-view-toggle {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+.cj-toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.cj-danger {
+  color: #ff6b6b;
+}
+
+.cj-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.25rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.55rem 0.9rem;
+  background: var(--surface, #121417);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+}
+
+.cj-opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  color: var(--muted, #9aa3b2);
+  cursor: pointer;
+}
+
+.cj-opt input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--accent, #7c3aed);
+  cursor: pointer;
+}
+
+.cj-opt-delimiter {
+  gap: 0.5rem;
+}
+
+.cj-opt-delimiter select {
+  font: inherit;
+  font-size: 0.85rem;
+  color: #fff;
+  background: #0b0c0d;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 0.3rem 0.5rem;
+  cursor: pointer;
+}
+
+.cj-opt-delimiter select:focus {
+  outline: 2px solid rgba(124, 58, 237, 0.4);
+  outline-offset: 1px;
+}
+
+.cj-status {
+  min-height: 1.4em;
+  margin: 0.25rem 0 0.5rem;
+  font-size: 0.85rem;
+  color: var(--muted, #9aa3b2);
+}
+
+.cj-status.is-error {
+  color: #ff8080;
+  font-weight: 600;
+}
+
+.cj-summary {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent2, #ff6bb5);
+  min-height: 1.2em;
+}
+
+.cj-workside {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 720px) {
+  .cj-workside {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cj-pane {
+  background: var(--surface, #121417);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.cj-pane-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.cj-pane-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted, #9aa3b2);
+}
+
+.cj-pane-meta {
+  font-size: 0.75rem;
+  color: var(--muted, #9aa3b2);
+  opacity: 0.8;
+}
+
+.cj-input {
+  width: 100%;
+  height: 320px;
+  resize: vertical;
+  background: transparent;
+  color: inherit;
+  border: none;
+  outline: none;
+  padding: 0.9rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  tab-size: 2;
+}
+
+.cj-output {
+  background: rgba(124, 58, 237, 0.05);
+  color: #d7dbe2;
+}

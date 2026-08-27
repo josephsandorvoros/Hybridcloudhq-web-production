@@ -6,10 +6,10 @@
     <title>Storage Sizing Calculator</title>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="/assets/styles.css?v=20260531b">
+    <link rel="stylesheet" href="/assets/styles.css?v=20260827b">
     
       
-        <link rel="stylesheet" href="/assets/tools/storage-sizing-calculator.css?v=20260531b">
+        <link rel="stylesheet" href="/assets/tools/storage-sizing-calculator.css?v=20260827b">
       
     
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
@@ -44,88 +44,192 @@
   <header class="tool-header">
     <h1>Storage Sizing Calculator</h1>
     
-      <p class="tool-description">Estimate usable and raw storage needs for backups, logs, and general data retention.</p>
+      <p class="tool-description">Estimate usable, raw, and purchased storage across multiple workloads — with GFS retention, RAID sizing, growth projection, and cost estimates.</p>
     
   </header>
 
   <section class="tool-content">
-    <p>This calculator gives a practical first-pass estimate for storage planning. It is useful for homelab services, log pipelines, backup targets, and hybrid cloud landing zones where you need to plan both usable capacity and raw capacity. It is my first tool and I am learning so its small by design. AI did help me build it and comment it out and create learning docs to take advantage of.</p>
-<p>The model is intentionally simple so you can reason about it quickly:</p>
-<ul>
-  <li>Daily data ingested</li>
-  <li>Retention in days</li>
-  <li>Replication factor for resilience</li>
-  <li>Effective compression and dedup ratio</li>
-  <li>Growth and buffer percentage</li>
-</ul>
-<!-- Main tool form: semantic fieldset/legend groups related inputs. -->
+    <p>Plan storage for backups, logs, and general data retention across multiple workloads. Add a line item per data source, pick flat or GFS retention, choose replica or RAID redundancy, then get usable, compressed, raw, and purchased capacity — plus drive counts, cost estimates, and a multi-year growth projection.</p>
+<p>Everything runs in your browser and saves automatically. Use <strong>Share link</strong> to send a client the exact scenario, or <strong>Export</strong> to keep a copy.</p>
+<!-- Main tool form: line items + global settings + actions. IMPORTANT: no blank lines inside this HTML block, or the markdown parser wraps child elements in <p> tags and breaks the grids. -->
 <form class="tool-panel tool-form" data-tool="storage-sizing" novalidate>
   <fieldset>
-    <legend>Inputs</legend>
-<p><!-- Grid container for responsive input layout. -->
-<div class="tool-grid">
-<!-- Each tool-field pairs one label with one input for clarity and accessibility. -->
-<div class="tool-field">
-<label for="dailyGb">Daily data added (GB/day)</label>
-<input id="dailyGb" name="dailyGb" type="number" min="0" step="0.1" value="120" required>
-</div></p>
-<p><div class="tool-field">
-<label for="retentionDays">Retention (days)</label>
-<input id="retentionDays" name="retentionDays" type="number" min="1" step="1" value="30" required>
-</div></p>
-<p><div class="tool-field">
-<label for="replicaFactor">Replication factor</label>
-<input id="replicaFactor" name="replicaFactor" type="number" min="1" step="0.1" value="2" required>
-</div></p>
-<p><div class="tool-field">
-<label for="compressionRatio">Compression and dedup ratio</label>
-<input id="compressionRatio" name="compressionRatio" type="number" min="1" step="0.1" value="1.5" required>
-</div></p>
-<p><div class="tool-field">
-<label for="growthPct">Growth and safety buffer (%)</label>
-<input id="growthPct" name="growthPct" type="number" min="0" step="1" value="25" required>
-</div>
-</div></p>
+    <legend>Line items</legend>
+    <p style="margin:0 0 0.8rem 0; color:var(--muted); font-size:0.9rem;">Each line item is one data source (e.g. VM backups, SQL logs, file shares) with its own daily volume, retention, and compression.</p>
+    <div id="ssItems"></div>
+    <button type="button" id="ssAddItem" class="btn ghost">+ Add line item</button>
   </fieldset>
-  <div class="tool-actions">
+  <fieldset>
+    <legend>Redundancy, growth &amp; units</legend>
+    <div class="ss-settings">
+      <label>Redundancy mode
+        <select id="ssRedundancyMode">
+          <option value="factor">Replica factor</option>
+          <option value="raid">RAID level</option>
+        </select>
+      </label>
+      <label id="ssFactorWrap">Replica factor (×)
+        <input id="ssReplicaFactor" type="number" min="1" step="0.1" value="2">
+      </label>
+      <label id="ssRaidWrap" style="display:none;">RAID level
+        <select id="ssRaidLevel">
+          <option value="raid0">RAID 0 — striped, no redundancy</option>
+          <option value="raid1">RAID 1 — mirrored</option>
+          <option value="raid10">RAID 10 — striped mirrors</option>
+          <option value="raid5">RAID 5 — single parity</option>
+          <option value="raid50">RAID 50 — striped RAID 5</option>
+          <option value="raid6">RAID 6 — double parity</option>
+          <option value="raid60">RAID 60 — striped RAID 6</option>
+        </select>
+      </label>
+      <label>Drive size (TB)
+        <input id="ssDriveSize" type="number" min="0" step="1" value="16">
+      </label>
+      <label>Growth &amp; safety buffer (%)
+        <input id="ssGrowthPct" type="number" min="0" step="1" value="25">
+      </label>
+      <label>Projection horizon (years)
+        <input id="ssGrowthYears" type="number" min="0" step="1" value="3">
+      </label>
+      <label>Capacity units
+        <select id="ssUnit">
+          <option value="binary">Binary (1 TB = 1024 GB)</option>
+          <option value="decimal">Decimal (1 TB = 1000 GB)</option>
+        </select>
+      </label>
+    </div>
+  </fieldset>
+  <fieldset>
+    <legend>Cost estimation</legend>
+    <div class="ss-settings">
+      <label>On-prem cost ($/TB)
+        <input id="ssCostPerTb" type="number" min="0" step="1" value="150">
+      </label>
+      <label class="ss-check">
+        <input id="ssCloudEnabled" type="checkbox">
+        Compare cloud storage (monthly)
+      </label>
+      <div id="ssCloudWrap" class="ss-cloud-fields" style="display:none;">
+        <label>Hot $/GB-mo
+          <input id="ssHotRate" type="number" min="0" step="0.001" value="0.018">
+        </label>
+        <label>Cool $/GB-mo
+          <input id="ssCoolRate" type="number" min="0" step="0.001" value="0.008">
+        </label>
+        <label>Archive $/GB-mo
+          <input id="ssArchiveRate" type="number" min="0" step="0.001" value="0.003">
+        </label>
+        <label>Hot share (%)
+          <input id="ssHotPct" type="number" min="0" step="1" value="40">
+        </label>
+        <label>Cool share (%)
+          <input id="ssCoolPct" type="number" min="0" step="1" value="40">
+        </label>
+        <label>Archive share (%)
+          <input id="ssArchivePct" type="number" min="0" step="1" value="20">
+        </label>
+      </div>
+    </div>
+  </fieldset>
+  <div class="ss-toolbar">
     <button type="submit" class="btn primary">Calculate</button>
-    <button type="button" id="resetTool" class="btn ghost">Reset</button>
+    <button type="button" id="ssReset" class="btn ghost">Reset</button>
+    <select id="ssPreset" aria-label="Apply preset">
+      <option value="">Apply preset…</option>
+      <option value="small">Small office</option>
+      <option value="mid">Mid-size</option>
+      <option value="enterprise">Enterprise</option>
+    </select>
+    <button type="button" id="ssCopy" class="btn ghost">Copy summary</button>
+    <button type="button" id="ssCsv" class="btn ghost">Download CSV</button>
+    <button type="button" id="ssShare" class="btn ghost">Share link</button>
+    <button type="button" id="ssExport" class="btn ghost">Export</button>
+    <button type="button" id="ssImport" class="btn ghost">Import</button>
+    <input type="file" id="ssImportFile" accept="application/json,.json" hidden>
   </div>
-  <!-- Validation errors are announced through this alert region. -->
-  <p id="toolError" class="tool-error" role="alert" hidden></p>
+  <p id="ssStatus" class="ss-status" role="status" aria-live="polite"></p>
 </form>
-<!-- Results section is announced politely after recalculation. -->
-<section class="tool-results" aria-live="polite" aria-atomic="true">
+<!-- Results section is announced politely after recalculation. No blank lines inside the card grids. -->
+<section class="tool-results" data-tool-results aria-live="polite">
   <h2>Results</h2>
-  <div class="tool-results-grid">
-    <!-- Result cards are intentionally split by planning stage for quick interpretation. -->
+  <div class="ss-cards">
     <article class="result-card">
       <h3>Total usable data</h3>
-      <p id="usableResult" class="result-value">0 TB</p>
-      <p class="result-note">Before replication overhead</p>
+      <p id="ssUsable" class="result-value">0 TB</p>
+      <p class="result-note">Before compression</p>
     </article>
-<p><article class="result-card">
-<h3>Total raw capacity</h3>
-<p id="rawResult" class="result-value">0 TB</p>
-<p class="result-note">After replication and compression assumptions</p>
-</article></p>
-<p><article class="result-card">
-<h3>Suggested purchased capacity</h3>
-<p id="purchaseResult" class="result-value">0 TB</p>
-<p class="result-note">Includes growth and safety buffer</p>
-</article></p>
+    <article class="result-card">
+      <h3>After compression</h3>
+      <p id="ssCompressed" class="result-value">0 TB</p>
+      <p class="result-note">Per-item ratios applied</p>
+    </article>
+    <article class="result-card">
+      <h3>Raw capacity</h3>
+      <p id="ssRaw" class="result-value">0 TB</p>
+      <p class="result-note">After redundancy</p>
+    </article>
+    <article class="result-card">
+      <h3>Suggested purchase</h3>
+      <p id="ssPurchase" class="result-value">0 TB</p>
+      <p class="result-note">Includes growth buffer</p>
+    </article>
+  </div>
+  <div class="ss-cards">
+    <article class="result-card">
+      <h3>Drives needed</h3>
+      <p id="ssDrives" class="result-value">—</p>
+      <p class="result-note" id="ssDrivesNote">At selected drive size</p>
+    </article>
+    <article class="result-card">
+      <h3>On-prem hardware</h3>
+      <p id="ssHardware" class="result-value">—</p>
+      <p class="result-note">At $/TB rate</p>
+    </article>
+    <article class="result-card">
+      <h3>Cloud equivalent</h3>
+      <p id="ssCloud" class="result-value">—</p>
+      <p class="result-note">Monthly, tiered</p>
+    </article>
+  </div>
+  <div id="ssWarnings" class="ss-warnings"></div>
+  <div class="ss-table-wrap">
+    <table class="ss-table">
+      <thead>
+        <tr>
+          <th>Line item</th>
+          <th>GB/day</th>
+          <th>Retention (days)</th>
+          <th>Usable</th>
+          <th>Compression</th>
+          <th>Compressed</th>
+        </tr>
+      </thead>
+      <tbody id="ssItemBody"></tbody>
+    </table>
+  </div>
+  <div class="ss-table-wrap">
+    <table class="ss-table">
+      <thead>
+        <tr>
+          <th>Year</th>
+          <th>Projected purchased capacity</th>
+        </tr>
+      </thead>
+      <tbody id="ssGrowthBody"></tbody>
+    </table>
   </div>
 </section>
 <!-- Interpretation notes provide context so numbers are not used blindly. -->
 <section class="tool-notes">
   <h2>How to interpret this</h2>
-  <p>Use this output as a planning baseline, then refine with workload specifics such as hot vs cold tiers, RAID or erasure coding overhead, and real measured compression ratios from your platform.</p>
-  <p>If this estimate is for production workloads, keep an additional operational buffer for snapshots, temporary spikes, and rebuild windows.</p>
+  <p><strong>Usable</strong> is the data you actually keep (daily volume × retention). <strong>Compressed</strong> applies each item's compression/dedup ratio. <strong>Raw</strong> adds redundancy — either a replica factor or the drive count a RAID level needs. <strong>Purchased</strong> adds your growth buffer on top.</p>
+  <p>GFS retention counts daily snapshots as 1 day each, monthly as 30 days, and yearly as 365 days. RAID 10 uses half the drive count for capacity; RAID 5/6 lose one/two drives to parity.</p>
+  <p>Cloud comparison prices the <em>compressed</em> stored data across hot/cool/archive tiers — useful for a hybrid on-prem vs. cloud conversation. Treat all outputs as a planning baseline, then refine with measured compression ratios and real drive pricing.</p>
 </section>
-<!-- Static-first fallback for users with JavaScript disabled. -->
 <noscript>
-  <p>This calculator uses JavaScript for live math. Without JavaScript, use the input guidance above and calculate manually with your preferred spreadsheet.</p>
+  <p>This calculator uses JavaScript for live math. Without JavaScript, estimate manually: daily GB × retention days = usable; divide by compression; multiply by replica factor (or size a RAID level); add your growth buffer.</p>
 </noscript>
+
   </section>
 </article>
     </main>
@@ -174,7 +278,7 @@
 
     
       
-        <script src="/assets/tools/storage-sizing-calculator.js?v=20260531b" defer></script>
+        <script src="/assets/tools/storage-sizing-calculator.js?v=20260827b" defer></script>
       
     
   </body>

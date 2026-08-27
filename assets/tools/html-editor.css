@@ -1,0 +1,136 @@
+/* HTML Editor — self-contained styles (scoped to .he-* classes). */
+
+.he-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0 0.5rem;
+}
+
+.he-pane-tabs {
+  display: inline-flex;
+  gap: 0.25rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 0.2rem;
+}
+
+.he-pane-tabs .btn {
+  padding: 0.25rem 0.8rem;
+  font-size: 0.85rem;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+}
+
+.he-pane-tabs .btn.is-active {
+  background: rgba(124, 58, 237, 0.25);
+  color: #fff;
+}
+
+.he-toolbar-spacer {
+  flex: 1;
+}
+
+.he-danger {
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.he-status {
+  min-height: 1.2rem;
+  margin: 0.2rem 0 0.6rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.he-status.is-error {
+  color: #fca5a5;
+  font-weight: 600;
+}
+
+/* Workspace: editor left, preview right. */
+.he-workspace {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.he-editor-pane,
+.he-preview-pane {
+  min-width: 0;
+}
+
+.he-editor-wrap {
+  position: relative;
+  display: flex;
+  background: #0b0c0d;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  overflow: hidden;
+  height: 60vh;
+  min-height: 420px;
+}
+
+.he-line-numbers {
+  margin: 0;
+  padding: 0.9rem 0.5rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: #4b5563;
+  text-align: right;
+  user-select: none;
+  overflow: hidden;
+  min-width: 2.4rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.he-editor {
+  flex: 1;
+  width: 100%;
+  border: none;
+  resize: none;
+  background: transparent;
+  color: #e6e8ee;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  padding: 0.9rem 1rem;
+  tab-size: 2;
+}
+
+.he-editor:focus {
+  outline: none;
+}
+
+.he-editor-wrap:focus-within {
+  outline: 2px solid rgba(124, 58, 237, 0.4);
+  outline-offset: 1px;
+}
+
+.he-preview {
+  width: 100%;
+  height: 60vh;
+  min-height: 420px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: #fff;
+}
+
+/* Narrow screens: stack editor above preview. */
+@media (max-width: 720px) {
+  .he-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .he-editor-wrap,
+  .he-preview {
+    height: 45vh;
+    min-height: 280px;
+  }
+}

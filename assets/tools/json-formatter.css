@@ -1,0 +1,161 @@
+/* JSON Formatter & Validator — self-contained styles.
+   Scoped under .jf-* so it never leaks into other tools. */
+
+.jf-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1.25rem 0 0.5rem;
+}
+
+.jf-toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.jf-indent,
+.jf-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--muted, #9aa3b2);
+}
+
+.jf-indent select {
+  background: var(--surface, #121417);
+  color: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.85rem;
+}
+
+.jf-sort input[type="checkbox"] {
+  accent-color: var(--accent, #7c3aed);
+}
+
+.jf-danger {
+  color: #ff6b6b;
+}
+
+.jf-status {
+  min-height: 1.4em;
+  margin: 0.25rem 0 0.75rem;
+  font-size: 0.85rem;
+  color: var(--muted, #9aa3b2);
+}
+
+.jf-status.is-error {
+  color: #ff8080;
+}
+
+.jf-workspace {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 720px) {
+  .jf-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+.jf-pane {
+  background: var(--surface, #121417);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.jf-pane-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.jf-pane-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted, #9aa3b2);
+}
+
+.jf-pane-meta {
+  font-size: 0.75rem;
+  color: var(--muted, #9aa3b2);
+  opacity: 0.8;
+}
+
+.jf-input {
+  width: 100%;
+  height: 60vh;
+  min-height: 320px;
+  resize: vertical;
+  background: transparent;
+  color: inherit;
+  border: none;
+  outline: none;
+  padding: 0.9rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  tab-size: 2;
+}
+
+.jf-output {
+  height: 60vh;
+  min-height: 320px;
+  margin: 0;
+  padding: 0.9rem;
+  overflow: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  white-space: pre;
+}
+
+.jf-output code {
+  font-family: inherit;
+}
+
+/* Syntax highlighting */
+.jf-key {
+  color: #7dd3fc;
+}
+
+.jf-str {
+  color: #86efac;
+}
+
+.jf-num {
+  color: #fbbf24;
+}
+
+.jf-bool {
+  color: #ff6bb5;
+}
+
+.jf-null {
+  color: #9aa3b2;
+  font-style: italic;
+}
+
+.jf-error-text {
+  color: #ff8080;
+}
+
+.jf-stats {
+  margin: 0.75rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted, #9aa3b2);
+  min-height: 1.2em;
+}

@@ -1,0 +1,271 @@
+/* Text Diff Checker — self-contained styles.
+   Scoped under .td-* so it never leaks into other tools. */
+
+.td-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1.25rem 0 0.5rem;
+}
+
+.td-view-toggle {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+.td-toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.td-danger {
+  color: #ff6b6b;
+}
+
+.td-status {
+  min-height: 1.4em;
+  margin: 0.25rem 0 0.5rem;
+  font-size: 0.85rem;
+  color: var(--muted, #9aa3b2);
+}
+
+.td-status.is-error {
+  color: #ff8080;
+}
+
+.td-summary {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent2, #ff6bb5);
+  min-height: 1.2em;
+}
+
+.td-workside {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 720px) {
+  .td-workside {
+    grid-template-columns: 1fr;
+  }
+}
+
+.td-pane {
+  background: var(--surface, #121417);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.td-pane-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.td-pane-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted, #9aa3b2);
+}
+
+.td-pane-meta {
+  font-size: 0.75rem;
+  color: var(--muted, #9aa3b2);
+  opacity: 0.8;
+}
+
+.td-input {
+  width: 100%;
+  height: 280px;
+  resize: vertical;
+  background: transparent;
+  color: inherit;
+  border: none;
+  outline: none;
+  padding: 0.9rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  tab-size: 2;
+}
+
+/* ---------- Diff output ---------- */
+
+.td-diff-wrap {
+  margin-top: 1rem;
+  background: var(--surface, #121417);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.td-diff-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.td-legend {
+  display: inline-flex;
+  gap: 0.75rem;
+  font-size: 0.72rem;
+  color: var(--muted, #9aa3b2);
+}
+
+.td-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.td-legend-item::before {
+  content: "";
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.td-legend-add::before {
+  background: rgba(134, 239, 172, 0.35);
+}
+
+.td-legend-del::before {
+  background: rgba(255, 128, 128, 0.35);
+}
+
+.td-legend-ctx::before {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.td-diff {
+  max-height: 480px;
+  overflow: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+/* Side-by-side table */
+.td-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.td-table td {
+  vertical-align: top;
+  padding: 0 0.6rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.td-ln {
+  width: 2.4rem;
+  text-align: right;
+  color: var(--muted, #9aa3b2);
+  opacity: 0.6;
+  user-select: none;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.72rem;
+}
+
+.td-cell {
+  width: calc(50% - 2.4rem);
+}
+
+.td-table tr.td-ctx td {
+  background: transparent;
+}
+
+.td-table tr.td-del td {
+  background: rgba(255, 128, 128, 0.12);
+}
+
+.td-table tr.td-del td.td-cell:last-child {
+  background: transparent;
+}
+
+.td-table tr.td-add td {
+  background: rgba(134, 239, 172, 0.12);
+}
+
+.td-table tr.td-add td:nth-child(2) {
+  background: transparent;
+}
+
+.td-table tr.td-chg td:nth-child(1),
+.td-table tr.td-chg td:nth-child(2) {
+  background: rgba(255, 128, 128, 0.12);
+}
+
+.td-table tr.td-chg td:nth-child(3),
+.td-table tr.td-chg td:nth-child(4) {
+  background: rgba(134, 239, 172, 0.12);
+}
+
+/* Inline (unified) view */
+.td-inline {
+  padding: 0.25rem 0;
+}
+
+.td-inline > div {
+  display: flex;
+  align-items: flex-start;
+  padding: 0 0.6rem;
+}
+
+.td-mark {
+  width: 1.4rem;
+  flex: 0 0 auto;
+  text-align: center;
+  user-select: none;
+  color: var(--muted, #9aa3b2);
+}
+
+.td-inline .td-ctx {
+  background: transparent;
+}
+
+.td-inline .td-del {
+  background: rgba(255, 128, 128, 0.12);
+}
+
+.td-inline .td-del .td-mark {
+  color: #ff8080;
+}
+
+.td-inline .td-add {
+  background: rgba(134, 239, 172, 0.12);
+}
+
+.td-inline .td-add .td-mark {
+  color: #86efac;
+}
+
+.td-inline .td-cell {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.td-too-large {
+  padding: 1rem;
+  color: #ff8080;
+  font-family: inherit;
+}

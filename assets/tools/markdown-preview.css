@@ -1,0 +1,276 @@
+/* Markdown Live Preview — self-contained styles (scoped to .mdp-* classes). */
+
+.mdp-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0 0.5rem;
+}
+
+.mdp-view-modes {
+  display: inline-flex;
+  gap: 0.25rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 0.2rem;
+}
+
+.mdp-view-modes .btn {
+  padding: 0.25rem 0.7rem;
+  font-size: 0.85rem;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+}
+
+.mdp-view-modes .btn.is-active {
+  background: rgba(124, 58, 237, 0.25);
+  color: #fff;
+}
+
+.mdp-toolbar-spacer {
+  flex: 1;
+}
+
+.mdp-danger {
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.mdp-status {
+  min-height: 1.2rem;
+  margin: 0.2rem 0 0.6rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.mdp-status.is-error {
+  color: #fca5a5;
+  font-weight: 600;
+}
+
+/* Formatting toolbar. */
+.mdp-format-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-bottom: 0.6rem;
+}
+
+.mdp-format-bar button {
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+}
+
+.mdp-format-bar button:hover {
+  color: #fff;
+  border-color: rgba(124, 58, 237, 0.6);
+  background: rgba(124, 58, 237, 0.12);
+}
+
+/* Workspace: split / editor / preview modes. */
+.mdp-workspace {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.mdp-workspace.mdp-view-editor {
+  grid-template-columns: 1fr;
+}
+
+.mdp-workspace.mdp-view-editor .mdp-preview {
+  display: none;
+}
+
+.mdp-workspace.mdp-view-preview {
+  grid-template-columns: 1fr;
+}
+
+.mdp-workspace.mdp-view-preview .mdp-editor {
+  display: none;
+}
+
+.mdp-editor {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: #e6e8ee;
+  background: #0b0c0d;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  min-height: 480px;
+  height: 60vh;
+  resize: vertical;
+  tab-size: 2;
+}
+
+.mdp-editor:focus {
+  outline: 2px solid rgba(124, 58, 237, 0.4);
+  outline-offset: 1px;
+}
+
+.mdp-preview {
+  background: var(--surface);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  min-height: 480px;
+  height: 60vh;
+  overflow-y: auto;
+  color: #d7dae0;
+  line-height: 1.6;
+  word-wrap: break-word;
+}
+
+/* Rendered Markdown typography (scoped to the preview pane). */
+.mdp-preview h1,
+.mdp-preview h2,
+.mdp-preview h3,
+.mdp-preview h4,
+.mdp-preview h5,
+.mdp-preview h6 {
+  color: #fff;
+  margin: 1.2rem 0 0.5rem;
+  line-height: 1.3;
+}
+
+.mdp-preview h1:first-child,
+.mdp-preview h2:first-child,
+.mdp-preview h3:first-child {
+  margin-top: 0;
+}
+
+.mdp-preview h1 {
+  font-size: 1.6rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.3rem;
+}
+
+.mdp-preview h2 {
+  font-size: 1.3rem;
+}
+
+.mdp-preview h3 {
+  font-size: 1.1rem;
+}
+
+.mdp-preview p {
+  margin: 0.6rem 0;
+}
+
+.mdp-preview a {
+  color: var(--accent2);
+}
+
+.mdp-preview code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85em;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
+}
+
+.mdp-preview pre {
+  background: #0b0c0d;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  overflow-x: auto;
+  margin: 0.8rem 0;
+}
+
+.mdp-preview pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.85rem;
+}
+
+.mdp-preview blockquote {
+  border-left: 3px solid var(--accent);
+  margin: 0.8rem 0;
+  padding: 0.2rem 1rem;
+  color: var(--muted);
+  background: rgba(124, 58, 237, 0.06);
+  border-radius: 0 6px 6px 0;
+}
+
+.mdp-preview ul,
+.mdp-preview ol {
+  margin: 0.6rem 0;
+  padding-left: 1.4rem;
+}
+
+.mdp-preview li {
+  margin: 0.2rem 0;
+}
+
+.mdp-preview li.mdp-task {
+  list-style: none;
+  margin-left: -1.2rem;
+}
+
+.mdp-preview li.mdp-task input {
+  margin-right: 0.4rem;
+  accent-color: var(--accent);
+}
+
+.mdp-preview table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.8rem 0;
+  font-size: 0.9rem;
+}
+
+.mdp-preview th,
+.mdp-preview td {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+}
+
+.mdp-preview th {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.mdp-preview img {
+  max-width: 100%;
+  border-radius: 6px;
+}
+
+.mdp-preview hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  margin: 1.2rem 0;
+}
+
+/* Stats bar. */
+.mdp-stats {
+  margin: 0.5rem 0 1rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* Narrow screens: stack the split view. */
+@media (max-width: 720px) {
+  .mdp-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .mdp-editor,
+  .mdp-preview {
+    height: 45vh;
+    min-height: 260px;
+  }
+}
