@@ -221,11 +221,45 @@
     syncScroll();
   }
 
+  // The gutter's base bottom padding from CSS, captured once before any
+  // inline override so we can add to it rather than replace it.
+  const GUTTER_BASE_PAD_BOTTOM =
+    parseFloat(getComputedStyle(lineNumbers).paddingBottom) || 0;
+
   function syncScroll() {
+    // The editor's horizontal scrollbar (no-wrap mode) shrinks its
+    // clientHeight, so it can scroll a few px further than the gutter.
+    // Add the scrollbar height ON TOP of the gutter's base bottom padding
+    // so both reach the same maximum scroll position and stay aligned at
+    // the end of the file.
+    const hbar = editor.offsetHeight - editor.clientHeight;
+    lineNumbers.style.paddingBottom =
+      GUTTER_BASE_PAD_BOTTOM + hbar + "px";
     lineNumbers.scrollTop = editor.scrollTop;
+    updateActiveLine();
+  }
+
+  // VS Code-style highlight for the line the cursor is on.
+  function updateActiveLine() {
+    const old = lineNumbers.querySelector(".he-active-line");
+    if (old) old.remove();
+    const lineH = parseFloat(getComputedStyle(editor).lineHeight);
+    if (!isFinite(lineH) || lineH <= 0) return;
+    const padTop = parseFloat(getComputedStyle(editor).paddingTop) || 0;
+    const pos = editor.selectionStart ?? 0;
+    const line = editor.value.slice(0, pos).split("\n").length - 1;
+    const bar = document.createElement("div");
+    bar.className = "he-active-line";
+    bar.style.height = lineH + "px";
+    // The gutter's content box starts at the element's top edge, so the
+    // highlight must be offset by the gutter's own scroll position.
+    bar.style.top = padTop + line * lineH - lineNumbers.scrollTop + "px";
+    lineNumbers.appendChild(bar);
   }
 
   editor.addEventListener("scroll", syncScroll);
+  editor.addEventListener("keyup", updateActiveLine);
+  editor.addEventListener("click", updateActiveLine);
 
   // ---------- Export / import / download ----------
 

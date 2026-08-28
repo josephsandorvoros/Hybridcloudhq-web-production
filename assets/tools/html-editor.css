@@ -75,7 +75,11 @@
   min-height: 420px;
 }
 
+/* The gutter is a separate element, but styled to be seamless with the
+   editor: same background, no divider, matching padding — so it reads as
+   one surface, like VS Code's integrated gutter. */
 .he-line-numbers {
+  position: relative;
   margin: 0;
   padding: 0.9rem 0.5rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -86,8 +90,16 @@
   user-select: none;
   overflow: hidden;
   min-width: 2.4rem;
-  background: rgba(255, 255, 255, 0.02);
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  background: transparent;
+}
+
+/* VS Code-style highlight for the line the cursor is on. */
+.he-line-numbers .he-active-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.05);
+  pointer-events: none;
 }
 
 .he-editor {
@@ -102,6 +114,10 @@
   line-height: 1.55;
   padding: 0.9rem 1rem;
   tab-size: 2;
+  /* No soft-wrap: each logical line is one visual line so the line-number
+     gutter stays aligned. Long lines scroll horizontally (wrap="off"). */
+  white-space: pre;
+  overflow-x: auto;
 }
 
 .he-editor:focus {
