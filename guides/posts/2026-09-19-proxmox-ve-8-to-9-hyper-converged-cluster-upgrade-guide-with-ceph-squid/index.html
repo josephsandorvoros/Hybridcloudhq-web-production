@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Proxmox VE 8 to 9 Hyper-Converged Cluster Upgrade Guide (With Ceph Squid)</title>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/styles.css?v=20260828d">
+    
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+        <!-- Schema.org Knowledge Graph Integration -->
+    
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <div class="brand">
+          <a class="logo" href="/">Hybridcloudhq</a>
+          <span class="tag">Cloud tools & guides</span>
+        </div>
+        <nav class="main-nav">
+          <a href="/">Home</a>
+          <a href="/projects/">Projects</a>
+          <a href="/guides/">Guides</a>
+          <a href="/tools/">Tools</a>
+          <a href="/tags/">Tags</a>
+          <a href="/links/">Great Links</a>
+          <a href="/blog/">Blog</a>
+          <a href="/aboutme/">About</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      
+<p class="breadcrumb"><a href="/blog/">← Back to Blog</a></p>
+
+<article class="post container">
+  
+
+  <header>
+    <h1>Proxmox VE 8 to 9 Hyper-Converged Cluster Upgrade Guide (With Ceph Squid)</h1>
+    <p class="post-meta">February 21, 2026</p>
+  </header>
+
+  <section class="post-content">
+    <h1 id="proxmox-ve-8-to-9-hyper-converged-cluster-upgrade-guide-with-ceph-squid">Proxmox VE 8 to 9 Hyper-Converged Cluster Upgrade Guide (With Ceph Squid)</h1>
+<p>Hello and I hope this finds you well. Today I wanted to make a guide to help with a problem I am guessing most have likely solved at this point. I, however, chose to wait to upgrade my Proxmox cluster until after the last minute because it felt a bit intimidating. I finally did it though using the official guide, a walkthrough that missed a couple things at the end for me, a pretty decent youtube video, and a touch of AI. In the end, over the course of about 5 hours I was able to upgrade my 4 node cluster to version 9 with no downtime, so I am calling this a success. Anyway this is to help anyone who might have put off their upgrade the way I did.</p>
+<p>Upgrading a multi-node Proxmox Virtual Environment (PVE) cluster with an integrated Ceph storage backend requires a strict order of operations. This guide covers upgrading Ceph from Reef to Squid, transitioning package files to the modern DEB822 format, and mitigating the common <code>aes256k</code> cipher security errors.</p>
+<p><a href="https://pve.proxmox.com/wiki/Upgrade_from_8_to_9">Proxmox upgrade from 8 to 9 official guide</a></p>
+<p><a href="https://www.youtube.com/watch?v=bjhgoMeXrQs">Upgrade Proxmox VE 8 to 9 in Cluster with Ceph | Full Step-by-Step Guide 2025 - syncbricks youtube guide</a></p>
+<p><a href="https://www.starwindsoftware.com/blog/proxmox-ve-8-to-9-upgrade-guide/">Proxmox VE 8 to 9 Upgrade Guide: Step-by-Step - Paolo Valsecchi web guide</a></p>
+<hr>
+<h2 id="-prerequisites-precautions">⚠️ Prerequisites &amp; Precautions</h2>
+<ul>
+<li>Backup Everything: Ensure all VMs and containers have verified, external backups.</li>
+<li>Maintain Quorum: Upgrade nodes one at a time. Never reboot or stop services on multiple nodes simultaneously.</li>
+<li>No-Subscription Focus: This guide is tailored for standard environments utilizing free no-subscription repositories.</li>
+<li>Ensure you are on the latest version of proxmox 8.</li>
+<li>Before working on a node ensure to migrate the VMs off of that node to ensure uptime and no issues while updating.</li>
+</ul>
+<hr>
+<h2 id="-phase-1-ceph-upgrade-reef-to-squid">🗒 Phase 1: Ceph Upgrade (Reef to Squid)</h2>
+<p>Before upgrading the underlying operating system to Proxmox VE 9 (Debian Trixie), you must first upgrade your Ceph storage layer to Ceph Squid while still running Proxmox VE 8.</p>
+<p>Perform these steps on Node 1, then repeat sequentially for Node 2, Node 3, and Node 4.</p>
+<h2 id="step-1-set-storage-protection-flags">Step 1: Set Storage Protection Flags</h2>
+<p>Prevent Ceph from attempting to rebalance or heal data pools while services are restarting:</p>
+<pre class="language-bash"><code class="language-bash">ceph osd <span class="token builtin class-name">set</span> noout</code></pre>
+<h2 id="step-2-switch-the-ceph-repository-url">Step 2: Switch the Ceph Repository URL</h2>
+<p>Update the legacy repository file configuration to target the newer version release:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">sed</span> <span class="token parameter variable">-i</span> <span class="token string">'s/reef/squid/'</span> /etc/apt/sources.list.d/ceph.list</code></pre>
+<h2 id="step-3-fetch-and-install-packages">Step 3: Fetch and Install Packages</h2>
+<p>Refresh your index database maps and pull down the modern binaries:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">apt</span> update <span class="token operator">&amp;&amp;</span> <span class="token function">apt</span> upgrade <span class="token parameter variable">-y</span></code></pre>
+<p>Verify the installation by validating the running binary metadata details:</p>
+<pre class="language-bash"><code class="language-bash">ceph <span class="token parameter variable">--version</span></code></pre>
+<h2 id="step-4-restart-core-monitors-managers">Step 4: Restart Core Monitors &amp; Managers</h2>
+<p>Gracefully reload your monitor cluster daemons to force them to run the newer release code:</p>
+<pre class="language-bash"><code class="language-bash">systemctl restart ceph-mon.target</code></pre>
+<p>Verify the monitor health ring status before proceeding:</p>
+<pre class="language-bash"><code class="language-bash">ceph <span class="token parameter variable">-s</span>
+ceph mon dump <span class="token operator">|</span> <span class="token function">grep</span> min_mon_release</code></pre>
+<p>Once the monitors register cleanly, restart the primary manager daemons:</p>
+<pre class="language-bash"><code class="language-bash">systemctl restart ceph-mgr.target
+ceph <span class="token parameter variable">-s</span></code></pre>
+<hr>
+<h2 id="-phase-2-proxmox-ve-8-to-9-distribution-upgrade">🗒 Phase 2: Proxmox VE 8 to 9 Distribution Upgrade</h2>
+<p>Once all nodes are happily running Ceph Squid, begin upgrading the operating system layer. Perform these steps one node at a time.</p>
+<h2 id="step-1-put-the-node-into-maintenance-mode">Step 1: Put the Node into Maintenance Mode</h2>
+<p>Gracefully clear running tasks and notify the cluster high-availability tracker:</p>
+<pre class="language-bash"><code class="language-bash">ha-manager crm-command node-maintenance <span class="token builtin class-name">enable</span> PVENX</code></pre>
+<p><em>(Replace <code>PVENX</code> with your specific node hostname, e.g., <code>PVEN1</code>)</em></p>
+<h2 id="step-2-protect-and-check-pre-flight-readiness">Step 2: Protect and Check Pre-flight Readiness</h2>
+<p>Set your storage protection flags again to guard your active disks during the OS transition:</p>
+<pre class="language-bash"><code class="language-bash">ceph osd <span class="token builtin class-name">set</span> noout</code></pre>
+<p>Run the official Proxmox configuration analyzer utility to catch layout issues:</p>
+<pre class="language-bash"><code class="language-bash">pve8to9 <span class="token parameter variable">--full</span></code></pre>
+<p><em>Note: If using standard UEFI boot layouts, clean out legacy boot blocks to avoid conflicts:</em></p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">apt</span> remove systemd-boot <span class="token parameter variable">-y</span></code></pre>
+<h2 id="step-3-modernize-repositories-to-deb822-standard">Step 3: Modernize Repositories to DEB822 Standard</h2>
+<p>Proxmox 9 drops support for legacy <code>.list</code> configuration rows in favor of structured <code>.sources</code> blocks. To prevent critical meta-package removal safety prompts (<code>proxmox-ve</code>), you must clean out old system configurations and generate fresh files targeting Debian Trixie.</p>
+<p>First, scrub historical baseline rows out of your directory path maps:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token comment"># Clear out traditional file locations completely</span>
+<span class="token function">rm</span> <span class="token parameter variable">-f</span> /etc/apt/sources.list
+<span class="token function">rm</span> <span class="token parameter variable">-f</span> /etc/apt/sources.list.d/ceph.list</code></pre>
+<p>Next, deploy your clean, modern <code>.sources</code> components:</p>
+<ol>
+<li>Create the Main Proxmox No-Subscription Source:</li>
+</ol>
+<pre class="language-bash"><code class="language-bash"><span class="token function">cat</span> <span class="token operator">></span> /etc/apt/sources.list.d/proxmox.sources <span class="token operator">&lt;&lt;</span> <span class="token string">EOF
+Types: deb
+URIs: http://download.proxmox.com/debian/pve
+Suites: trixie
+Components: pve-no-subscription
+Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
+EOF</span></code></pre>
+<ol start="2">
+<li>Create the Free Ceph Squid Source:</li>
+</ol>
+<pre class="language-bash"><code class="language-bash"><span class="token function">cat</span> <span class="token operator">></span> /etc/apt/sources.list.d/ceph.sources <span class="token operator">&lt;&lt;</span> <span class="token string">EOF
+Types: deb
+URIs: http://download.proxmox.com/debian/ceph-squid
+Suites: trixie
+Components: no-subscription
+Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
+EOF</span></code></pre>
+<ol start="3">
+<li>Create the Core Debian Trixie Base OS Source:</li>
+</ol>
+<pre class="language-bash"><code class="language-bash"><span class="token function">cat</span> <span class="token operator">></span> /etc/apt/sources.list.d/debian.sources <span class="token operator">&lt;&lt;</span> <span class="token string">EOF
+Types: deb
+URIs: http://ftp.debian.org/debian
+Suites: trixie trixie-updates
+Components: main contrib non-free non-free-firmware
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+
+Types: deb
+URIs: http://security.debian.org/debian-security
+Suites: trixie-security
+Components: main contrib non-free non-free-firmware
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+EOF</span></code></pre>
+<ol start="4">
+<li>Disable Ghost Enterprise Files:<br>
+If stray enterprise trackers are lingering on your file grid, rename them out of sight to block <code>401 Unauthorized</code> errors during synchronization:</li>
+</ol>
+<pre class="language-bash"><code class="language-bash"><span class="token function">mv</span> /etc/apt/sources.list.d/pve-enterprise.sources /etc/apt/sources.list.d/pve-enterprise.sources.bak <span class="token operator"><span class="token file-descriptor important">2</span>></span>/dev/null</code></pre>
+<h2 id="step-4-execute-the-distribution-upgrade">Step 4: Execute the Distribution Upgrade</h2>
+<p>Clear the internal cache storage folder completely and kick off your core upgrade procedure:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">rm</span> <span class="token parameter variable">-rf</span> /var/lib/apt/lists/*
+<span class="token function">apt</span> update
+<span class="token function">apt</span> dist-upgrade <span class="token parameter variable">-y</span></code></pre>
+<p><em>There will be an apt-listchanges: News page that comes up, just hit q to quit, or read it, up to you. During configuration file prompts, press <code>N</code> (keep local version) unless you have highly specific manual custom system configuration parameters to re-inject.</em></p>
+<h2 id="step-5-reboot-and-verify-cluster-state">Step 5: Reboot and Verify Cluster State</h2>
+<p>Bring the host back up on the modern Proxmox 9 system kernel:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">reboot</span></code></pre>
+<p>Once the machine initializes and rejoins your network console, run your operational validation checks:</p>
+<pre class="language-bash"><code class="language-bash">pveversion
+pvecm status</code></pre>
+<h2 id="step-6-bring-the-node-back-online">Step 6: Bring the Node Back Online</h2>
+<p>Take the node out of standby and resume storage traffic:</p>
+<pre class="language-bash"><code class="language-bash">ha-manager crm-command node-maintenance disable PVENX
+ceph osd <span class="token builtin class-name">unset</span> noout
+ceph <span class="token parameter variable">-s</span></code></pre>
+<hr>
+<h2 id="-phase-3-mitigating-ceph-security-key-errors-aes256k">🗒 Phase 3: Mitigating Ceph Security Key Errors (<code>aes256k</code>)</h2>
+<p>After completing your upgrades, Ceph Squid will trigger critical dashboard security alerts (<code>AUTH_INSECURE_CLIENT_KEY_TYPE</code>). This is because it requires legacy authentication tokens to be rotated over to stronger <code>aes256k</code> ciphers.</p>
+<p>Run these final repair routines from your primary cluster node shell (Node 1):</p>
+<h2 id="step-1-rotate-cluster-service-keys">Step 1: Rotate Cluster Service Keys</h2>
+<p>Rotate your underlying daemon and system connection keyrings securely:</p>
+<pre class="language-bash"><code class="language-bash">/usr/share/pve-manager/migrations/pve-cephx-rotate-service-keys --rotate-cluster-keys <span class="token parameter variable">--apply</span></code></pre>
+<h2 id="step-2-stage-the-new-admin-key">Step 2: Stage the New Admin Key</h2>
+<p>Stage an upgraded secret for your global administrator account. This runs concurrently with the old key so active connections do not get terminated:</p>
+<pre class="language-bash"><code class="language-bash">/usr/share/pve-manager/migrations/pve-cephx-rotate-service-keys --rotate-admin-key <span class="token parameter variable">--apply</span></code></pre>
+<h2 id="step-3-refresh-active-virtual-machine-client-sessions">Step 3: Refresh Active Virtual Machine Client Sessions</h2>
+<p>Running VMs hold onto the old session keys in memory. To move them to the modern cipher, you must force them to reconnect to storage.</p>
+<ul>
+<li>Zero Downtime Method: Go to your cluster GUI and live-migrate your running VMs across different hardware nodes. The live handoff drops old sessions and picks up the fresh key format seamlessly.</li>
+<li>Alternative Method: Perform a clean stop-and-start reboot cycle on your hosted guest machines.</li>
+</ul>
+<h2 id="step-4-confirm-key-migrations-lock-down-ciphers">Step 4: Confirm Key Migrations &amp; Lock Down Ciphers</h2>
+<p>Once all active clients are holding the updated credentials, commit the tracking changes permanently:</p>
+<pre class="language-bash"><code class="language-bash">/usr/share/pve-manager/migrations/pve-cephx-rotate-service-keys --confirm-all-clients-refreshed <span class="token parameter variable">--apply</span></code></pre>
+<p>Finally, restrict your system monitors from acknowledging weak encryption attempts moving forward:</p>
+<pre class="language-bash"><code class="language-bash">/usr/share/pve-manager/migrations/pve-cephx-rotate-service-keys <span class="token parameter variable">--apply</span> --restrict-ciphers</code></pre>
+<p><em>Note: The remaining transient tracking alerts (<code>AUTH_INSECURE_ROTATING_SERVICE_KEY_TYPE</code>) will clear off your main dashboard metrics view entirely within a few hours as remaining temporary cache tickets reach their expiration limits.</em></p>
+
+  </section>
+
+  <footer class="post-footer">
+    <h4>Author - Joseph Sándor Voros</h4>
+    
+  </footer>
+</article>
+
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <div class="copyright">©  Hybridcloudhq - Disclaimer The views and opinions expressed on this website are solely my own and do not reflect the official positions of Dell Technologies, or any other affiliated organizations. All content is provided for informational purposes only.</div>
+        <a href="https://smallcounter.com"><img src="https://smallcounter.com/count.php?c_style=104&id=1771869804" border=0 alt="web counter"></a><br>
+        <div class="social">
+          
+            <a href="https://x.com/sandorvoros" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+              
+                <svg width="1200" height="1227" viewBox="0 0 1200 1227" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z"/>
+                  </svg>
+              
+            </a>
+          
+            <a href="https://github.com/josephsandorvoros" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+              
+                <svg fill="#000000" width="24px" height="24px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-name="Layer 1">
+                  <path d="M12,2.2467A10.00042,10.00042,0,0,0,8.83752,21.73419c.5.08752.6875-.21247.6875-.475,0-.23749-.01251-1.025-.01251-1.86249C7,19.85919,6.35,18.78423,6.15,18.22173A3.636,3.636,0,0,0,5.125,16.8092c-.35-.1875-.85-.65-.01251-.66248A2.00117,2.00117,0,0,1,6.65,17.17169a2.13742,2.13742,0,0,0,2.91248.825A2.10376,2.10376,0,0,1,10.2,16.65923c-2.225-.25-4.55-1.11254-4.55-4.9375a3.89187,3.89187,0,0,1,1.025-2.6875,3.59373,3.59373,0,0,1,.1-2.65s.83747-.26251,2.75,1.025a9.42747,9.42747,0,0,1,5,0c1.91248-1.3,2.75-1.025,2.75-1.025a3.59323,3.59323,0,0,1,.1,2.65,3.869,3.869,0,0,1,1.025,2.6875c0,3.83747-2.33752,4.6875-4.5625,4.9375a2.36814,2.36814,0,0,1,.675,1.85c0,1.33752-.01251,2.41248-.01251,2.75,0,.26251.1875.575.6875.475A10.0053,10.0053,0,0,0,12,2.2467Z"/>
+                  </svg>
+              
+            </a>
+          
+            <a href="https://www.linkedin.com/in/josephsvoros/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+              
+                <svg width="24px" height="24px" viewBox="0 0 24 24" role="img" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn icon</title>
+                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                  </svg>
+              
+            </a>
+          
+            <a href="https://www.instagram.com/jsvoros/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+              
+                <svg fill="#000000" width="800px" height="800px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-name="Layer 1">
+                  <path d="M17.34,5.46h0a1.2,1.2,0,1,0,1.2,1.2A1.2,1.2,0,0,0,17.34,5.46Zm4.6,2.42a7.59,7.59,0,0,0-.46-2.43,4.94,4.94,0,0,0-1.16-1.77,4.7,4.7,0,0,0-1.77-1.15,7.3,7.3,0,0,0-2.43-.47C15.06,2,14.72,2,12,2s-3.06,0-4.12.06a7.3,7.3,0,0,0-2.43.47A4.78,4.78,0,0,0,3.68,3.68,4.7,4.7,0,0,0,2.53,5.45a7.3,7.3,0,0,0-.47,2.43C2,8.94,2,9.28,2,12s0,3.06.06,4.12a7.3,7.3,0,0,0,.47,2.43,4.7,4.7,0,0,0,1.15,1.77,4.78,4.78,0,0,0,1.77,1.15,7.3,7.3,0,0,0,2.43.47C8.94,22,9.28,22,12,22s3.06,0,4.12-.06a7.3,7.3,0,0,0,2.43-.47,4.7,4.7,0,0,0,1.77-1.15,4.85,4.85,0,0,0,1.16-1.77,7.59,7.59,0,0,0,.46-2.43c0-1.06.06-1.4.06-4.12S22,8.94,21.94,7.88ZM20.14,16a5.61,5.61,0,0,1-.34,1.86,3.06,3.06,0,0,1-.75,1.15,3.19,3.19,0,0,1-1.15.75,5.61,5.61,0,0,1-1.86.34c-1,.05-1.37.06-4,.06s-3,0-4-.06A5.73,5.73,0,0,1,6.1,19.8,3.27,3.27,0,0,1,5,19.05a3,3,0,0,1-.74-1.15A5.54,5.54,0,0,1,3.86,16c0-1-.06-1.37-.06-4s0-3,.06-4A5.54,5.54,0,0,1,4.21,6.1,3,3,0,0,1,5,5,3.14,3.14,0,0,1,6.1,4.2,5.73,5.73,0,0,1,8,3.86c1,0,1.37-.06,4-.06s3,0,4,.06a5.61,5.61,0,0,1,1.86.34A3.06,3.06,0,0,1,19.05,5,3.06,3.06,0,0,1,19.8,6.1,5.61,5.61,0,0,1,20.14,8c.05,1,.06,1.37.06,4S20.19,15,20.14,16ZM12,6.87A5.13,5.13,0,1,0,17.14,12,5.12,5.12,0,0,0,12,6.87Zm0,8.46A3.33,3.33,0,1,1,15.33,12,3.33,3.33,0,0,1,12,15.33Z"/>
+                  </svg>
+              
+            </a>
+          
+        </div>
+      </div>
+    </footer>
+
+    
+  </body>
+</html>
