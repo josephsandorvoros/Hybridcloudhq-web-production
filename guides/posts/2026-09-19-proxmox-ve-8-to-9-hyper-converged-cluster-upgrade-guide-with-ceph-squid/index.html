@@ -95,7 +95,7 @@ ceph <span class="token parameter variable">-s</span></code></pre>
 <pre class="language-bash"><code class="language-bash">ceph osd <span class="token builtin class-name">set</span> noout</code></pre>
 <p>Run the official Proxmox configuration analyzer utility to catch layout issues:</p>
 <pre class="language-bash"><code class="language-bash">pve8to9 <span class="token parameter variable">--full</span></code></pre>
-<p><em>Note: If using standard UEFI boot layouts, clean out legacy boot blocks to avoid conflicts:</em></p>
+<p><em>Note: Make sure to correct any errors, warnings were ok for me. If using standard UEFI boot layouts, clean out legacy boot blocks to avoid conflicts:</em></p>
 <pre class="language-bash"><code class="language-bash"><span class="token function">apt</span> remove systemd-boot <span class="token parameter variable">-y</span></code></pre>
 <h2 id="step-3-modernize-repositories-to-deb822-standard">Step 3: Modernize Repositories to DEB822 Standard</h2>
 <p>Proxmox 9 drops support for legacy <code>.list</code> configuration rows in favor of structured <code>.sources</code> blocks. To prevent critical meta-package removal safety prompts (<code>proxmox-ve</code>), you must clean out old system configurations and generate fresh files targeting Debian Trixie.</p>
